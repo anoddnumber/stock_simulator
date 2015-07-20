@@ -5,7 +5,6 @@
                 var ctx = Canvas.getCtx();
                 var playImg = Resources.get('resources/images/play.png');
                 ctx.drawImage(playImg, Math.floor((Canvas.getWidth() - playImg.width)/2), Math.floor((Canvas.getHeight() - playImg.height)/2));
-                console.log("start");
             },
         };
         
@@ -35,7 +34,6 @@ var ready = function() {
     }
 };
 
-console.log("hi");
 /**
  * Global variables listed here.
  */

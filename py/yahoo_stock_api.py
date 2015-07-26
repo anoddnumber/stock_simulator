@@ -1,0 +1,30 @@
+from urllib2 import Request, urlopen, URLError
+
+
+
+class yahoo_stock_api:
+    '''
+        stock_symbols - The symbol of the stock that you want information for
+        info_arguments - What type of information you want. The arguments you can specify are documented here:
+        http://www.jarloo.com/yahoo_finance/
+    '''
+    def __init__(self, stock_symbols, info_arguments):
+        self.ss = stock_symbols;
+        self.info = info_arguments;
+        
+    def submitRequest(self):
+        symbols = ""
+        for s in self.ss:
+            symbols += s + '+'
+        request = Request('http://finance.yahoo.com/d/quotes.csv?s=' + symbols + '&f=' + self.info)
+        
+        try:
+            response = urlopen(request)
+            text = response.read()
+            print text
+        except URLError, e:
+            print 'Error in sending/receiving request/reply: ', e
+            
+if __name__ == "__main__":
+    api = yahoo_stock_api(['AAPL', 'GOOG', 'AMZN'], 'nab')
+    api.submitRequest()

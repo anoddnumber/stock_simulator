@@ -1,7 +1,5 @@
 from urllib2 import Request, urlopen, URLError
 
-
-
 class yahoo_stock_api:
     '''
         stock_symbols - The symbol of the stock that you want information for
@@ -22,9 +20,7 @@ class yahoo_stock_api:
             response = urlopen(request)
             text = response.read()
             print text
+            return text
         except URLError, e:
             print 'Error in sending/receiving request/reply: ', e
-            
-if __name__ == "__main__":
-    api = yahoo_stock_api(['AAPL', 'GOOG', 'AMZN'], 'nab')
-    api.submitRequest()
+            return 'There was an error retreiving stock information. Please try again.'

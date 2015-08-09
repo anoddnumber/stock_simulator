@@ -11,6 +11,8 @@ class yahoo_stock_api:
         self.info = info_arguments;
         
     def submitRequest(self):
+        if len(self.ss) > 200:
+            return 'Too many symbols requested. Please request at most 200 symbols. Exiting.'
         symbols = ""
         for s in self.ss:
             symbols += s + '+'

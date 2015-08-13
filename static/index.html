@@ -6,12 +6,15 @@
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <link rel="stylesheet" type="text/css" href="css/simulator.css">
 <script src="/js/resources.js"></script>
-<script src="js/simulator.js"></script>
-<script src="js/canvas.js"></script>
 <script src="js/api.js"></script>
 
 
 <title>Stock Simulator</title>
 <div id="stock_simulator">
-    <canvas id="canvas" width="1000" height="500" style="border:1px solid #000000;"></canvas>
+    <form action="/createAccount" method="post">
+        Username: <input type="text" name="username"><br>
+        Password: <input type="text" name="password"><br>
+        Email: <input type="text" name="email"><br>
+        <input type="submit" value="Submit">
+    </form>
 </div>

@@ -19,6 +19,19 @@ def getStockInfo():
     '''
     api = yahoo_stock_api(symbols, 'nabl1')
     return api.submitRequest()
+
+
+@app.route("/createAccount", methods=['POST'])
+def createAccount():
+    username = request.form['username']
+    password = request.form['password']
+    email = request.form['email']
+    print username
+    print password
+    print email
+    print "createAccount()"
+    return "Created Account!"
+
             
 if __name__ == "__main__":
     app.debug = True

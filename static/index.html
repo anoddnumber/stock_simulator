@@ -5,16 +5,34 @@
 <!-- Include all the necessary files that the html pages requires-->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <link rel="stylesheet" type="text/css" href="css/simulator.css">
-<script src="/js/resources.js"></script>
 <script src="js/api.js"></script>
+<script src="js/uiMethods.js"></script>
 
 
 <title>Stock Simulator</title>
 <div id="stock_simulator">
-    <form action="/createAccount" method="post">
-        Username: <input type="text" name="username"><br>
-        Password: <input type="text" name="password"><br>
-        Email: <input type="text" name="email"><br>
-        <input type="submit" value="Submit">
-    </form>
+    <div id="login">
+        Login:
+        <form action="/createAccount" method="post">
+            Username: <input type="text" name="username"><br>
+            Password: <input type="text" name="password"><br>
+            Email: <input type="text" name="email"><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    
+    <div id="createAccount">
+        Create Account:
+        <form action="/createAccount" method="post">
+            Username: <input type="text" name="username"><br>
+            Password: <input type="text" name="password"><br>
+            Retype Password: <input type="text" name="retypePassword"><br>
+            Email: <input type="text" name="email"><br>
+            <input type="submit" value="Submit">
+        </form>
+    </div>
+    
+    <a href="#" id="loginLink">Login</a>
+    <a href="#" id="createAccountLink">Create Account</a>
+    <br>
 </div>

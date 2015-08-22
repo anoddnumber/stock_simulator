@@ -1,3 +1,6 @@
 *.komodoproject
 *.DS_Store
 *.pyc
+
+.project
+.pydevproject

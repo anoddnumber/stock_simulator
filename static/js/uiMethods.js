@@ -5,10 +5,12 @@ $( document ).ready(function() {
     function showLoginForm() {
         $('#createAccount').hide();
         $('#login').show();
+        return false;
     }
     
     function showCreateAccount() {
         $('#login').hide();
         $('#createAccount').show();
+        return false;
     }
 }) ;

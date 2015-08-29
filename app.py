@@ -1,6 +1,6 @@
 from py.yahoo_stock_api import YahooStockAPI
 from flask import Flask, send_from_directory, request
-from py.db_test import DbAccess, UsersDbAccess
+from py.db_access import DbAccess, UsersDbAccess
 from py.user import User
 
 app = Flask(__name__, static_url_path='')
@@ -34,8 +34,8 @@ def createAccount():
     print email
     print "createAccount()"
     user = User(username, password, email)
-    userDbAccess.saveUser(user)
-    return "Created Account!"
+    return userDbAccess.saveUser(user)
+    
 
             
 if __name__ == "__main__":

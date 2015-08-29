@@ -1,5 +1,8 @@
-from py.yahoo_stock_api import yahoo_stock_api
+from py.yahoo_stock_api import YahooStockAPI
 from flask import Flask, send_from_directory, request
+from py.db_test import DbAccess, UsersDbAccess
+from py.user import User
+
 app = Flask(__name__, static_url_path='')
 
 @app.route('/')
@@ -17,7 +20,7 @@ def getStockInfo():
     '''
     To find out what options the yahoo_stock_api has, view http://www.jarloo.com/yahoo_finance/
     '''
-    api = yahoo_stock_api(symbols, 'nabl1')
+    api = YahooStockAPI(symbols, 'nabl1')
     return api.submitRequest()
 
 
@@ -30,9 +33,13 @@ def createAccount():
     print password
     print email
     print "createAccount()"
+    user = User(username, password, email)
+    userDbAccess.saveUser(user)
     return "Created Account!"
 
             
 if __name__ == "__main__":
+    dbAccess = DbAccess("stock_market_simulator_db")
+    userDbAccess = UsersDbAccess(dbAccess)
     app.debug = True
     app.run()

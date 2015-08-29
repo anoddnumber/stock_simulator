@@ -1,6 +1,6 @@
 from urllib2 import Request, urlopen, URLError
 
-class yahoo_stock_api:
+class YahooStockAPI:
     '''
         stock_symbols - The symbol of the stock that you want information for
         info_arguments - What type of information you want. The arguments you can specify are documented here:
@@ -12,7 +12,7 @@ class yahoo_stock_api:
         
     def submitRequest(self):
         if len(self.ss) > 200:
-            return 'Too many symbols requested. Please request at most 200 symbols. Exiting.'
+            return 'Too many stock symbols requested. Please request at most 200 stock symbols. Exiting.'
         symbols = ""
         for s in self.ss:
             symbols += s + '+'

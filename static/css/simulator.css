@@ -5,3 +5,8 @@ body {
 #createAccount {
     display : none;
 }
+
+#errorBox {
+  display : none;
+  margin : 12px;
+}

@@ -14,6 +14,12 @@ $( document ).ready(function() {
         return false;
     }
     
+    // process the login form when pressing the submit button
+    $('#loginForm').submit(function(event) {
+        // stop the form from submitting the normal way and refreshing the page
+        event.preventDefault();
+    });
+    
     // process the create account form when pressing the submit button
     $('#createAccountForm').submit(function(event) {
         // stop the form from submitting the normal way and refreshing the page
@@ -31,6 +37,11 @@ $( document ).ready(function() {
         }
     });
     
+    function showError(errorMsg) {
+        $('#errorBox').text(errorMsg);
+        $('#errorBox').show();
+    }
+    
     /*
      * Note that this does not mean we do not need to validate on the backend.
      * The backend check should do the same validation checks as here.
@@ -45,17 +56,17 @@ $( document ).ready(function() {
     function validateCreateAccountData(formData) {
         var emptyValue = hasEmptyValue(formData);
         if (emptyValue) {
-            console.log("not all fields filled in, " + emptyValue + " is not defined");
+            showError("Some fields are empty. Please fill in all of the fields.");
             return false;
         }
         
         if (formData.password !== formData.retypePassword) {
-            console.log("password does not match the retyped password");
+            showError("The passwords typed in do not match. Please try again.");
             return false;
         }
         
         if (formData.username.indexOf(" ") > -1) {
-            console.log("the username cannot contain spaces")
+            showError("The username should not contain any spaces. Please try again.");
             return false;
         }
         
@@ -68,23 +79,23 @@ $( document ).ready(function() {
     
     function validateEmail(email) {
         if (email.indexOf(" ") > -1) {
-            console.log("the email should not have any spaces in it");
+            showError("The email should not contain any spaces. Please try again");
             return false;
         }
         
         var atIndex = email.indexOf("@");
         if (atIndex < 1) {
-            console.log("there must be characters before the @ symbol");
+            showError("The email address should have characters before @ symbol. Please try again.");
             return false;
         }
         
         if (atIndex === email.length - 1) {
-            console.log("there must be characters after the @ symbol");
+            showError("The email address should have character after the @ symbol. Please try again.");
             return false;
         }
         
         if ((email.indexOf("@", atIndex + 1) > -1)) {
-            console.log("multiple @ symbols not allowed in email address");
+            showError("Email addresses should only contain a single @ symbol. Please try again");
             return false;
         }
         return true;

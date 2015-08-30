@@ -36,7 +36,21 @@ def createAccount():
     user = User(username, password, email)
     return userDbAccess.saveUser(user)
     
-
+@app.route("/login", methods=['POST'])
+def login():
+    print 'login'
+    username = request.form['username']
+    password = request.form['password']
+    user = userDbAccess.getUserByUsername(username)
+    if not user:
+        return "No user found" #TODO throw API exception
+    
+    if password == user.password:
+        print 'Username and password match'
+    else:
+        print 'Wrong password'
+        
+    return "Login"
             
 if __name__ == "__main__":
     dbAccess = DbAccess("stock_market_simulator_db")

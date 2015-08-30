@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from user import User
 
 class DbAccess:
     def __init__(self, dbname):
@@ -15,8 +16,13 @@ class UsersDbAccess:
         self.db.users.insert_one({"username" : user.username, "email" : user.email, "password" : user.password})
         return "Successful"
 
-
-
+    def getUserByUsername(self, username):
+        user = self.db.users.find_one({"username": username})
+        if user is not None:
+            print user
+            return User(user['username'], user['password'], user['email'])
+        print 'No user found with username ' + username
+        return None
 
 
 

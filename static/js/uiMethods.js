@@ -18,6 +18,13 @@ $( document ).ready(function() {
     $('#loginForm').submit(function(event) {
         // stop the form from submitting the normal way and refreshing the page
         event.preventDefault();
+        
+        var formData = {
+            'username' : $('#loginForm input[name=username]').val().trim(),
+            'password' : $('#loginForm input[name=password]').val(),
+        };
+        
+        login(formData);
     });
     
     // process the create account form when pressing the submit button
@@ -118,6 +125,19 @@ $( document ).ready(function() {
             }
         }
         return false;
+    }
+    
+    function login(formData) {
+        $.ajax("/login", {
+            method: "POST",
+            data: formData,
+            success: function(data) {
+                console.log("successfully logged in!");
+            },
+            error: function() {
+                console.log("error, did not login");
+            }
+        });
     }
     
     function createAccount(formData) {

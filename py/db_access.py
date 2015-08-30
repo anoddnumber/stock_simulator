@@ -12,8 +12,13 @@ class UsersDbAccess:
         self.db_access = db_access
         self.db = self.db_access.db
 
-    def saveUser(self, user):
-        self.db.users.insert_one({"username" : user.username, "email" : user.email, "password" : user.password})
+    def createUser(self, user):
+        userInDB = self.db.users.find_one({"username": user.username})
+        if userInDB is not None:
+            print "User already exists. Choose another username."
+            return "Unsuccessful"
+        else:
+            self.db.users.insert_one({"username" : user.username, "email" : user.email, "password" : user.password})
         return "Successful"
 
     def getUserByUsername(self, username):

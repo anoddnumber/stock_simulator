@@ -34,7 +34,7 @@ def createAccount():
     print email
     print "createAccount()"
     user = User(username, password, email)
-    return userDbAccess.saveUser(user)
+    return userDbAccess.createUser(user)
     
 @app.route("/login", methods=['POST'])
 def login():

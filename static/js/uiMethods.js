@@ -49,6 +49,14 @@ $( document ).ready(function() {
         $('#errorBox').show();
     }
     
+    /**
+     * Gets the error message from a jqXHR (jQuery XMLHttpRequest) object.
+     */
+    function showErrorFromJqXHR(jqXHR) {
+        var obj = JSON.parse(jqXHR.responseText);
+        showError(obj.message);
+    }
+    
     /*
      * Note that this does not mean we do not need to validate on the backend.
      * The backend check should do the same validation checks as here.
@@ -134,7 +142,8 @@ $( document ).ready(function() {
             success: function(data) {
                 console.log("successfully logged in!");
             },
-            error: function() {
+            error: function(jqXHR, textStatus, errorThrown) {
+                showErrorFromJqXHR(jqXHR);
                 console.log("error, did not login");
             }
         });
@@ -147,8 +156,8 @@ $( document ).ready(function() {
             success: function(data) {
                 console.log("successfully created account!");
             },
-            error: function() {
-                console.log("error, did not create account");
+            error: function(jqXHR, textStatus, errorThrown ) {
+                showErrorFromJqXHR(jqXHR);
             }
         });
     }

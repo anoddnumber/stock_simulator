@@ -1,7 +1,8 @@
 from py.yahoo_stock_api import YahooStockAPI
-from flask import Flask, send_from_directory, request
+from flask import Flask, send_from_directory, request, jsonify
 from py.db_access import DbAccess, UsersDbAccess
 from py.user import User
+from py.invalid_usage import InvalidUsage
 
 app = Flask(__name__, static_url_path='')
 
@@ -43,14 +44,21 @@ def login():
     password = request.form['password']
     user = userDbAccess.getUserByUsername(username)
     if not user:
-        return "No user found" #TODO throw API exception
+        raise InvalidUsage('Wrong username or password', status_code=400)
     
     if password == user.password:
         print 'Username and password match'
     else:
         print 'Wrong password'
+        raise InvalidUsage('Wrong username or password', status_code=400)
         
     return "Login"
+
+@app.errorhandler(InvalidUsage)
+def handle_invalid_usage(error):
+    response = jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response
             
 if __name__ == "__main__":
     dbAccess = DbAccess("stock_market_simulator_db")

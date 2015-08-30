@@ -12,7 +12,7 @@ class YahooStockAPI:
         
     def submitRequest(self):
         if len(self.ss) > 200:
-            return 'Too many stock symbols requested. Please request at most 200 stock symbols. Exiting.'
+            raise InvalidUsage('Too many stock symbols requested. Please request at most 200 stock symbols. Exiting.', status_code=501)
         symbols = ""
         for s in self.ss:
             symbols += s + '+'
@@ -25,4 +25,4 @@ class YahooStockAPI:
             return text
         except URLError, e:
             print 'Error in sending/receiving request/reply: ', e
-            return 'There was an error retreiving stock information. Please try again.'
+            raise InvalidUsage('There was an error retreiving stock information. Please try again.', status_code=503)

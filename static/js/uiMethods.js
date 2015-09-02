@@ -2,6 +2,22 @@ $( document ).ready(function() {
     $('#loginLink').click(showLoginForm);
     $('#createAccountLink').click(showCreateAccount);
 
+    $.ajax("/stockSymbolsMap", {
+        success : function(data) {
+            console.log("successfully got the stock symbols map!");
+            console.log(data);
+            displayStocks(data);
+        },
+        error : function() {
+            console.log("error, did not get the stock symbols map");
+        }
+    });
+    
+    function displayStocks(jsonStr) {
+        var obj = JSON.parse(jsonStr);
+        $('#stocks_table').text(jsonStr);
+    }
+
     function showLoginForm() {
         $('#createAccount').hide();
         $('#login').show();

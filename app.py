@@ -24,6 +24,10 @@ def getStockInfo():
     api = YahooStockAPI(symbols, 'nabl1')
     return api.submitRequest()
 
+@app.route("/stockSymbolsMap", methods=['GET'])
+def getStockSymbolMap():
+    print "getStockSymbolMap"
+    return app.send_static_file('parsed_symbols.txt')
 
 @app.route("/createAccount", methods=['POST'])
 def createAccount():

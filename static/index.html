@@ -11,28 +11,32 @@
 
 <title>Stock Simulator</title>
 <div id="stock_simulator">
-    <div id="errorBox"></div>
-    <div id="login">
-        Login:
-        <form id="loginForm">
-            Username: <input type="text" name="username" maxLength="20" size="50"><br>
-            Password: <input type="password" name="password" autocomplete="off" maxLength="30" size="50"><br>
-            <input type="submit" value="Login">
-        </form>
+    <div id="LoginPage">
+        <div id="errorBox"></div>
+        <div id="login">
+            Login:
+            <form id="loginForm">
+                Username: <input type="text" name="username" maxLength="20" size="50"><br>
+                Password: <input type="password" name="password" autocomplete="off" maxLength="30" size="50"><br>
+                <input type="submit" value="Login">
+            </form>
+        </div>
+        
+        <div id="createAccount">
+            Create Account:
+            <form id="createAccountForm">
+                Username: <input type="text" name="username" maxLength="20" size="50"><br>
+                Password: <input type="password" name="password" autocomplete="off" maxLength="30" size="50"><br>
+                Retype Password: <input type="password" name="retypePassword" autocomplete="off" maxLength="30" size="50"><br>
+                Email: <input type="text" name="email" maxLength="30" size="50"><br>
+                <input type="submit" value="Create Account">
+            </form>
+        </div>
+        <a href="#" id="loginLink">Login</a>
+        <a href="#" id="createAccountLink">Create Account</a>
     </div>
     
-    <div id="createAccount">
-        Create Account:
-        <form id="createAccountForm">
-            Username: <input type="text" name="username" maxLength="20" size="50"><br>
-            Password: <input type="password" name="password" autocomplete="off" maxLength="30" size="50"><br>
-            Retype Password: <input type="password" name="retypePassword" autocomplete="off" maxLength="30" size="50"><br>
-            Email: <input type="text" name="email" maxLength="30" size="50"><br>
-            <input type="submit" value="Create Account">
-        </form>
+    <div id="FindStocksPage">
+        <table id="stocks_table"></table>
     </div>
-    
-    <a href="#" id="loginLink">Login</a>
-    <a href="#" id="createAccountLink">Create Account</a>
-    <div id=stocks_table></div>
 </div>

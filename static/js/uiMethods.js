@@ -1,3 +1,5 @@
+var stockSymbolsMap;
+
 $( document ).ready(function() {
     $('#loginLink').click(showLoginForm);
     $('#createAccountLink').click(showCreateAccount);
@@ -5,7 +7,7 @@ $( document ).ready(function() {
     $.ajax("/stockSymbolsMap", {
         success : function(data) {
             console.log("successfully got the stock symbols map!");
-            console.log(data);
+            stockSymbolsMap = JSON.parse(data);
             displayStocks(data);
         },
         error : function() {
@@ -14,8 +16,53 @@ $( document ).ready(function() {
     });
     
     function displayStocks(jsonStr) {
-        var obj = JSON.parse(jsonStr);
-        $('#stocks_table').text(jsonStr);
+        var keys = Object.keys(stockSymbolsMap);
+        var displayedKeys = keys.slice(0,11);
+        
+        $.ajax("/info", {
+            data:{symbols: displayedKeys.toString()},
+            success: function(data) {
+                console.log("success, got the stock information");
+                data = data.split('\n');
+                data.pop(); //the last element will be an empty string
+                data.unshift("Symbol, Name, Stock Price");
+                data.forEach(displayRow);
+            },
+            error: function() {
+                console.log("error, could not retreive stock quotes.");
+            }
+        });
+    }
+    
+    function displayRow(value, index, arr) {
+        var table = $('#stocks_table')[0]; //grab the DOM element (0 indexed element of a jQuery object)
+        var row = table.insertRow(-1);
+        
+        /*
+         * find all strings that are not a , or a "
+         * but, find strings within double quotes (even if it is a ,)
+         
+         (?:           # non-capturing group
+          [^\s"]+      # anything that's not a space or a double-quote
+          |            #   or…
+          "            # opening double-quote
+          [^"]*        # …followed by zero or more chacacters that are not a double-quote
+          "            # …closing double-quote
+          )+           # each mach is one or more of the things described in the group
+        */
+        var values = value.match(/(?:[^,"]+|"[^"]*")+/g);
+        for (i=0; i < values.length; i++) {
+            displayCell(row, values[i]);
+        }
+    }
+    
+    function displayCell(row, value) {
+        value = replaceAll('"', '', value);
+        row.insertCell(-1).innerHTML = value;
+    }
+    
+    function replaceAll(find, replace, str) {
+      return str.replace(new RegExp(find, 'g'), replace);
     }
 
     function showLoginForm() {
@@ -133,7 +180,8 @@ $( document ).ready(function() {
     }
     
     /*
-     * Returns the property that has an value of undefined or is an empty string. Otherwise returns false.
+     * If one of the properties is undefined or an empty string, return the property.
+     * Otherwise returns false.
      */
     function hasEmptyValue(object) {
         for (var property in object) {

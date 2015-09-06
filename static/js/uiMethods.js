@@ -1,7 +1,20 @@
 $( document ).ready(function() {
+    $('#loginPageLink').click(function() {
+        changePage('loginPage');
+    });
+    
+    $('#stockTablePageLink').click(function() {
+        changePage('stockTablePage');
+    });
+    
     $('#loginLink').click(showLoginForm);
     $('#createAccountLink').click(showCreateAccount);
 
+    function changePage(page) {
+        $('#stock_simulator > div').hide();
+        $('#' + page).show();
+    }
+    
     function showLoginForm() {
         $('#createAccount').hide();
         $('#login').show();

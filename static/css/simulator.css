@@ -10,3 +10,11 @@ body {
   display : none;
   margin : 12px;
 }
+
+#stockTablePage {
+    display : none;
+}
+
+a:visited{
+  color:blue;
+}

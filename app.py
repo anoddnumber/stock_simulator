@@ -17,7 +17,7 @@ def getStockInfo():
         return 'No symbols were in the get request'
     symbols = [x.strip() for x in symbols.split(',')]
 
-    api = YahooStockAPI(symbols, 'snl1')
+    api = YahooStockAPI(symbols, 'l1')
     return api.submitRequest()
 
 @app.route("/stockSymbolsMap", methods=['GET'])

@@ -30,14 +30,20 @@ $( document ).ready(function() {
             success: function(data) {
                 console.log("success, got the stock information");
                 data = data.split('\n');
-                data.pop(); //the last element will be an empty string
-                data.forEach(function(value, index, arr) {
-                    var symbol = curSymbols[begin + index];
+                for (i = data.length - 1; i >= 0; i--) {
+                    if (data[i].trim() === '') {
+                        data.splice(i,1);
+                        continue;
+                    }
+                    var symbol = curSymbols[begin + i];
                     var name = '"' + stockSymbolsMap[symbol] + '"'; 
-                    arr[index] = symbol + ',' + name + ',' + value;
-                });
+                    data[i] = symbol + ',' + name + ',' + data[i];
+                }
                 data.unshift("Symbol, Name, Stock Price");
                 data.forEach(displayRow);
+                if (data.length === 1) {
+                    displayRow("Nothing found, please try again.");
+                }
             },
             error: function() {
                 console.log("error, could not retreive stock quotes.");
@@ -62,7 +68,7 @@ $( document ).ready(function() {
           )+           # each mach is one or more of the things described in the group
         */
         var values = value.match(/(?:[^,"]+|"[^"]*")+/g);
-        if (values) {
+        if (values && values[values.length-1] !== 'N/A') {
             for (i=0; i < values.length; i++) {
                 displayCell(row, values[i]);
             }

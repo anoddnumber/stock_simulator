@@ -3,8 +3,10 @@ from flask import Flask, send_from_directory, request, jsonify
 from py.db_access import DbAccess, UsersDbAccess
 from py.user import User
 from py.invalid_usage import InvalidUsage
+from py.cache import Cache
 
 app = Flask(__name__, static_url_path='')
+cache = Cache()
 
 @app.route('/')
 def root():
@@ -12,18 +14,18 @@ def root():
     
 @app.route("/info")
 def getStockInfo():
+    cache.update(15)
+    
     symbols = request.args.get('symbols')
     if symbols == None:
         return 'No symbols were in the get request'
     symbols = [x.strip() for x in symbols.split(',')]
-
-    api = YahooStockAPI(symbols, 'l1')
-    return api.submitRequest()
+    return cache.getStockPrices(symbols)
 
 @app.route("/stockSymbolsMap", methods=['GET'])
 def getStockSymbolMap():
     print "getStockSymbolMap"
-    return app.send_static_file('parsed_symbols.txt')
+    return app.send_static_file('parsed_symbols.json')
 
 @app.route("/createAccount", methods=['POST'])
 def createAccount():

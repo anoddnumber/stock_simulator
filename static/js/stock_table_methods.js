@@ -25,30 +25,34 @@ $( document ).ready(function() {
         var end = (curPage + 1) * config.numStocksPerPage;
         var displayedKeys = stockSymbols.slice(begin, end);
         curSymbols = stockSymbols;
-        $.ajax("/info", {
-            data:{symbols: displayedKeys.toString()},
-            success: function(data) {
-                console.log("success, got the stock information");
-                data = data.split('\n');
-                for (i = data.length - 1; i >= 0; i--) {
-                    if (data[i].trim() === '') {
-                        data.splice(i,1);
-                        continue;
+        
+        if (displayedKeys.length > 0) {
+            $.ajax("/info", {
+                data:{symbols: displayedKeys.toString()},
+                success: function(data) {
+                    console.log("success, got the stock information");
+                    data = data.split('\n');
+                    for (i = data.length - 1; i >= 0; i--) {
+                        var value = data[i];
+                        if (value.trim() === '') {
+                            data.splice(i,1);
+                            continue;
+                        }
+                        var symbol = curSymbols[begin + i];
+                        var name = '"' + stockSymbolsMap[symbol] + '"'; 
+                        data[i] = symbol + ',' + name + ',' + value;
                     }
-                    var symbol = curSymbols[begin + i];
-                    var name = '"' + stockSymbolsMap[symbol] + '"'; 
-                    data[i] = symbol + ',' + name + ',' + data[i];
+                    data.unshift("Symbol, Name, Stock Price");
+                    data.forEach(displayRow);
+                    if (data.length === 1) {
+                        displayRow("Nothing found, please try again.");
+                    }
+                },
+                error: function() {
+                    console.log("error, could not retreive stock quotes.");
                 }
-                data.unshift("Symbol, Name, Stock Price");
-                data.forEach(displayRow);
-                if (data.length === 1) {
-                    displayRow("Nothing found, please try again.");
-                }
-            },
-            error: function() {
-                console.log("error, could not retreive stock quotes.");
-            }
-        });
+            });
+        }
     }
     
     function displayRow(value, index, arr) {

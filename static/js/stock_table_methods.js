@@ -102,6 +102,22 @@ $( document ).ready(function() {
         }
     });
     
+    $("#stockSearchBar").keyup(event, function() {
+        var query = $('#searchStocksForm input[name=searchbar]').val().trim();
+        var regEx = new RegExp(query,'i');
+        var keys = Object.keys(stockSymbolsMap);
+        var keysToShow = [];
+        
+        keys.forEach(function(value, index, arr) {
+            if (value.match(regEx) || stockSymbolsMap[value].match(regEx)) {
+                keysToShow.push(value);
+            }
+        });
+        
+        curPage = 0;
+        displayStocks(keysToShow);
+    });
+    
     // Search for stocks that contain the user's query.
     $('#searchStocksForm').submit(function(event) {
         // stop the form from submitting the normal way and refreshing the page

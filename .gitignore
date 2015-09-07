@@ -1,6 +1,7 @@
 *.komodoproject
 *.DS_Store
 *.pyc
-
+static/cache.json
 .project
 .pydevproject
+

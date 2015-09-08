@@ -20,7 +20,6 @@ $( document ).ready(function() {
     
     function displayStocks(stockSymbols) {
         var table = $('#stocks_table')[0]; //grab the DOM element (0 indexed element of a jQuery object)
-        table.innerHTML = "";
         var begin = curPage * config.numStocksPerPage;
         var end = (curPage + 1) * config.numStocksPerPage;
         var displayedKeys = stockSymbols.slice(begin, end);
@@ -43,6 +42,7 @@ $( document ).ready(function() {
                         data[i] = symbol + ',' + name + ',' + value;
                     }
                     data.unshift("Symbol, Name, Stock Price");
+                    table.innerHTML = "";
                     data.forEach(displayRow);
                     if (data.length === 1) {
                         displayRow("Nothing found, please try again.");
@@ -52,6 +52,9 @@ $( document ).ready(function() {
                     console.log("error, could not retreive stock quotes.");
                 }
             });
+        } else {
+            table.innerHTML = "";
+            displayRow("Nothing found, please try again.");
         }
     }
     

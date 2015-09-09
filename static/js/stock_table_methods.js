@@ -13,7 +13,7 @@ $( document ).ready(function() {
     $.ajax("/stockSymbolsMap", {
         success : function(data) {
             console.log("successfully got the stock symbols map!");
-            stockSymbolsMap = JSON.parse(data);
+            stockSymbolsMap = data;
             displayStocks(Object.keys(stockSymbolsMap));
         },
         error : function() {
@@ -164,7 +164,7 @@ $( document ).ready(function() {
      * Finds out which stocks/stock names have matches with the searched value.
      * Then displays those stocks with the queried stock information.
      */
-    $("#stockSearchBar").keyup(event, function() {
+    $("#stockSearchBar").keyup(function() {
         var query = $('#searchStocksForm input[name=searchbar]').val().trim();
         var regEx = new RegExp(query,'i'); //i flag to ignore case
         var keys = Object.keys(stockSymbolsMap);

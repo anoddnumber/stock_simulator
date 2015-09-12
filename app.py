@@ -4,6 +4,7 @@ from py.db_access import DbAccess, UsersDbAccess
 from py.user import User
 from py.invalid_usage import InvalidUsage
 from py.cache import Cache
+import json
 
 app = Flask(__name__, static_url_path='')
 cache = Cache()
@@ -29,12 +30,15 @@ The stock prices will be returned in the same order as the arguments, delimited 
 """
 @app.route("/info")
 def getStockInfo():
-    cache.update(15)
-    
     symbols = request.args.get('symbols')
     if symbols == None:
         return 'No symbols were in the get request'
-    symbols = [x.strip() for x in symbols.split(',')]
+    return getStockInfoHelper([x.strip() for x in symbols.split(',')])
+    
+def getStockInfoHelper(symbols):
+    if symbols == None:
+        return None
+    cache.update(15)
     return cache.getStockPrices(symbols)
 
 """
@@ -49,7 +53,18 @@ TODO: retreive the NASDAQ file daily (currently called stock_symbols.txt) and ge
 @app.route("/stockSymbolsMap", methods=['GET'])
 def getStockSymbolMap():
     print "getStockSymbolMap"
-    return app.send_static_file('parsed_symbols.json')
+    cache = open('./static/parsed_symbols.json', 'r')
+    json_string = ''
+    for line in cache:
+        json_string += line
+    parsed_json = json.loads(json_string)
+    keys = parsed_json.keys()
+    keys.sort()
+    prices = getStockInfoHelper(keys).split('\n', len(keys)-1)
+    for i, price in enumerate(prices):
+        obj = str('{"name":"' + str(parsed_json[keys[i]]) + '","price":"' + str(price) + '"}')
+        parsed_json[keys[i]] = obj
+    return json.dumps(parsed_json, sort_keys=True)
 
 """
 This service creates an account for the user.

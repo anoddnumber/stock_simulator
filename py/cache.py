@@ -111,10 +111,14 @@ class Cache:
     """
     def getStockPrices(self, symbols):
         prices = ''
-        for symbol in symbols:
+        for i, symbol in enumerate(symbols):
             try:
-                prices += self.parsed_json[symbol] + '\n'
+                if i == len(symbols) - 1:
+                    prices += self.parsed_json[symbol]
+                else:
+                    prices += self.parsed_json[symbol] + '\n'
             except KeyError, e:
+                print e
                 print "Stock symbol " + symbol + " not found"
         return prices
         

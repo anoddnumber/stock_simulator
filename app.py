@@ -34,7 +34,12 @@ def getStockInfo():
     if symbols == None:
         return 'No symbols were in the get request'
     return getStockInfoHelper([x.strip() for x in symbols.split(',')])
-    
+
+"""
+Returns stock prices that are delimited by newlines ("\n").
+
+symbols - an array of stock symbols (that are strings)
+"""
 def getStockInfoHelper(symbols):
     if symbols == None:
         return None
@@ -53,9 +58,9 @@ TODO: retreive the NASDAQ file daily (currently called stock_symbols.txt) and ge
 @app.route("/stockSymbolsMap", methods=['GET'])
 def getStockSymbolMap():
     print "getStockSymbolMap"
-    cache = open('./static/parsed_symbols.json', 'r')
+    parsed_symbols = open('./static/parsed_symbols.json', 'r')
     json_string = ''
-    for line in cache:
+    for line in parsed_symbols:
         json_string += line
     parsed_json = json.loads(json_string)
     keys = parsed_json.keys()
@@ -104,6 +109,10 @@ def login():
         
     return "Login"
 
+"""
+This method is used to send error messages to the client.
+Whenever an InvalidUsage is raised, this method will be executed.
+"""
 @app.errorhandler(InvalidUsage)
 def handle_invalid_usage(error):
     response = jsonify(error.to_dict())

@@ -1,4 +1,5 @@
 from urllib2 import Request, urlopen, URLError
+from invalid_usage import InvalidUsage
 
 class YahooStockAPI:
     '''
@@ -21,7 +22,6 @@ class YahooStockAPI:
         try:
             response = urlopen(request)
             text = response.read()
-            print text
             return text
         except URLError, e:
             print 'Error in sending/receiving request/reply: ', e

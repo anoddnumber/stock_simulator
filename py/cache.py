@@ -1,7 +1,8 @@
 import os
 import json
-from yahoo_stock_api import YahooStockAPI
 import datetime
+from invalid_usage import InvalidUsage
+from yahoo_stock_api import YahooStockAPI
 
 """
 The cache is responsible for having fast access to stock price information.
@@ -23,7 +24,7 @@ class Cache:
             for line in cache:
                 json_string += line
             self.parsed_json = json.loads(json_string)
-        except IOError, e:
+        except (ValueError, IOError) as e:
             print e
             self.update()
             
@@ -50,20 +51,18 @@ class Cache:
             limit = datetime.timedelta(minutes = timeInMinutes)
             difference = datetime.datetime.now() - last_updated_date
             if difference > limit:
-                self.updateCache()
+                self.__updateCache()
         else:
             print 'no last_updated_date found'
-            self.updateCache()
+            self.__updateCache()
             
     """
-    Actually updates the cache by calling YahooStockAPI.
+    Actually updates the cache by calling YahooStockAPI (used by the update method).
     YahooStockAPI can only take 200 symbols at a time. Thus, break the requests to contain 200 or fewer symbols at a time.
     Save the results in a new JSON object, append a last_updated key with the current time as the value, 
-    sort it alphabetically by keys, and store it in the cache at the end.
-    
-    TODO: make private, and refactor.
+    sort it alphabetically by keys, and store it in the cache at the end (completely overwriting the old cache).
     """
-    def updateCache(self):
+    def __updateCache(self):
         #current directory is always /stock_simulator
         parsed_symbols_file = open('./static/parsed_symbols.json', 'r')
         json_string = ''
@@ -72,23 +71,35 @@ class Cache:
             
         keys = json.loads(json_string).keys()
         keys.sort()
-        newJson = json.loads("{}")
-        keysToSend = []
-        
-        for i, key in enumerate(keys):
-            if i is not 0 and i % 200 == 0:
-                api = YahooStockAPI(keysToSend, 'l1')
-                results = api.submitRequest()
-                self.addResultsToNewCache(newJson, keysToSend, [x.strip() for x in results.split('\n')])
-                keysToSend = []
-            keysToSend.append(key)
-            
-        self.addResultsToNewCache(newJson, keysToSend, [x.strip() for x in results.split('\n')])
-        newJson['last_updated'] = str(datetime.datetime.now())
-        self.parsed_json = newJson
+        self.parsed_json = self.__getNewJson(keys)
         
         cache = open(self.path, 'w')
-        json.dump(newJson, cache, indent=1, sort_keys='true')
+        json.dump(self.parsed_json, cache, indent=1, sort_keys='true')
+    
+    """
+    Calls Yahoo's Stock API to get up to date stock prices. Builds a JSON object with the stock symbols as keys and
+    the price as the value.
+    
+    keys - an array of stock symbols (that are strings)
+    """
+    def __getNewJson(self, keys):
+        newJson = json.loads("{}")
+        keysToSend = []
+        maxKeysToSend = 200
+        
+        for i, key in enumerate(keys):
+            if i is not 0 and i % maxKeysToSend == 0:
+                api = YahooStockAPI(keysToSend, 'l1')
+                results = api.submitRequest()
+                self.__addResultsToNewCache(newJson, keysToSend, [x.strip() for x in results.split('\n', maxKeysToSend - 1)])
+                keysToSend = []
+            keysToSend.append(key)
+        api = YahooStockAPI(keysToSend, 'l1')
+        results = api.submitRequest()
+        self.__addResultsToNewCache(newJson, keysToSend, [x.strip() for x in results.split('\n', len(keysToSend) - 1)])
+        newJson['last_updated'] = str(datetime.datetime.now())
+        
+        return newJson
     
     """
     Builds the new JSON object with the given keys/results.
@@ -97,15 +108,15 @@ class Cache:
     newJson - the JSON object to populate.
     keys - an array of keys (strings) to be inserted into the JSON object.
     results - an array of results (strings) corresponding to the given keys.
-    
-    TODO: make private
     """
-    def addResultsToNewCache(self, newJson, keys, results):
+    def __addResultsToNewCache(self, newJson, keys, results):
+        if len(keys) != len(results):
+            raise InvalidUsage('Server Cache Error, keys and results do not match', status_code=500) 
         for i, key in enumerate(keys):
             newJson[key] = results[i]
     
     """
-    Returns stock prices that are delimited by newlines ("\n").
+    Returns stock prices (as strings) that are delimited by newlines ("\n").
     
     symbols - an array of symbols whose stock prices will be returned
     """

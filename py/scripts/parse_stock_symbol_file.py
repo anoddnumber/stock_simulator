@@ -9,8 +9,8 @@ def parseLine(line):
     return None
     
 if __name__ == "__main__":    
-    symbols = open('../stock_symbols.txt', 'r')
-    newFile = open('../static/parsed_symbols.json', 'w')
+    symbols = open('../../stock_symbols.txt', 'r')
+    newFile = open('../../static/parsed_symbols.json', 'w')
     
     newFile.write("{\n")
 

@@ -8,7 +8,13 @@ $( document ).ready(function() {
     var curPage = 0;
     
     /**
-     * Stores a map of stock symbols (the keys) to stock names (the values) in stockSymbolsMap
+     * Stores a map of stock symbols (the keys) to an object with stock information 
+     * 
+     * The object is as follows: 
+     * {
+     *     'name' : *Stock Name*,
+     *     'price': *Stock Price*
+     * }
      */
     $.ajax("/stockSymbolsMap", {
         success : function(data) {
@@ -35,20 +41,31 @@ $( document ).ready(function() {
         var displayedKeys = stockSymbols.slice(begin, end);
         curSymbols = stockSymbols;
         table.innerHTML = "";
-        insertRowByValues(["Symbol", "Name", "Stock Price"]);
         if (displayedKeys.length > 0) {
+            insertRowByValues(["Symbol", "Name", "Stock Price"]);
             insertRowsBySymbols(displayedKeys);
         } else {
             insertRowByValue("Nothing found, please try again.");
         }
     }
     
+    /**
+     * Inserts multiple rows of stock information into the stocks table.
+     * 
+     * symbols - an array of stock symbols (that are strings)
+     */
     function insertRowsBySymbols(symbols) {
         for (var i = 0; i < symbols.length; i++) {
             insertRowBySymbol(symbols[i]);
         }
     }
     
+    /**
+     * Inserts the symbol's values into the stocks table.
+     * This includes the stock's Symbol, Name, and Price
+     * 
+     * symbol - the symbol to get information from (i.e. AMZN)
+     */
     function insertRowBySymbol(symbol) {
         var info = JSON.parse(stockSymbolsMap[symbol]);
         var name = info['name'];
@@ -57,10 +74,20 @@ $( document ).ready(function() {
         insertRowByValues([symbol, name, price]);
     }
     
+    /**
+     * Inserts the value into the stocks table as a row of its own.
+     * 
+     * value - the string to be inserted
+     */
     function insertRowByValue(value) {
         insertRowByValues([value]);
     }
     
+    /**
+     * Inserts the given values into the stocks table. Each element in values will be in a new cell
+     * 
+     * values - an array of strings to be inserted
+     */
     function insertRowByValues(values) {
         var table = $('#stocks_table')[0]; //grab the DOM element (0 indexed element of a jQuery object)
         var row = table.insertRow(-1);

@@ -3,6 +3,7 @@ import json
 import datetime
 from invalid_usage import InvalidUsage
 from yahoo_stock_api import YahooStockAPI
+from decimal import Decimal
 
 """
 The cache is responsible for having fast access to stock price information.
@@ -113,7 +114,11 @@ class Cache:
         if len(keys) != len(results):
             raise InvalidUsage('Server Cache Error, keys and results do not match', status_code=500) 
         for i, key in enumerate(keys):
-            newJson[key] = results[i]
+            try:
+                decimal = Decimal(float(results[i]))
+                newJson[key] = str(round(decimal, 2))
+            except ValueError as e:
+                continue
     
     """
     Returns stock prices (as strings) that are delimited by newlines ("\n").

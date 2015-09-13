@@ -47,29 +47,16 @@ def getStockInfoHelper(symbols):
     return cache.getStockPrices(symbols)
 
 """
-This service returns a json formatted file whose keys are available stock symbols
-and whose values are the stock symbols' names.
-
-The json file is generated from a file taken from NASDAQ (Which is updated daily).
-For more information on the file, visit the Wiki page on Github.
+This service returns a json formatted string whose keys are available stock symbols
+and whose values are the stock symbols' names and prices.
 
 TODO: retreive the NASDAQ file daily (currently called stock_symbols.txt) and generate the json file daily (currently called parsed_symbols.json).
 """
 @app.route("/stockSymbolsMap", methods=['GET'])
 def getStockSymbolMap():
     print "getStockSymbolMap"
-    parsed_symbols = open('./static/parsed_symbols.json', 'r')
-    json_string = ''
-    for line in parsed_symbols:
-        json_string += line
-    parsed_json = json.loads(json_string)
-    keys = parsed_json.keys()
-    keys.sort()
-    prices = getStockInfoHelper(keys).split('\n', len(keys)-1)
-    for i, price in enumerate(prices):
-        obj = str('{"name":"' + str(parsed_json[keys[i]]) + '","price":"' + str(price) + '"}')
-        parsed_json[keys[i]] = obj
-    return json.dumps(parsed_json, sort_keys=True)
+    cache.update(15)
+    return json.dumps(cache.parsed_json, sort_keys=True)
 
 """
 This service creates an account for the user.

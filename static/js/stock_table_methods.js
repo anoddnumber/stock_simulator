@@ -67,7 +67,7 @@ $( document ).ready(function() {
      * symbol - the symbol to get information from (i.e. AMZN)
      */
     function insertRowBySymbol(symbol) {
-        var info = JSON.parse(stockSymbolsMap[symbol]);
+        var info = stockSymbolsMap[symbol];
         var name = info['name'];
         var price = info.price;
         
@@ -137,7 +137,18 @@ $( document ).ready(function() {
         var keysToShow = [];
         
         keys.forEach(function(value, index, arr) {
-            if (value.match(regEx) || stockSymbolsMap[value].match(regEx)) {
+            var info = stockSymbolsMap[value];
+            var infoKeys = Object.keys(info);
+            var flag = false;
+            
+            for (var i = 0; i < infoKeys.length; i++) {
+                if (info[infoKeys[i]].toString().match(regEx)) {
+                    flag = true;
+                    break;
+                }
+            }
+            
+            if (flag === true || value.match(regEx)) {
                 keysToShow.push(value);
             }
         });

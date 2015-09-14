@@ -17,7 +17,7 @@ class Cache:
     def __init__(self):
         #current directory is always /stock_simulator
         self.path = './static/cache.json' 
-        self.parsed_json = None
+        self.parsed_json = None #the object that holds the cache info
         
         try:
             cache = open(self.path, 'r')
@@ -59,10 +59,8 @@ class Cache:
             self.__updateCache()
             
     """
-    Actually updates the cache by calling YahooStockAPI (used by the update method).
-    YahooStockAPI can only take 200 symbols at a time. Thus, break the requests to contain 200 or fewer symbols at a time.
-    Save the results in a new JSON object, append a last_updated key with the current time as the value, 
-    sort it alphabetically by keys, and store it in the cache at the end (completely overwriting the old cache).
+    Finds what symbols should be updated. Updates the parsed_json field, which holds the cache data as a variable.
+    Updates the cache.json file.
     """
     def __updateCache(self):
         #current directory is always /stock_simulator
@@ -72,13 +70,13 @@ class Cache:
             json_string += line
             
         self.parsed_json = self.__getNewJson(json.loads(json_string))
+#         self.loadCacheFromFile() #for testing purposes only
         
-        cache = open(self.path, 'w')
-        json.dump(self.parsed_json, cache, indent=1, sort_keys='true')
+        cacheFile = open(self.path, 'w')
+        json.dump(self.parsed_json, cacheFile, indent=1, sort_keys='true')
     
     """
-    Calls Yahoo's Stock API to get up to date stock prices. Builds a JSON object with the stock symbols as keys and
-    the price as the value.
+    Builds up the new cache and returns it
     
     symbolNameJson - the json object (a dictionary) that contains the symbol to name mapping
     """
@@ -87,7 +85,7 @@ class Cache:
         newJson = json.loads("{}")
         keysToSend = []
         names = []
-        maxKeysToSend = 200
+        maxKeysToSend = 200 # Yahoo's API takes at most 200 symbols at a time
         
         for i, key in enumerate(keys):
             if i is not 0 and i % maxKeysToSend == 0:
@@ -102,8 +100,9 @@ class Cache:
         return newJson
     
     """
-    Builds the new JSON object with the given keys/results.
-    This JSON object represents the new cache.
+    Helps to build the new cache
+    Calls Yahoo's Stock API to get up to date stock prices. Builds a JSON object with the stock symbols as keys and
+    the price as the value. This JSON object represents the new cache.
     
     newJson - the JSON object to populate.
     keys - an array of keys (strings) to be inserted into the JSON object.
@@ -144,4 +143,15 @@ class Cache:
                 print e
                 print "Stock symbol " + symbol + " not found"
         return prices
+    
+    def loadCacheFromFile(self):
+        cacheFile = open('./static/cache.json', 'r')
+        json_string = ''
+        for line in cacheFile:
+            json_string += line
+        
+        newJson = json.loads(json_string)
+        newJson['last_updated'] = str(datetime.datetime.now())
+        self.parsed_json = newJson
+        
         

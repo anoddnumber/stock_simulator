@@ -1,14 +1,19 @@
 var config = {
     numStocksPerPage : 10,
+    numMinutesToUpdate : 15,
 };
 
 $( document ).ready(function() {
     var stockSymbolsMap;
     var curSymbols; //the symbols that should be shown 
     var curPage = 0;
+    var lastUpdatedDate; //last time the server's cache was updated
+    
+    updateCache();
     
     /**
-     * Stores a map of stock symbols (the keys) to an object with stock information 
+     * Stores a map of stock symbols (the keys) to an object with stock information .
+     * Also updates the lastUpdatedDate variable.
      * 
      * The object is as follows: 
      * {
@@ -16,16 +21,43 @@ $( document ).ready(function() {
      *     'price': *Stock Price*
      * }
      */
-    $.ajax("/stockSymbolsMap", {
-        success : function(data) {
-            console.log("successfully got the stock symbols map!");
-            stockSymbolsMap = JSON.parse(data);
-            displayStocks(Object.keys(stockSymbolsMap));
-        },
-        error : function() {
-            console.log("error, did not get the stock symbols map");
-        }
-    });
+    function updateCache() {
+        $.ajax("/stockSymbolsMap", {
+            success : function(data) {
+                console.log("successfully got the stock symbols map!");
+                stockSymbolsMap = JSON.parse(data);
+                lastUpdatedDate = stockSymbolsMap['last_updated'];
+                
+                var lastUpdatedTime = Date.parse(lastUpdatedDate);
+                var currentTime = Date.now();
+                var lenientTime = 2000; //give the server more time to update, in milliseconds
+                var numMillisecondsToUpdate = config.numMinutesToUpdate * 60 * 1000;
+                var delay = lenientTime + numMillisecondsToUpdate - (currentTime - lastUpdatedTime);
+                
+                
+                if (delay < 0) {
+                    setTimeout(updateCache, numMillisecondsToUpdate);
+                } else {
+                    setTimeout(updateCache, delay);
+                }
+                
+                delete stockSymbolsMap['last_updated'];
+                
+                if ( ! curSymbols) {
+                    displayStocks(Object.keys(stockSymbolsMap));
+                } else {
+                    displayStocks(curSymbols);
+                }
+                
+            },
+            error : function() {
+                console.log("error, did not get the stock symbols map");
+                //try again in a minute...
+                var numMillisecondsToUpdate = 60000;
+                setTimeout(updateCache, numMillisecondsToUpdate);
+            }
+        });
+    }
     
     /**
      * Displays all of the given stock symbols in a paginated view.

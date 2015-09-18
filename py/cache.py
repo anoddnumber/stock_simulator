@@ -114,12 +114,12 @@ class Cache:
         results = [x.strip() for x in results.split('\n', len(keys) - 1)]
         
         if len(keys) != len(results):
-            raise InvalidUsage('Server Cache Error, keys and results do not match', status_code=500) 
+            raise InvalidUsage('Server Cache Error, keys and results do not match', status_code=500)
         for i, key in enumerate(keys):
             try:
                 name = names[i]
                 decimal = Decimal(float(results[i]))
-                price = str(round(decimal, 2))
+                price = str('{:.2f}'.format(round(decimal, 2)))
                 newJson[key] = {"name": str(name), "price" : price}
             except ValueError as e:
                 continue

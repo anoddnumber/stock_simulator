@@ -1,12 +1,16 @@
 from py.yahoo_stock_api import YahooStockAPI
-from flask import Flask, send_from_directory, request, jsonify
+from flask import Flask, session, send_from_directory, request, jsonify
 from py.db_access import DbAccess, UsersDbAccess
 from py.user import User
 from py.invalid_usage import InvalidUsage
 from py.cache import Cache
 import json
+from jinja2 import Environment, PackageLoader
 
+
+env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='')
+app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 cache = Cache()
 
 """
@@ -15,7 +19,11 @@ Everything else is a service.
 """
 @app.route('/')
 def root():
-    return app.send_static_file('index.html')
+    username = session.get('username')
+    if username is None:
+        username = "Not logged in"
+    template = env.get_template('index.html')
+    return template.render(username=username)
 
 """
 Gets the stock prices of the passed in symbols.
@@ -43,7 +51,7 @@ symbols - an array of stock symbols (that are strings)
 def getStockInfoHelper(symbols):
     if symbols == None:
         return None
-    cache.update(15)
+    cache.update(5)
     return cache.getStockPrices(symbols)
 
 """
@@ -55,7 +63,7 @@ TODO: retreive the NASDAQ file daily (currently called stock_symbols.txt) and ge
 @app.route("/stockSymbolsMap", methods=['GET'])
 def getStockSymbolMap():
     print "getStockSymbolMap"
-    cache.update(15)
+    cache.update(5)
     return json.dumps(cache.parsed_json, sort_keys=True)
 
 """
@@ -93,8 +101,17 @@ def login():
     else:
         print 'Wrong password'
         raise InvalidUsage('Wrong username or password', status_code=400)
-        
-    return "Login"
+    
+    session['username'] = username
+    return "Logged in"
+
+"""
+Logs the user out.
+"""
+@app.route("/logout", methods=['POST'])
+def logout():
+    session.pop('username', None)
+    return "Logged out"
 
 """
 This method is used to send error messages to the client.

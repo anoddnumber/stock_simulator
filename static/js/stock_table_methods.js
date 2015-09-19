@@ -1,6 +1,6 @@
 var config = {
     numStocksPerPage : 10,
-    numMinutesToUpdate : 15,
+    numMinutesToUpdate : 5,
 };
 
 $( document ).ready(function() {
@@ -96,8 +96,6 @@ $( document ).ready(function() {
             $('#previousStocksButton').show();
         }
         
-        console.log(lastPage);
-        console.log(curPage);
         if (lastPage <= curPage) {
             $('#nextStocksButton').hide();
         } else {

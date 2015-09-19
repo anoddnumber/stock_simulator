@@ -9,9 +9,12 @@ $( document ).ready(function() {
     
     $('#loginLink').click(showLoginForm);
     $('#createAccountLink').click(showCreateAccount);
+    $('#createAccountLink').click(showCreateAccount);
+    $('#logoutButton').click(logout);
+    
 
     function changePage(page) {
-        $('#stock_simulator > div').hide();
+        $('#tabs > div').hide();
         $('#' + page).show();
     }
     
@@ -36,6 +39,9 @@ $( document ).ready(function() {
             'username' : $('#loginForm input[name=username]').val().trim(),
             'password' : $('#loginForm input[name=password]').val(),
         };
+        
+        var passwordFields = $(':input[type="password"]');
+        passwordFields.val('');
         
         login(formData);
     });
@@ -154,7 +160,22 @@ $( document ).ready(function() {
             method: "POST",
             data: formData,
             success: function(data) {
-                console.log("successfully logged in!");
+                console.log(data);
+                $('#usernameBox').text(formData.username);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                showErrorFromJqXHR(jqXHR);
+                console.log("error, did not login");
+            }
+        });
+    }
+    
+    function logout() {
+        $.ajax("/logout", {
+            method: "POST",
+            success: function(data) {
+                console.log(data);
+                $('#usernameBox').text("Not logged in");
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 showErrorFromJqXHR(jqXHR);

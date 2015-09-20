@@ -3,6 +3,8 @@ var config = {
     numMinutesToUpdate : 5,
 };
 
+
+    
 $( document ).ready(function() {
     var stockSymbolsMap;
     var curSymbols; //the symbols that should be shown 
@@ -75,7 +77,7 @@ $( document ).ready(function() {
         curSymbols = stockSymbols;
         table.innerHTML = "";
         if (displayedKeys.length > 0) {
-            insertRowByValues(["Symbol", "Name", "Stock Price"]);
+            insertRowByValues(["Symbol", "Name", "Stock Price", "Buy"]);
             insertRowsBySymbols(displayedKeys);
         } else {
             insertRowByValue("Nothing found, please try again.");
@@ -124,9 +126,22 @@ $( document ).ready(function() {
         var info = stockSymbolsMap[symbol];
         var name = info['name'];
         var price = info.price;
+        var buttonId = 'buy' + symbol + 'Button';
+        var buyButton = '<button id="' + buttonId + '" type="button">Buy</button>';
         
-        insertRowByValues([symbol, name, price]);
+        insertRowByValues([symbol, name, price, buyButton]);
+        
+        //add the on click event after inserting the button into the table
+        $( "#stocks_table #" + buttonId ).on( "click", function() {
+            previewBuyStock(symbol);
+        });
     }
+    
+    function previewBuyStock(symbol) {
+        $('#previewBuyStockSymolName').text(symbol);
+        $('#previewBuyStockPrice').text(stockSymbolsMap[symbol].price);
+    }
+
     
     /**
      * Inserts the value into the stocks table as a row of its own.

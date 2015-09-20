@@ -18,7 +18,7 @@ config = {'defaultCash' : 50000}
 The root page. There is only 1 html page in this project.
 Everything else is a service.
 """
-@app.route('/')
+@app.route("/", methods=['GET'])
 def root():
     username = session.get('username')
     cash = ''
@@ -43,7 +43,7 @@ The method attempts to update the cache every time it is called.
 The cache will update if it has been more than n minutes since it has updated (specified in the argument, currently 15 minutes).
 The stock prices will be returned in the same order as the arguments, delimited by newlines ("\n").
 """
-@app.route("/info")
+@app.route("/info", methods=['GET'])
 def getStockInfo():
     symbols = request.args.get('symbols')
     if symbols == None:

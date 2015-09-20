@@ -23,10 +23,9 @@ class UsersDbAccess:
         return "Successful"
 
     def getUserByUsername(self, username):
-        user = self.db.users.find_one({"username": username})
-        if user is not None:
-            print user
-            return User(user['username'], user['password'], user['email'])
+        userDict = self.db.users.find_one({"username": username})
+        if userDict is not None:
+            return User(userDict)
         print 'No user found with username ' + username
         return None
 

@@ -162,6 +162,7 @@ $( document ).ready(function() {
             success: function(data) {
                 console.log(data);
                 $('#usernameBox').text(formData.username);
+                getAndDisplayUserData();
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 showErrorFromJqXHR(jqXHR);
@@ -176,10 +177,25 @@ $( document ).ready(function() {
             success: function(data) {
                 console.log(data);
                 $('#usernameBox').text("Not logged in");
+                $('#cashBox').text("");
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 showErrorFromJqXHR(jqXHR);
-                console.log("error, did not login");
+                console.log("error, did not log out");
+            }
+        });
+    }
+    
+    function getAndDisplayUserData() {
+        $.ajax("/getUserInfo", {
+            method: "GET",
+            success: function(data) {
+                data = JSON.parse(data);
+                $('#cashBox').text('Cash: $' + data.cash);
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                showErrorFromJqXHR(jqXHR);
+                console.log("error, did not retreive user data");
             }
         });
     }

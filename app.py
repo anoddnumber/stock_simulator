@@ -12,6 +12,7 @@ env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='')
 app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 cache = Cache()
+config = {'defaultCash' : 50000}
 
 """
 The root page. There is only 1 html page in this project.
@@ -20,10 +21,16 @@ Everything else is a service.
 @app.route('/')
 def root():
     username = session.get('username')
+    cash = ''
+    
     if username is None:
         username = "Not logged in"
+    else:
+        user = userDbAccess.getUserByUsername(username)
+        cash = 'Cash: $' + str(user.getRoundedCash())
+        
     template = env.get_template('index.html')
-    return template.render(username=username)
+    return template.render(username=username, cash=cash)
 
 """
 Gets the stock prices of the passed in symbols.
@@ -80,7 +87,9 @@ def createAccount():
     print password
     print email
     print "createAccount()"
-    user = User(username, password, email)
+    
+    dict = {'username' : username, 'password' : password, 'email' : email, 'cash' : config.get('defaultCash')}
+    user = User(dict)
     return userDbAccess.createUser(user)
 
 """
@@ -112,6 +121,17 @@ Logs the user out.
 def logout():
     session.pop('username', None)
     return "Logged out"
+
+"""
+"""
+@app.route("/getUserInfo", methods=['GET'])
+def getUserInfo():
+    username = session.get('username')
+    if username is None:
+        return 'Not logged in as user, cannot retreive information.'
+    user = userDbAccess.getUserByUsername(username)
+    dict = {'cash' : user.getRoundedCash()}
+    return json.dumps(dict, sort_keys=True)
 
 """
 This method is used to send error messages to the client.

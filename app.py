@@ -27,7 +27,7 @@ def root():
         username = "Not logged in"
     else:
         user = userDbAccess.getUserByUsername(username)
-        cash = 'Cash: $' + str(user.getRoundedCash())
+        cash = str(user.getRoundedCash())
         
     template = env.get_template('index.html')
     return template.render(username=username, cash=cash)

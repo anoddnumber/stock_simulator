@@ -13,7 +13,7 @@
 <div id="stock_simulator">
     <div id="topbar">
         <span id="usernameBox">{{username}}</span> 
-        <span id="cashBox">{{cash}}</span>
+        <span id="cashBox">Cash: ${{cash}}</span>
         <span id="logoutButton"> <input type="submit" value="Logout"> </span>
     </div>
     
@@ -57,10 +57,10 @@
             <br><br>
             
             <div id="previewBuyStockBox">
-                Available Cash: <span></span>
+                Available Cash: <span id="previewBuyStockCash"></span> <br>
                 Stock Name: <span id="previewBuyStockSymolName"></span> <br>
                 Price: <span id="previewBuyStockPrice"></span> <br>
-                Quantity: <input id="previewBuyStockQuantity" autocomplete="off" type="text" name="searchbar" size="10"> <br>
+                Quantity: <input id="previewBuyStockQuantity" autocomplete="off" type="text" name="quantitybar" size="10"> <br>
                 Total Price: <span id="previewBuyStockTotalPrice">0.00</span> <br>
                 <button id="nextStocksButton" type="button">Buy</button>
             </div>

@@ -2,8 +2,6 @@ var config = {
     numStocksPerPage : 10,
     numMinutesToUpdate : 5,
 };
-
-
     
 $( document ).ready(function() {
     var stockSymbolsMap;
@@ -138,6 +136,7 @@ $( document ).ready(function() {
     }
     
     function previewBuyStock(symbol) {
+        $('#previewBuyStockCash').text('$' + userInfo.cash);
         $('#previewBuyStockSymolName').text(symbol);
         $('#previewBuyStockPrice').text(stockSymbolsMap[symbol].price);
     }
@@ -195,6 +194,25 @@ $( document ).ready(function() {
             curPage++;
             displayStocks(curSymbols);
         }
+    });
+    
+    /**
+     * Computes the total amount of money required to buy the number of stocks
+     */
+    $("#previewBuyStockQuantity").keyup(function() {
+        var value = $('#previewBuyStockBox input[name=quantitybar]').val().trim();
+        var stockSymbol = $("#previewBuyStockSymolName").html();
+        var stockPrice = stockSymbolsMap[stockSymbol].price;
+        console.log("price: " + stockPrice);
+        var quantity = parseInt(value);
+        console.log("quantity: " + quantity);
+        if (quantity && quantity > 0 && stockPrice && value.indexOf('.') < 0) {
+            var totalPrice = quantity * stockPrice;
+            $('#previewBuyStockBox #previewBuyStockTotalPrice').text('$' + totalPrice.toFixed(2));
+        } else {
+            $('#previewBuyStockBox #previewBuyStockTotalPrice').text("Please input a positive integer");
+        }
+        
     });
     
     /**

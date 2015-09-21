@@ -1,3 +1,5 @@
+var userInfo;
+
 $( document ).ready(function() {
     $('#loginPageLink').click(function() {
         changePage('loginPage');
@@ -11,6 +13,7 @@ $( document ).ready(function() {
     $('#createAccountLink').click(showCreateAccount);
     $('#createAccountLink').click(showCreateAccount);
     $('#logoutButton').click(logout);
+    updateUserData();
     
 
     function changePage(page) {
@@ -162,7 +165,7 @@ $( document ).ready(function() {
             success: function(data) {
                 console.log(data);
                 $('#usernameBox').text(formData.username);
-                getAndDisplayUserData();
+                updateUserData();
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 showErrorFromJqXHR(jqXHR);
@@ -186,12 +189,16 @@ $( document ).ready(function() {
         });
     }
     
-    function getAndDisplayUserData() {
+    function updateUserData() {
         $.ajax("/getUserInfo", {
             method: "GET",
             success: function(data) {
-                data = JSON.parse(data);
-                $('#cashBox').text('Cash: $' + data.cash);
+                try {
+                    userInfo = JSON.parse(data);
+                    $('#cashBox').text('Cash: $' + userInfo.cash);
+                } catch (err){
+                    //not logged in, thus the response is not in JSON format
+                }
             },
             error: function(jqXHR, textStatus, errorThrown) {
                 showErrorFromJqXHR(jqXHR);

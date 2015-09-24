@@ -1,11 +1,6 @@
 from decimal import Decimal
 
 class User():
-#     def __init__(self, username, password, email):
-#         self._username = username
-#         self._password = password
-#         self._email = email
-        
     def __init__(self, dict):
         self._username = dict.get('username')
         self._password = dict.get('password')
@@ -29,6 +24,16 @@ class User():
         return self._cash
     
     def getRoundedCash(self):
-        cash = Decimal(self._cash)
+        if self.cash is None:
+            return None
+        cash = Decimal(self.cash)
         cash = '{:.2f}'.format(round(cash, 2))
         return cash
+    
+    def getDict(self):
+        return {
+                "username" : self.username,
+                "password" : self.password,
+                "email" : self.email,
+                "cash" : self.cash
+                }

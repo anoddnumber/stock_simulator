@@ -19,7 +19,7 @@ class UsersDbAccess:
             print "User already exists. Choose another username."
             raise InvalidUsage('Username already taken.', status_code=400)
         else:
-            self.db.users.insert_one({"username" : user.username, "email" : user.email, "password" : user.password})
+            self.db.users.insert_one(user.getDict())
         return "Successful"
 
     def getUserByUsername(self, username):

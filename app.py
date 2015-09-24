@@ -24,11 +24,15 @@ def root():
     username = session.get('username')
     cash = ''
     
+    print username
     if username is None:
         username = "Not logged in"
     else:
         user = userDbAccess.getUserByUsername(username)
-        cash = str(user.getRoundedCash())
+        if user is None:
+            username = "Not logged in"
+        else:
+            cash = str(user.getRoundedCash())
     
     username = cgi.escape(username)
     template = env.get_template('index.html')
@@ -82,9 +86,9 @@ or raises an error if there is an issue.
 """
 @app.route("/createAccount", methods=['POST'])
 def createAccount():
-    username = cgi.escape(request.form['username'])
+    username = request.form['username']
     password = request.form['password']
-    email = cgi.escape(request.form['email'])
+    email = request.form['email']
     print username
     print password
     print email
@@ -101,7 +105,7 @@ TODO: Cookies
 @app.route("/login", methods=['POST'])
 def login():
     print 'login'
-    username = cgi.escape(request.form['username'])
+    username = request.form['username']
     password = request.form['password']
     user = userDbAccess.getUserByUsername(username)
     if not user:

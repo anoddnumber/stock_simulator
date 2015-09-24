@@ -6,6 +6,7 @@ from py.invalid_usage import InvalidUsage
 from py.cache import Cache
 import json
 from jinja2 import Environment, PackageLoader
+import cgi
 
 
 env = Environment(loader=PackageLoader('py', 'templates'))
@@ -28,7 +29,8 @@ def root():
     else:
         user = userDbAccess.getUserByUsername(username)
         cash = str(user.getRoundedCash())
-        
+    
+    username = cgi.escape(username)
     template = env.get_template('index.html')
     return template.render(username=username, cash=cash)
 
@@ -80,9 +82,9 @@ or raises an error if there is an issue.
 """
 @app.route("/createAccount", methods=['POST'])
 def createAccount():
-    username = request.form['username']
+    username = cgi.escape(request.form['username'])
     password = request.form['password']
-    email = request.form['email']
+    email = cgi.escape(request.form['email'])
     print username
     print password
     print email
@@ -99,7 +101,7 @@ TODO: Cookies
 @app.route("/login", methods=['POST'])
 def login():
     print 'login'
-    username = request.form['username']
+    username = cgi.escape(request.form['username'])
     password = request.form['password']
     user = userDbAccess.getUserByUsername(username)
     if not user:
@@ -122,13 +124,28 @@ def logout():
     session.pop('username', None)
     return "Logged out"
 
+@app.route("/buyStock", methods=['POST'])
+def buyStock():
+    #get stock symbol
+    #get username from session/cookie
+    #get number of stocks that want to be purchased
+    username = session.get('username')
+    if username is None:
+        return 'Not logged in, cannot buy stock.'
+    user = userDbAccess.getUserByUsername(username)
+    symbol = request.form['symbol']
+    quantity = request.form['quantity']
+    stockPrice = request.form['stockPrice']
+    
+    return None
+
 """
 """
 @app.route("/getUserInfo", methods=['GET'])
 def getUserInfo():
     username = session.get('username')
     if username is None:
-        return 'Not logged in as user, cannot retreive information.'
+        return 'Not logged in, cannot retreive information.'
     user = userDbAccess.getUserByUsername(username)
     dict = {'cash' : user.getRoundedCash()}
     return json.dumps(dict, sort_keys=True)

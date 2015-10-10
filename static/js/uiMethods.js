@@ -1,5 +1,26 @@
 var userInfo;
 
+function updateUserData() {
+    $.ajax("/getUserInfo", {
+        method: "GET",
+        success: function(data) {
+            try {
+                userInfo = JSON.parse(data);
+                $('#cashBox').text('Cash: $' + userInfo.cash);
+                $('#previewBuyStockCash').text('$' + userInfo.cash);
+                
+                //TODO: Update stocks in profile page
+            } catch (err){
+                //not logged in, thus the response is not in JSON format
+            }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            showErrorFromJqXHR(jqXHR);
+            console.log("error, did not retreive user data");
+        }
+    });
+}
+    
 $( document ).ready(function() {
     $('#loginPageLink').click(function() {
         changePage('loginPage');
@@ -15,7 +36,6 @@ $( document ).ready(function() {
     $('#logoutButton').click(logout);
     updateUserData();
     
-
     function changePage(page) {
         $('#tabs > div').hide();
         $('#' + page).show();
@@ -185,24 +205,6 @@ $( document ).ready(function() {
             error: function(jqXHR, textStatus, errorThrown) {
                 showErrorFromJqXHR(jqXHR);
                 console.log("error, did not log out");
-            }
-        });
-    }
-    
-    function updateUserData() {
-        $.ajax("/getUserInfo", {
-            method: "GET",
-            success: function(data) {
-                try {
-                    userInfo = JSON.parse(data);
-                    $('#cashBox').text('Cash: $' + userInfo.cash);
-                } catch (err){
-                    //not logged in, thus the response is not in JSON format
-                }
-            },
-            error: function(jqXHR, textStatus, errorThrown) {
-                showErrorFromJqXHR(jqXHR);
-                console.log("error, did not retreive user data");
             }
         });
     }

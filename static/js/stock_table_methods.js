@@ -41,6 +41,7 @@ $( document ).ready(function() {
                     setTimeout(updateCache, delay);
                 }
                 
+                //the last_updated date should not be shown to the user
                 delete stockSymbolsMap['last_updated'];
                 
                 if ( ! curSymbols) {
@@ -204,16 +205,54 @@ $( document ).ready(function() {
         var stockSymbol = $("#previewBuyStockSymolName").html();
         var stockPrice = stockSymbolsMap[stockSymbol].price;
         console.log("price: " + stockPrice);
-        var quantity = parseInt(value);
+        var quantity = isPositiveInteger(value);
         console.log("quantity: " + quantity);
-        if (quantity && quantity > 0 && stockPrice && value.indexOf('.') < 0) {
+        if (quantity && stockPrice) {
             var totalPrice = quantity * stockPrice;
             $('#previewBuyStockBox #previewBuyStockTotalPrice').text('$' + totalPrice.toFixed(2));
         } else {
             $('#previewBuyStockBox #previewBuyStockTotalPrice').text("Please input a positive integer");
         }
-        
     });
+    
+    $('#previewBuyStocksBuyButton').click(function() {
+        var value = $('#previewBuyStockBox input[name=quantitybar]').val().trim();
+        quantity = isPositiveInteger(value);
+        if (quantity) {
+            buyStock($("#previewBuyStockSymolName").html(), quantity);
+        }
+    });
+    
+    function isPositiveInteger(str) {
+        if (str.indexOf('.') < 0) {
+            var num = parseInt(str);
+            if (num && num > 0) {
+                return num;
+            }
+        }
+        return false;
+    }
+    
+    /**
+     * TODO
+     */
+    function buyStock(symbol, quantity) {
+        $.ajax("/buyStock", {
+            method: "POST",
+            data: {'symbol' : symbol,
+                    'quantity' : quantity,
+                    'stockPrice' : stockSymbolsMap[symbol].price
+                    },
+            success: function(data) {
+                console.log(data);
+                updateUserData();
+            },
+            error: function(jqXHR, textStatus, errorThrown) {
+                console.log("JSON.parse(jqXHR.responseText).message: " + jqXHR.responseText);
+                console.log("error, did not buy stock");
+            }
+        });
+    }
     
     /**
      * Finds out which stocks/stock names have matches with the searched value.

@@ -23,17 +23,17 @@ Everything else is a service.
 def root():
     username = session.get('username')
     cash = ''
-    
+     
     print username
     if username is None:
         username = "Not logged in"
     else:
-        user = userDbAccess.getUserByUsername(username)
+        user = UsersDbAccess.getUserByUsername(username)
         if user is None:
             username = "Not logged in"
         else:
             cash = str(user.getRoundedCash())
-    
+     
     username = cgi.escape(username)
     template = env.get_template('index.html')
     return template.render(username=username, cash=cash)
@@ -94,9 +94,14 @@ def createAccount():
     print email
     print "createAccount()"
     
-    dict = {'username' : username, 'password' : password, 'email' : email, 'cash' : config.get('defaultCash')}
+    dict = {'username' : username,
+            'password' : password,
+            'email' : email,
+            'cash' : config.get('defaultCash'),
+            'stocks_owned' : {}
+            }
     user = User(dict)
-    return userDbAccess.createUser(user)
+    return UsersDbAccess.createUser(user)
 
 """
 Logs the user in. Verifies that the given username and password match the ones in the database.
@@ -105,9 +110,10 @@ TODO: Cookies
 @app.route("/login", methods=['POST'])
 def login():
     print 'login'
+    #logout() then login as the new user.
     username = request.form['username']
     password = request.form['password']
-    user = userDbAccess.getUserByUsername(username)
+    user = UsersDbAccess.getUserByUsername(username)
     if not user:
         raise InvalidUsage('Wrong username or password', status_code=400)
     
@@ -130,13 +136,47 @@ def logout():
 
 @app.route("/buyStock", methods=['POST'])
 def buyStock():
+    print 'buyStock'
+    
+    username = session.get('username')
+    if username is None:
+        return 'Not logged in, cannot buy stock.'
+    
+    user = UsersDbAccess.getUserByUsername(username)
+    if user is None:
+        return 'User with username ' + username
+    try:
+        symbol = request.form['symbol']
+        quantity = int(request.form['quantity'])
+        stockPrice = float(request.form['stockPrice'])
+    except ValueError, e:
+        return "Error reading arguments"
+    
+    if symbol is None or quantity is None or stockPrice is None:
+        return 'Missing at least one argument: symbol, quantity, stockPrice required. No optional arguments.'
+    
+    #check if quantity is a positive integer
+    #check if stock price is a positive floating point number and is equal to the server's stock price
+    if stockPrice < 0 or quantity < 0:
+        return "stock price or quantity less than 0"
+        
+    totalCost = quantity * stockPrice
+    # check that the user has enough cash to buy the stocks requested
+    if totalCost > user.cash:
+        return "Not enough cash"
+    
+    #buy the stock
+    return UsersDbAccess.addStockToUser(user.username, symbol, stockPrice, quantity)
+
+@app.route("/sellStock", methods=['POST'])
+def sellStock():
     #get stock symbol
     #get username from session/cookie
     #get number of stocks that want to be purchased
     username = session.get('username')
     if username is None:
-        return 'Not logged in, cannot buy stock.'
-    user = userDbAccess.getUserByUsername(username)
+        return 'Not logged in, cannot sell stock.'
+    user = UsersDbAccess.getUserByUsername(username)
     symbol = request.form['symbol']
     quantity = request.form['quantity']
     stockPrice = request.form['stockPrice']
@@ -150,7 +190,9 @@ def getUserInfo():
     username = session.get('username')
     if username is None:
         return 'Not logged in, cannot retreive information.'
-    user = userDbAccess.getUserByUsername(username)
+    user = UsersDbAccess.getUserByUsername(username)
+    if user is None:
+        return 'Could not find the current user in the database.'
     dict = {'cash' : user.getRoundedCash()}
     return json.dumps(dict, sort_keys=True)
 
@@ -165,7 +207,5 @@ def handle_invalid_usage(error):
     return response
             
 if __name__ == "__main__":
-    dbAccess = DbAccess("stock_market_simulator_db")
-    userDbAccess = UsersDbAccess(dbAccess)
     app.debug = True
     app.run()

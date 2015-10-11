@@ -4,4 +4,4 @@
 static/cache.json
 .project
 .pydevproject
-
+*.idea*

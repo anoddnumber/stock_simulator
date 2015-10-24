@@ -1,4 +1,3 @@
-from py.yahoo_stock_api import YahooStockAPI
 from flask import Flask, session, send_from_directory, request, jsonify
 from py.db_access import DbAccess, UsersDbAccess
 from py.user import User
@@ -134,6 +133,7 @@ def logout():
     session.pop('username', None)
     return "Logged out"
 
+
 @app.route("/buyStock", methods=['POST'])
 def buyStock():
     print 'buyStock'
@@ -144,7 +144,8 @@ def buyStock():
     
     user = UsersDbAccess.getUserByUsername(username)
     if user is None:
-        return 'User with username ' + username
+        return 'User with username ' + username + ' not found in database.'
+
     try:
         symbol = request.form['symbol']
         quantity = int(request.form['quantity'])
@@ -154,37 +155,68 @@ def buyStock():
     
     if symbol is None or quantity is None or stockPrice is None:
         return 'Missing at least one argument: symbol, quantity, stockPrice required. No optional arguments.'
+
+    # check if the price that the user wants to buy the stock for is the same as the server's stock price
+    stocksMap = cache.json
+    symbolMap = stocksMap.get(symbol)
+    if symbolMap is None:
+       return "Invalid symbol"
+    serverStockPrice = float(symbolMap.get("price"))
+
+    print "stockPrice: " + str(type(stockPrice))
+    print "serverStockPrice: " + str(type(serverStockPrice))
+    if stockPrice != serverStockPrice:
+       return "Stock price changed, please try again."
     
-    #check if quantity is a positive integer
-    #check if stock price is a positive floating point number and is equal to the server's stock price
+    # check if quantity is a positive integer
     if stockPrice < 0 or quantity < 0:
         return "stock price or quantity less than 0"
         
     totalCost = quantity * stockPrice
     # check that the user has enough cash to buy the stocks requested
-    if totalCost > user.cash:
+    if totalCost >= user.cash:
         return "Not enough cash"
     
     #buy the stock
     return UsersDbAccess.addStockToUser(user.username, symbol, stockPrice, quantity)
 
+
 @app.route("/sellStock", methods=['POST'])
-def sellStock():
-    #get stock symbol
-    #get username from session/cookie
-    #get number of stocks that want to be purchased
+def sell_stock():
     username = session.get('username')
     if username is None:
-        return 'Not logged in, cannot sell stock.'
-    user = UsersDbAccess.getUserByUsername(username)
-    symbol = request.form['symbol']
-    quantity = request.form['quantity']
-    stockPrice = request.form['stockPrice']
+        return 'Not logged in, cannot sell stock.' 
     
-    return None
+    user = UsersDbAccess.getUserByUsername(username)
+    if user is None:
+        return 'User with username ' + username + ' not found in database.'
 
-"""
-"""
+    try:
+        symbol = request.form['symbol']
+        quantity = int(request.form['quantity'])
+        stockPrice = float(request.form['stockPrice'])
+    except ValueError, e:
+        return "Error reading arguments"
+    
+    if symbol is None or quantity is None or stockPrice is None:
+        return 'Missing at least one argument: symbol, quantity, stockPrice required. No optional arguments.'
+
+    stocks_map = cache.json
+    symbol_map = stocks_map.get(symbol)
+    if symbol_map is None:
+        return "Invalid symbol"
+    server_stock_price = float(symbol_map.get("price"))
+
+    if stockPrice < 0 or quantity < 0:
+        return "stock price or quantity less than 0"
+
+    if stockPrice != server_stock_price:
+        return "Stock price changed, please try again."
+
+    # sell the stock
+    return UsersDbAccess.sell_stocks_from_user(username, symbol, quantity, cache)
+
+
 @app.route("/getUserInfo", methods=['GET'])
 def getUserInfo():
     username = session.get('username')

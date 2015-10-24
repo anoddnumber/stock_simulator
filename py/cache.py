@@ -30,6 +30,10 @@ class Cache:
             print e
             self.update()
             
+    @property
+    def json(self):
+        return self.parsed_json
+    
     """
     Returns the last datetime that the cache was updated.
     Looks in the cache for the last_updated key and returns the value.
@@ -143,6 +147,13 @@ class Cache:
                 print e
                 print "Stock symbol " + symbol + " not found"
         return prices
+
+    def get_stock_price(self, symbol):
+        try:
+            return self.parsed_json[symbol]["price"]
+        except KeyError, e:
+            print e
+            return "Stock symbol " + symbol + " not found"
     
     def loadCacheFromFile(self):
         cacheFile = open('./static/cache.json', 'r')

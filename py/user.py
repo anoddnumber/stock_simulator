@@ -6,6 +6,7 @@ class User():
         self._password = dict.get('password')
         self._email = dict.get('email')
         self._cash = dict.get('cash')
+        self._stocks = dict.get('stocks_owned')
         
     @property
     def username(self):
@@ -23,6 +24,10 @@ class User():
     def cash(self):
         return self._cash
     
+    @property
+    def stocks(self):
+        return self._stocks
+    
     def getRoundedCash(self):
         if self.cash is None:
             return None
@@ -35,5 +40,6 @@ class User():
                 "username" : self.username,
                 "password" : self.password,
                 "email" : self.email,
-                "cash" : self.cash
+                "cash" : self.cash,
+                "stocks" : self.stocks
                 }

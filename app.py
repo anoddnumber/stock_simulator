@@ -177,7 +177,7 @@ def buyStock():
     if totalCost >= user.cash:
         return "Not enough cash"
     
-    #buy the stock
+    # buy the stock
     return UsersDbAccess.addStockToUser(user.username, symbol, stockPrice, quantity)
 
 
@@ -225,7 +225,7 @@ def getUserInfo():
     user = UsersDbAccess.getUserByUsername(username)
     if user is None:
         return 'Could not find the current user in the database.'
-    dict = {'cash' : user.getRoundedCash()}
+    dict = {'cash' : user.getRoundedCash(), 'stocks_owned' : user.stocks}
     return json.dumps(dict, sort_keys=True)
 
 """

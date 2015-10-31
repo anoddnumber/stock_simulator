@@ -72,58 +72,6 @@ var config = {
             },
 
             /**
-             * Stores a map of stock symbols (the keys) to an object with stock information .
-             * Also updates the lastUpdatedDate variable.
-             *
-             * The object is as follows:
-             * {
-             *     'name' : *Stock Name*,
-             *     'price': *Stock Price*
-             * }
-             * Updates the cache: TODO move to global area
-             */
-            updateCache : function() {
-                $.ajax("/stockSymbolsMap", {
-                    success : function(data) {
-                        console.log("successfully got the stock symbols map!");
-                        stockSymbolsMap = JSON.parse(data);
-                        lastUpdatedDate = stockSymbolsMap['last_updated'];
-
-                        var lastUpdatedTime = Date.parse(lastUpdatedDate);
-                        var currentTime = Date.now();
-                        var lenientTime = 2000; //give the server more time to update, in milliseconds
-                        var numMillisecondsToUpdate = config.numMinutesToUpdate * 60 * 1000;
-                        var delay = lenientTime + numMillisecondsToUpdate - (currentTime - lastUpdatedTime);
-
-
-                        if (delay < 0) {
-                            setTimeout(browseTab.updateCache, numMillisecondsToUpdate);
-                        } else {
-                            setTimeout(browseTab.updateCache, delay);
-                        }
-
-                        //the last_updated date should not be shown to the user
-                        delete stockSymbolsMap['last_updated'];
-
-                        //TODO: create a displayStocksHelper that takes in a list of symbols to display
-                        //displayStocks will then have no parameters and defaults to curSymbols or Object.keys(stockSymbolsMap)
-                        if ( ! curSymbols) {
-                            browseTab.displayStocks(Object.keys(stockSymbolsMap));
-                        } else {
-                            browseTab.displayStocks(curSymbols);
-                        }
-
-                    },
-                    error : function() {
-                        console.log("error, did not get the stock symbols map");
-                        //try again in a minute...
-                        var numMillisecondsToUpdate = 60000;
-                        setTimeout(browseTab.updateCache, numMillisecondsToUpdate);
-                    }
-                });
-            },
-
-            /**
              * Displays all of the given stock symbols in a paginated view.
              * Meaning that the first n stocks will appear on the first page where n is config.numStocksPerPage
              * The other stocks will be displayed on the following pages when the user presses the next button.
@@ -203,16 +151,18 @@ var config = {
                 $('#previewBuyStockSymolName').text(symbol);
                 $('#previewBuyStockPrice').text(stockSymbolsMap[symbol].price);
             },
+
+            //TODO: add an update method
         }
 
         return {
-            updateCache : browseTab.updateCache,
             getCurSymbols : browseTab.getCurSymbols,
             getCurPage : browseTab.getCurPage,
             getLastUpdatedDate : browseTab.getLastUpdatedDate,
             showPreviousPage : browseTab.showPreviousPage,
             showNextPage : browseTab.showNextPage,
             search : browseTab.search,
+            displayStocks : browseTab.displayStocks,
         };
     };
 })(jQuery);
@@ -221,7 +171,7 @@ var config = {
 var BrowseTab = $.BrowseTab();
 $( document ).ready(function() {
 
-    BrowseTab.updateCache();
+    ApiClient.updateCache();
 
     /**
      * Moves to and displays the previous page of stocks.

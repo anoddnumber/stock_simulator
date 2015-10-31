@@ -15,6 +15,10 @@ body {
     display : none;
 }
 
+#profilePage {
+    display : none;
+}
+
 a:visited{
   color:blue;
 }

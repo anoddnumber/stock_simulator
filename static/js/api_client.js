@@ -98,6 +98,7 @@
             },
 
             updateUserData : function() {
+                console.log("updateUserData");
                 $.ajax("/getUserInfo", {
                     method: "GET",
                     success: function(data) {
@@ -107,14 +108,67 @@
                             $('#previewBuyStockCash').text('$' + userInfo.cash);
 
                             //TODO: Update stocks in profile page
-                            updateProfilePage(userInfo)
+                            ProfileTab.update(userInfo)
                         } catch (err){
                             //not logged in, thus the response is not in JSON format
+                            console.log("not logged in");
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         TopBar.showErrorFromJqXHR(jqXHR);
                         console.log("error, did not retrieve user data");
+                    }
+                });
+            },
+
+                        /**
+             * Stores a map of stock symbols (the keys) to an object with stock information .
+             * Also updates the lastUpdatedDate variable.
+             *
+             * The object is as follows:
+             * {
+             *     'name' : *Stock Name*,
+             *     'price': *Stock Price*
+             * }
+             * Updates the cache: TODO move to global area
+             */
+            updateCache : function() {
+                $.ajax("/stockSymbolsMap", {
+                    success : function(data) {
+                        console.log("successfully got the stock symbols map!");
+                        stockSymbolsMap = JSON.parse(data);
+                        lastUpdatedDate = stockSymbolsMap['last_updated'];
+
+                        var lastUpdatedTime = Date.parse(lastUpdatedDate);
+                        var currentTime = Date.now();
+                        var lenientTime = 2000; //give the server more time to update, in milliseconds
+                        var numMillisecondsToUpdate = config.numMinutesToUpdate * 60 * 1000;
+                        var delay = lenientTime + numMillisecondsToUpdate - (currentTime - lastUpdatedTime);
+
+
+                        if (delay < 0) {
+                            setTimeout(apiClient.updateCache, numMillisecondsToUpdate);
+                        } else {
+                            setTimeout(apiClient.updateCache, delay);
+                        }
+
+                        //the last_updated date should not be shown to the user
+                        delete stockSymbolsMap['last_updated'];
+
+                        //TODO: create a displayStocksHelper that takes in a list of symbols to display
+                        //displayStocks will then have no parameters and defaults to curSymbols or Object.keys(stockSymbolsMap)
+                        if ( ! BrowseTab.getCurSymbols()) {
+                            BrowseTab.displayStocks(Object.keys(stockSymbolsMap));
+                        } else {
+                            BrowseTab.displayStocks(BrowseTab.getCurSymbols());
+                        }
+
+                    },
+                    error : function() {
+                        console.log("error, did not get the stock symbols map");
+                        //try again in a minute...
+                        var numMillisecondsToUpdate = 60000;
+                        setTimeout(apiClient.updateCache, numMillisecondsToUpdate);
                     }
                 });
             },
@@ -126,6 +180,7 @@
             createAccount : apiClient.createAccount,
             buyStock : apiClient.buyStock,
             updateUserData : apiClient.updateUserData,
+            updateCache : apiClient.updateCache,
         }
     }
 })(jQuery);

@@ -62,7 +62,7 @@ var stockSymbolsMap;
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        showErrorFromJqXHR(jqXHR);
+                        TopBar.showErrorFromJqXHR(jqXHR);
                         console.log("error, did not retrieve user data");
                     }
                 });

@@ -25,7 +25,7 @@
                         Utility.updateUserData();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        showErrorFromJqXHR(jqXHR);
+                        TopBar.showErrorFromJqXHR(jqXHR);
                         console.log("error, did not login");
                     }
                 });
@@ -41,7 +41,7 @@
                         Utility.updateUserData();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        showErrorFromJqXHR(jqXHR);
+                        TopBar.showErrorFromJqXHR(jqXHR);
                         console.log("error, did not login");
                     }
                 });
@@ -56,7 +56,7 @@
                         $('#cashBox').text("");
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        showErrorFromJqXHR(jqXHR);
+                        TopBar.showErrorFromJqXHR(jqXHR);
                         console.log("error, did not log out");
                     }
                 });
@@ -70,7 +70,7 @@
                         console.log("successfully created account!");
                     },
                     error: function(jqXHR, textStatus, errorThrown ) {
-                        showErrorFromJqXHR(jqXHR);
+                        TopBar.showErrorFromJqXHR(jqXHR);
                     }
                 });
             }

@@ -5,8 +5,12 @@
 <!-- Include all the necessary files that the html pages requires-->
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 <link rel="stylesheet" type="text/css" href="css/simulator.css">
-<script src="js/uiMethods.js"></script>
-<script src="js/stock_table_methods.js"></script>
+<script src="js/api_client.js"></script>
+<script src="js/browse_tab.js"></script>
+<script src="js/utility.js"></script>
+<script src="js/profile_tab.js"></script>
+<script src="js/top_bar.js"></script>
+<script src="js/login.js"></script>
 
 
 <title>Stock Simulator</title>
@@ -17,9 +21,11 @@
         <span id="logoutButton"> <input type="submit" value="Logout"> </span>
     </div>
     
-    <a href="#" id="loginPageLink">Login</a> <!-- Will be removed later..-->
+    <a href="#" id="loginPageLink">Login</a> <!-- Login tab will be removed later..-->
+    <a href="#" id="profilePageLink">Profile</a>
     <a href="#" id="stockTablePageLink">Browse Stocks</a>
-    
+
+    <!-- TODO change names to "*Tab" -->
     <div id="tabs">
         <div id="loginPage">
             <div id="errorBox"></div>
@@ -44,6 +50,14 @@
             </div>
             <a href="#" id="loginLink">Login</a>
             <a href="#" id="createAccountLink">Create Account</a>
+        </div>
+
+        <div id="profilePage">
+            <form id="searchProfileForm">
+            Search: <input id="profileSearchBar" autocomplete="off" type="text" name="searchbar" size="100">
+            </form>
+
+            <table id="profile_table"></table>
         </div>
         
         <div id="stockTablePage">

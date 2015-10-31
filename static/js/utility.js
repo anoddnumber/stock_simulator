@@ -46,28 +46,6 @@ var stockSymbolsMap;
                 }
             },
 
-            updateUserData : function() {
-                $.ajax("/getUserInfo", {
-                    method: "GET",
-                    success: function(data) {
-                        try {
-                            userInfo = JSON.parse(data);
-                            $('#cashBox').text('Cash: $' + userInfo.cash);
-                            $('#previewBuyStockCash').text('$' + userInfo.cash);
-
-                            //TODO: Update stocks in profile page
-                            updateProfilePage(userInfo)
-                        } catch (err){
-                            //not logged in, thus the response is not in JSON format
-                        }
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        TopBar.showErrorFromJqXHR(jqXHR);
-                        console.log("error, did not retrieve user data");
-                    }
-                });
-            },
-
             /**
              * Replaces all the characters that match "find" in "str" with "replace"
              * @param {Object} find - the characters to replace
@@ -93,7 +71,6 @@ var stockSymbolsMap;
             hasEmptyValue : utility.hasEmptyValue,
             insertRowByValue : utility.insertRowByValue,
             insertRowByValues : utility.insertRowByValues,
-            updateUserData : utility.updateUserData,
             isPositiveInteger : utility.isPositiveInteger,
         };
     };
@@ -101,4 +78,5 @@ var stockSymbolsMap;
 
 var Utility = $.Utility();
 $( document ).ready(function() {
+    ApiClient.updateUserData();
 });

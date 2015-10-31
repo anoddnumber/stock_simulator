@@ -203,28 +203,6 @@ var config = {
                 $('#previewBuyStockSymolName').text(symbol);
                 $('#previewBuyStockPrice').text(stockSymbolsMap[symbol].price);
             },
-
-            /**
-             * TODO, create a central helper for all the APIs, or maybe a client.
-             *  since all the success and error parts of the functions are the same..
-             */
-            buyStock : function(symbol, quantity) {
-                $.ajax("/buyStock", {
-                    method: "POST",
-                    data: {'symbol' : symbol,
-                            'quantity' : quantity,
-                            'stockPrice' : stockSymbolsMap[symbol].price
-                            },
-                    success: function(data) {
-                        console.log(data);
-                        Utility.updateUserData();
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        console.log("JSON.parse(jqXHR.responseText).message: " + jqXHR.responseText);
-                        console.log("error, did not buy stock");
-                    }
-                });
-            }
         }
 
         return {
@@ -232,7 +210,6 @@ var config = {
             getCurSymbols : browseTab.getCurSymbols,
             getCurPage : browseTab.getCurPage,
             getLastUpdatedDate : browseTab.getLastUpdatedDate,
-            buyStock : browseTab.buyStock,
             showPreviousPage : browseTab.showPreviousPage,
             showNextPage : browseTab.showNextPage,
             search : browseTab.search,
@@ -280,7 +257,7 @@ $( document ).ready(function() {
         var value = $('#previewBuyStockBox input[name=quantitybar]').val().trim();
         quantity = Utility.isPositiveInteger(value);
         if (quantity) {
-            BrowseTab.buyStock($("#previewBuyStockSymolName").html(), quantity);
+            ApiClient.buyStock($("#previewBuyStockSymolName").html(), quantity);
         }
     });
 

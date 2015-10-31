@@ -18,11 +18,11 @@
                         if (onSuccess) {
                             onSuccess();
                         } else {
-                            Utility.updateUserData();
+                            ApiClient.updateUserData();
                         }
                         console.log(data);
                         $('#usernameBox').text(formData.username);
-                        Utility.updateUserData();
+                        ApiClient.updateUserData();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         TopBar.showErrorFromJqXHR(jqXHR);
@@ -38,7 +38,7 @@
                     success: function(data) {
                         console.log(data);
                         $('#usernameBox').text(formData.username);
-                        Utility.updateUserData();
+                        ApiClient.updateUserData();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         TopBar.showErrorFromJqXHR(jqXHR);
@@ -73,13 +73,59 @@
                         TopBar.showErrorFromJqXHR(jqXHR);
                     }
                 });
-            }
+            },
+
+            /**
+             * TODO, create a central helper for all the APIs, or maybe a client.
+             *  since all the success and error parts of the functions are the same..
+             */
+            buyStock : function(symbol, quantity) {
+                $.ajax("/buyStock", {
+                    method: "POST",
+                    data: {'symbol' : symbol,
+                            'quantity' : quantity,
+                            'stockPrice' : stockSymbolsMap[symbol].price
+                            },
+                    success: function(data) {
+                        console.log(data);
+                        ApiClient.updateUserData();
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.log("JSON.parse(jqXHR.responseText).message: " + jqXHR.responseText);
+                        console.log("error, did not buy stock");
+                    }
+                });
+            },
+
+            updateUserData : function() {
+                $.ajax("/getUserInfo", {
+                    method: "GET",
+                    success: function(data) {
+                        try {
+                            userInfo = JSON.parse(data);
+                            $('#cashBox').text('Cash: $' + userInfo.cash);
+                            $('#previewBuyStockCash').text('$' + userInfo.cash);
+
+                            //TODO: Update stocks in profile page
+                            updateProfilePage(userInfo)
+                        } catch (err){
+                            //not logged in, thus the response is not in JSON format
+                        }
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        TopBar.showErrorFromJqXHR(jqXHR);
+                        console.log("error, did not retrieve user data");
+                    }
+                });
+            },
         }
 
         return {
             login : apiClient.login,
             logout : apiClient.logout,
             createAccount : apiClient.createAccount,
+            buyStock : apiClient.buyStock,
+            updateUserData : apiClient.updateUserData,
         }
     }
 })(jQuery);

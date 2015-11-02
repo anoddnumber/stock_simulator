@@ -9,7 +9,8 @@
                 table.innerHTML = "";
 
                 Utility.insertRowByValues("profile_table", ["Symbol", "Amount Owned", "Price Bought", "Current Price",
-                "Price Difference", "Percent Difference"]);
+                "Price Difference", "Percent Difference", "Day Price Difference", "Day Percent Difference", "Buy",
+                "Sell"]);
                 var keys = Object.keys(userData.stocks_owned);
 
                 for (var i = 0; i < keys.length; i++) {
@@ -32,7 +33,11 @@
                     var avgPrice = (totalPrice / totalQuantity).toFixed(2);
                     var currentPrice = stockSymbolsMap[symbol].price;
                     var priceDifference = (currentPrice - avgPrice).toFixed(2);
-                    var row = [symbol, totalQuantity, avgPrice, currentPrice, priceDifference];
+                    var percentDifference = Utility.getPercentDifference(avgPrice, currentPrice).toFixed(2);
+                    var dayPriceDifference; //TODO
+                    var dayPercentDifference; //TODO
+
+                    var row = [symbol, totalQuantity, avgPrice, currentPrice, priceDifference, percentDifference];
 
                     Utility.insertRowByValues("profile_table", row);
                 }

@@ -65,6 +65,10 @@ var stockSymbolsMap;
                 }
                 return false;
             },
+
+            getPercentDifference : function(oldNum, newNum) {
+                return (newNum - oldNum)/oldNum * 100;
+            }
         }
 
         return {
@@ -72,6 +76,7 @@ var stockSymbolsMap;
             insertRowByValue : utility.insertRowByValue,
             insertRowByValues : utility.insertRowByValues,
             isPositiveInteger : utility.isPositiveInteger,
+            getPercentDifference : utility.getPercentDifference,
         };
     };
 })(jQuery);
@@ -80,3 +85,9 @@ var Utility = $.Utility();
 $( document ).ready(function() {
     ApiClient.updateUserData();
 });
+
+/*
+Random notes about useful methods:
+JSON.stringify(obj) - use to print out json rather than getting [Object] in the console
+.toFixed(n) - round to n decimal places
+*/

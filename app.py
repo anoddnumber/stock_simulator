@@ -76,7 +76,7 @@ TODO: retreive the NASDAQ file daily (currently called stock_symbols.txt) and ge
 def getStockSymbolMap():
     print "getStockSymbolMap"
     cache.update(5)
-    return json.dumps(cache.parsed_json, sort_keys=True)
+    return json.dumps(cache.json, sort_keys=True)
 
 """
 This service creates an account for the user.

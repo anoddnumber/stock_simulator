@@ -1,4 +1,3 @@
-import os
 import json
 import datetime
 from invalid_usage import InvalidUsage
@@ -110,21 +109,23 @@ class Cache:
     
     newJson - the JSON object to populate.
     keys - an array of keys (strings) to be inserted into the JSON object.
-    names - an array of names (strings) of the stocks that we are retreiving that will be inserted into the JSON object
+    names - an array of names (strings) of the stocks that we are retrieving that will be inserted into the JSON object
     """
     def __addResultsToNewCache(self, newJson, keys, names):
-        api = YahooStockAPI(keys, 'l1')
+        api = YahooStockAPI(keys, 'l1c1') #TODO: add day change/day percent change ('c')
         results = api.submitRequest()
         results = [x.strip() for x in results.split('\n', len(keys) - 1)]
-        
+
         if len(keys) != len(results):
             raise InvalidUsage('Server Cache Error, keys and results do not match', status_code=500)
         for i, key in enumerate(keys):
             try:
                 name = names[i]
-                decimal = Decimal(float(results[i]))
+                line = results[i]
+                (decimal, daily_percent_change) = tuple(line.split(','))
+                decimal = Decimal(float(decimal))
                 price = str('{:.2f}'.format(round(decimal, 2)))
-                newJson[key] = {"name": str(name), "price" : price}
+                newJson[key] = {"name": str(name), "price" : price, "daily_percent_change" : daily_percent_change}
             except ValueError as e:
                 continue
     

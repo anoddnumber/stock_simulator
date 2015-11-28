@@ -112,7 +112,7 @@ class Cache:
     names - an array of names (strings) of the stocks that we are retrieving that will be inserted into the JSON object
     """
     def __addResultsToNewCache(self, newJson, keys, names):
-        api = YahooStockAPI(keys, 'l1c1') #TODO: add day change/day percent change ('c')
+        api = YahooStockAPI(keys, 'l1c1p2') #TODO: add day change/day percent change ('c')
         results = api.submitRequest()
         results = [x.strip() for x in results.split('\n', len(keys) - 1)]
 
@@ -122,10 +122,12 @@ class Cache:
             try:
                 name = names[i]
                 line = results[i]
-                (decimal, daily_percent_change) = tuple(line.split(','))
+                (decimal, daily_price_change, daily_percent_change) = tuple(line.split(','))
                 decimal = Decimal(float(decimal))
+                daily_percent_change = daily_percent_change.replace('"','')
                 price = str('{:.2f}'.format(round(decimal, 2)))
-                newJson[key] = {"name": str(name), "price" : price, "daily_percent_change" : daily_percent_change}
+                newJson[key] = {"name": str(name), "price" : price, "daily_price_change" : daily_price_change,
+                                "daily_percent_change" : daily_percent_change}
             except ValueError as e:
                 continue
     

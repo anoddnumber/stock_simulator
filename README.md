@@ -6,6 +6,7 @@ Uses Python 2.7, Flask, HTML5, Javascript, CSS, MongoDB, and Bootstrap (uses Gru
 #Developer Information
 Install Python 2.7 (not Python 3, although it may still work), PyMongo (3.0.3+), MongoDB (3.0.6+), Flask (0.10.1+), Bootstrap (3.3.6+), Grunt (0.1.13+), NodeJS (v4.2.2). 
 
+While not necessary, installing the Flask-DebugToolbar will be very useful for developers: https://pypi.python.org/pypi/Flask-DebugToolbar
 
 The project has a single HTML file called index.html. The reason we only have a single HTML file is because we want the user to have a very fast and smooth experience. The user will not have to load new pages (which can be slow) but rather stay on the same page but reveal and hide different elements. This is acheived with Javascript/CSS.
 

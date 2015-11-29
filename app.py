@@ -6,6 +6,7 @@ from py.cache import Cache
 import json
 from jinja2 import Environment, PackageLoader
 import cgi
+from flask_debugtoolbar import DebugToolbarExtension
 
 
 env = Environment(loader=PackageLoader('py', 'templates'))
@@ -20,8 +21,6 @@ The root page where the user logs into the application
 @app.route("/", methods=['GET'])
 def root():
     username = session.get('username')
-    cash = ''
-     
     print username
     if username is None:
         template = env.get_template('index.html')
@@ -39,11 +38,11 @@ def the_app():
 
     print username
     if username is None:
-        return redirect(url_for('/'))
+        return redirect(url_for('root'))
     else:
         user = UsersDbAccess.getUserByUsername(username)
         if user is None:
-            return redirect(url_for('/'))
+            return redirect(url_for('root'))
         else:
             cash = str(user.getRoundedCash())
 
@@ -124,28 +123,34 @@ TODO: Cookies
 def login():
     print 'login'
     #logout() then login as the new user.
-    username = request.form['username']
-    password = request.form['password']
-    user = UsersDbAccess.getUserByUsername(username)
-    if not user:
-        raise InvalidUsage('Wrong username or password', status_code=400)
-    
-    if password == user.password:
-        print 'Username and password match'
-    else:
-        print 'Wrong password'
-        raise InvalidUsage('Wrong username or password', status_code=400)
-    
-    session['username'] = username
-    return "Logged in"
+    print "request: " + str(request)
+    email = request.form['email']
+    user = UsersDbAccess.get_user_by_email(email)
+
+    #username = request.form['inputEmail']
+    # password = request.form['password']
+    # user = UsersDbAccess.getUserByUsername(username)
+    # if not user:
+    #     raise InvalidUsage('Wrong username or password', status_code=400)
+    #
+    # if password == user.password:
+    #     print 'Username and password match'
+    # else:
+    #     print 'Wrong password'
+    #     raise InvalidUsage('Wrong username or password', status_code=400)
+    #
+    #print 'username: ' + str(username)
+    session['username'] = user.username
+    return redirect(url_for('the_app'))
 
 """
 Logs the user out.
 """
 @app.route("/logout", methods=['POST'])
 def logout():
+    print 'logout'
     session.pop('username', None)
-    return "Logged out"
+    return redirect(url_for('root'))
 
 
 @app.route("/buyStock", methods=['POST'])
@@ -254,4 +259,5 @@ def handle_invalid_usage(error):
             
 if __name__ == "__main__":
     app.debug = True
+    toolbar = DebugToolbarExtension(app)
     app.run()

@@ -17,69 +17,62 @@
 
     <!-- Custom styles for this template -->
     <link rel="stylesheet" type="text/css" href="css/root.css">
+
   </head>
 
   <body>
-    <nav class="navbar navbar-inverse navbar-fixed-top">
-      <div class="container">
-        <div class="navbar-header">
-          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-            <span class="sr-only">Toggle navigation</span>
-          </button>
-          <a class="navbar-brand" href="#">Stock Meister</a>
- <!--           <ul class="nav navbar-nav">
-                <li><a href="#">About</a></li>
-            </ul>
-            !-->
-        </div>
-        <div id="navbar" class="navbar-collapse collapse">
-          <form class="navbar-form navbar-right">
-            <div class="form-group">
-              <input type="text" placeholder="Email" class="form-control">
-            </div>
-            <div class="form-group">
-              <input type="password" placeholder="Password" class="form-control">
-            </div>
-            <button type="submit" class="btn btn-success">Sign in</button>
-          </form>
-        </div><!--/.navbar-collapse -->
-      </div>
-    </nav>
-
     <!-- Main jumbotron for a primary marketing message or call to action -->
     <div class="jumbotron" id="root-title">
       <div class="container">
         <h1>Stock Meister</h1>
-        <p>Make money, gain levels, have fun.</p>
+        <p>Buy, Sell, Dominate.</p>
       </div>
-    </div>
 
-    <div class="container">
-      <!-- Example row of columns -->
-      <div class="row">
-        <div class="col-md-4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
-        </div>
-        <div class="col-md-4">
-          <h2>Heading</h2>
-          <p>Donec id elit non mi porta gravida at eget metus. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus. Etiam porta sem malesuada magna mollis euismod. Donec sed odio dui. </p>
-          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
+      <!-- Note: each input should have a label associated with it for screen readers (to assist the handicapped).
+           The labels will not show up on the screen.
+      -->
+       <div class="container" id="loginDiv">
+          <form class="form-signin" action="login" method="post">
+
+            <label for="inputEmail" class="sr-only">Email address</label>
+            <input name="email" type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
+
+            <label for="inputPassword" class="sr-only">Password</label>
+            <input name="password" type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+
+            <div class="checkbox">
+              <label>
+                <input type="checkbox" value="remember-me"> Remember me
+              </label>
+            </div>
+            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+          </form>
+       </div> <!-- /container -->
+
+      <div class="container" id="createAccountDiv" hidden>
+          <form class="form-signin" action="createAccount" method="post">
+
+            <label for="createAccountInputEmail" class="sr-only">Email address</label>
+            <input name="email" type="email" id="createAccountInputEmail" class="form-control" placeholder="Email address" required autofocus>
+
+            <label for="inputUsername" class="sr-only">Username</label>
+            <input name="username" id="inputUsername" class="form-control" placeholder="Username" required>
+
+            <label for="createAccountInputPassword" class="sr-only">Password</label>
+            <input name="password" type="password" id="createAccountInputPassword" class="form-control" placeholder="Password" required>
+
+            <label for="retypePassword" class="sr-only">Retype Password</label>
+            <input name="retypePassword" type="password" id="retypePassword" class="form-control" placeholder="Retype Password" required>
+
+            <button id="createAccountButton" class="btn btn-lg btn-primary btn-block" type="submit">Create Account</button>
+          </form>
+       </div> <!-- /container -->
+
+       <div>
+         <a id="createAccountLink" href="#">Don't have an account? Create one here.</a>
+         <a id="loginLink" href="#" hidden>Already have an account? Login here.</a>
        </div>
-        <div class="col-md-4">
-          <h2>Heading</h2>
-          <p>Donec sed odio dui. Cras justo odio, dapibus ac facilisis in, egestas eget quam. Vestibulum id ligula porta felis euismod semper. Fusce dapibus, tellus ac cursus commodo, tortor mauris condimentum nibh, ut fermentum massa justo sit amet risus.</p>
-          <p><a class="btn btn-default" href="#" role="button">View details &raquo;</a></p>
-        </div>
-      </div>
-
-      <hr>
-
-      <footer>
-        <p>&copy; 2015 Company, Inc.</p>
-      </footer>
-    </div> <!-- /container -->
+    </div>
 
 
     <!-- Bootstrap core JavaScript
@@ -88,5 +81,6 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
     <script>window.jQuery || document.write('<script src="../../assets/js/vendor/jquery.min.js"><\/script>')</script>
     <script src="../../bootstrap-3.3.6/dist/js/bootstrap.min.js"></script>
+    <script src="js/login_page.js"></script>
   </body>
 </html>

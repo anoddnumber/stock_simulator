@@ -34,6 +34,14 @@ class UsersDbAccess:
         return None
 
     @staticmethod
+    def get_user_by_email(email):
+        user_dict = UsersDbAccess.collection.find_one({"email": email})
+        if user_dict is not None:
+            return User(user_dict)
+        print 'No user found with email ' + email
+        return None
+
+    @staticmethod
     def addStockToUser(username, symbol, pricePerStock, quantity):
         userDict = UsersDbAccess.collection.find_one({"username": username})
         totalCost = pricePerStock * quantity

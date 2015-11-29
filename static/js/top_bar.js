@@ -50,5 +50,5 @@ $( document ).ready(function() {
     $('#loginLink').click(Login.showLoginForm);
     $('#createAccountLink').click(Login.showCreateAccount);
     $('#createAccountLink').click(Login.showCreateAccount);
-    $('#logoutButton').click(ApiClient.logout);
+//    $('#logoutButton').click(ApiClient.logout);
 }) ;

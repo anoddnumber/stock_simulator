@@ -19,9 +19,13 @@
     <div id="topbar">
         <span id="usernameBox">{{username}}</span> 
         <span id="cashBox">Cash: ${{cash}}</span>
-        <span id="logoutButton"> <input type="submit" value="Logout"> </span>
+        <span>
+            <form class="form-logout" action="logout" method="post">
+                <input type="submit" value="Logout">
+            </form>
+        </span>
     </div>
-    
+
     <a href="#" id="loginPageLink">Login</a> <!-- Login tab will be removed later..-->
     <a href="#" id="profilePageLink">Profile</a>
     <a href="#" id="stockTablePageLink">Browse Stocks</a>

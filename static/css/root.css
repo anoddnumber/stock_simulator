@@ -1,9 +1,20 @@
-/* Move down content because we have a fixed navbar that is 50px tall */
 body {
-  padding-top: 50px;
+  padding-top: 20px;
   padding-bottom: 20px;
+  background-color: #eee;
+  overflow: hidden;
 }
 
 #root-title {
     text-align: center;
+}
+
+.form-signin {
+    max-width: 330px;
+    padding: 15px;
+    margin: 0 auto;
+}
+
+#createAccountButton {
+    margin-top: 10px;
 }

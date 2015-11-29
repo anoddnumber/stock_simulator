@@ -1,5 +1,5 @@
-from flask import Flask, session, send_from_directory, request, jsonify
-from py.db_access import DbAccess, UsersDbAccess
+from flask import Flask, session, redirect, request, jsonify, url_for
+from py.db_access import UsersDbAccess
 from py.user import User
 from py.invalid_usage import InvalidUsage
 from py.cache import Cache
@@ -15,8 +15,7 @@ cache = Cache()
 config = {'defaultCash' : 50000}
 
 """
-The root page. There is only 1 html page in this project.
-Everything else is a service.
+The root page where the user logs into the application
 """
 @app.route("/", methods=['GET'])
 def root():
@@ -25,16 +24,31 @@ def root():
      
     print username
     if username is None:
-        username = "Not logged in"
+        template = env.get_template('index.html')
+        return template.render()
+    else:
+        return redirect(url_for('the_app'))
+
+"""
+The application. Redirects to the root page if the user is not logged in.
+"""
+#TODO change names
+@app.route("/theApp", methods=['GET'])
+def the_app():
+    username = session.get('username')
+
+    print username
+    if username is None:
+        return redirect(url_for('/'))
     else:
         user = UsersDbAccess.getUserByUsername(username)
         if user is None:
-            username = "Not logged in"
+            return redirect(url_for('/'))
         else:
             cash = str(user.getRoundedCash())
-     
+
     username = cgi.escape(username)
-    template = env.get_template('index.html')
+    template = env.get_template('index-original.html') #TODO change name
     return template.render(username=username, cash=cash)
 
 """
@@ -51,7 +65,7 @@ The stock prices will be returned in the same order as the arguments, delimited 
 @app.route("/info", methods=['GET'])
 def getStockInfo():
     symbols = request.args.get('symbols')
-    if symbols == None:
+    if symbols is None:
         return 'No symbols were in the get request'
     return getStockInfoHelper([x.strip() for x in symbols.split(',')])
 
@@ -61,7 +75,7 @@ Returns stock prices that are delimited by newlines ("\n").
 symbols - an array of stock symbols (that are strings)
 """
 def getStockInfoHelper(symbols):
-    if symbols == None:
+    if symbols is None:
         return None
     cache.update(5)
     return cache.getStockPrices(symbols)
@@ -93,13 +107,13 @@ def createAccount():
     print email
     print "createAccount()"
     
-    dict = {'username' : username,
+    user_dict = {'username' : username,
             'password' : password,
             'email' : email,
             'cash' : config.get('defaultCash'),
             'stocks_owned' : {}
             }
-    user = User(dict)
+    user = User(user_dict)
     return UsersDbAccess.createUser(user)
 
 """

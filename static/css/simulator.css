@@ -20,6 +20,10 @@ body {
     display : none;
 }
 
+#logoutButton {
+    margin-right : 5px;
+}
+
 a:visited{
   color:blue;
 }

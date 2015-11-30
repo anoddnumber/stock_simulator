@@ -58,6 +58,12 @@
 							<li><a href="javascript:void(0)">Separated link</a></li>
 						</ul>
 					</li>
+                    <li>
+                        <!--<button type="submit" class="btn navbar-btn" action="logout" method="post">Log out</button>-->
+                        <form action="logout" method="post">
+                            <button id="logoutButton" type="submit" class="btn navbar-btn" formmethod="post" formaction="logout">Log Out</button>
+                        </form>
+                    </li>
 				</ul>
 			</div><!-- /.navbar-collapse -->
 		</nav>
@@ -68,7 +74,7 @@
                 Search: <input id="profileSearchBar" autocomplete="off" type="text" name="searchbar" size="100">
                 </form>
 
-                <table id="profile_table"></table>
+                <table id="profile_table" class="table table-hover"></table>
             </div>
 
 
@@ -77,7 +83,7 @@
                 Search: <input id="stockSearchBar" autocomplete="off" type="text" name="searchbar" size="100">
                 </form>
 
-                <table id="stocks_table"></table>
+                <table id="stocks_table" class="table table-hover"></table>
                 <button id="previousStocksButton" type="button">Previous</button>
                 <button id="nextStocksButton" type="button">Next</button>
                 <br><br>

@@ -1,6 +1,9 @@
 from pymongo import MongoClient
+from py.exceptions.create_account_errors import DuplicateEmailError, DuplicateUsernameError
+
 from user import User
-from invalid_usage import InvalidUsage
+from py.exceptions.invalid_usage import InvalidUsage
+
 
 class DbAccess:
     def __init__(self, dbname):
@@ -16,11 +19,15 @@ class UsersDbAccess:
     collection = db[collectionName]
 
     @staticmethod
-    def createUser(user):
+    def create_user(user):
+        print 'createUser'
         userInDB = UsersDbAccess.getUserByUsername(user.username)
         if userInDB is not None:
             print "User already exists. Choose another username."
-            raise InvalidUsage('Username already taken.', status_code=400)
+            raise DuplicateUsernameError('Username already taken.')
+        elif UsersDbAccess.get_user_by_email(user.email) is not None:
+            print "Account already exists for the given email."
+            raise DuplicateEmailError('Account already exists for the given email.')
         else:
             UsersDbAccess.collection.insert_one(user.getDict())
         return "Successful"

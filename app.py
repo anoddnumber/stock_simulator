@@ -1,13 +1,15 @@
-from flask import Flask, session, redirect, request, jsonify, url_for
-from py.db_access import UsersDbAccess
-from py.user import User
-from py.invalid_usage import InvalidUsage
-from py.cache import Cache
 import json
-from jinja2 import Environment, PackageLoader
 import cgi
+
+from flask import Flask, session, redirect, request, jsonify, url_for
+from jinja2 import Environment, PackageLoader
 from flask_debugtoolbar import DebugToolbarExtension
 
+from py.db_access import UsersDbAccess
+from py.user import User
+from py.exceptions.invalid_usage import InvalidUsage
+from py.cache import Cache
+from py.exceptions.create_account_errors import *
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='')
@@ -93,7 +95,7 @@ def getStockSymbolMap():
 
 """
 This service creates an account for the user.
-It takes in a username, password and email, does verfications, and saves the information to the database
+It takes in a username, password and email, does verifications, and saves the information to the database
 or raises an error if there is an issue.
 """
 @app.route("/createAccount", methods=['POST'])
@@ -105,15 +107,23 @@ def createAccount():
     print password
     print email
     print "createAccount()"
-    
+
     user_dict = {'username' : username,
-            'password' : password,
-            'email' : email,
-            'cash' : config.get('defaultCash'),
-            'stocks_owned' : {}
-            }
+                'password' : password,
+                'email' : email,
+                'cash' : config.get('defaultCash'),
+                'stocks_owned' : {} }
     user = User(user_dict)
-    return UsersDbAccess.createUser(user)
+    error = ''
+
+    try:
+        UsersDbAccess.create_user(user)
+    except DuplicateUsernameError:
+        error = 'Username already taken.'
+    except DuplicateEmailError:
+        error = 'Email already taken.'
+    template = env.get_template('index.html')
+    return template.render(createAccountError=error)
 
 """
 Logs the user in. Verifies that the given username and password match the ones in the database.

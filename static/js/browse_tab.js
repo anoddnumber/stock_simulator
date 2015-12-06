@@ -152,7 +152,29 @@ var config = {
                 $('#previewBuyStockPrice').text(stockSymbolsMap[symbol].price);
             },
 
-            //TODO: add an update method
+            filterStocks : function(minPrice, maxPrice) {
+                if (maxPrice == undefined) {
+                    maxPrice = Number.MAX_VALUE;
+                }
+
+                console.log("stock...map: " + JSON.stringify(stockSymbolsMap));
+                var keys = Object.keys(stockSymbolsMap);
+                var keysToShow = [];
+
+                keys.forEach(function(value, index, arr) {
+                    console.log("value thing: " + JSON.stringify(stockSymbolsMap[value]));
+                    var price = stockSymbolsMap[value].price;
+                    if (price >= minPrice && price <= maxPrice) {
+                        keysToShow.push(value);
+                    }
+                });
+
+                curPage = 0;
+                browseTab.displayStocks(keysToShow);
+                console.log("keysToShow in filterStocks: " + keysToShow);
+            },
+
+            //TODO: add an update method for the browseTab
         }
 
         return {
@@ -163,6 +185,7 @@ var config = {
             showNextPage : browseTab.showNextPage,
             search : browseTab.search,
             displayStocks : browseTab.displayStocks,
+            filterStocks : browseTab.filterStocks
         };
     };
 })(jQuery);
@@ -172,6 +195,8 @@ var BrowseTab = $.BrowseTab();
 $( document ).ready(function() {
 
     ApiClient.updateCache();
+//    setTimeout(function(){ BrowseTab.filterStocks(200); }, 1000);
+
 
     /**
      * Moves to and displays the previous page of stocks.

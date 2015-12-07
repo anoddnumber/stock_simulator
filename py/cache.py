@@ -1,8 +1,9 @@
 import json
 import datetime
-from invalid_usage import InvalidUsage
-from yahoo_stock_api import YahooStockAPI
 from decimal import Decimal
+
+from py.exceptions.invalid_usage import InvalidUsage
+from yahoo_stock_api import YahooStockAPI
 
 """
 The cache is responsible for having fast access to stock price information.
@@ -112,24 +113,28 @@ class Cache:
     names - an array of names (strings) of the stocks that we are retrieving that will be inserted into the JSON object
     """
     def __addResultsToNewCache(self, newJson, keys, names):
-        api = YahooStockAPI(keys, 'l1c1p2') #TODO: add day change/day percent change ('c')
-        results = api.submitRequest()
-        results = [x.strip() for x in results.split('\n', len(keys) - 1)]
+        api = YahooStockAPI(keys, 'l1c1p2')
 
-        if len(keys) != len(results):
-            raise InvalidUsage('Server Cache Error, keys and results do not match', status_code=500)
-        for i, key in enumerate(keys):
-            try:
-                name = names[i]
-                line = results[i]
-                (decimal, daily_price_change, daily_percent_change) = tuple(line.split(','))
-                decimal = Decimal(float(decimal))
-                daily_percent_change = daily_percent_change.replace('"','')
-                price = str('{:.2f}'.format(round(decimal, 2)))
-                newJson[key] = {"name": str(name), "price" : price, "daily_price_change" : daily_price_change,
-                                "daily_percent_change" : daily_percent_change}
-            except ValueError as e:
-                continue
+        try:
+            results = api.submitRequest()
+            results = [x.strip() for x in results.split('\n', len(keys) - 1)]
+
+            if len(keys) != len(results):
+                raise InvalidUsage('Server Cache Error, keys and results do not match', status_code=500)
+            for i, key in enumerate(keys):
+                try:
+                    name = names[i]
+                    line = results[i]
+                    (decimal, daily_price_change, daily_percent_change) = tuple(line.split(','))
+                    decimal = Decimal(float(decimal))
+                    daily_percent_change = daily_percent_change.replace('"','')
+                    price = str('{:.2f}'.format(round(decimal, 2)))
+                    newJson[key] = {"name": str(name), "price" : price, "daily_price_change" : daily_price_change,
+                                    "daily_percent_change" : daily_percent_change}
+                except ValueError as e:
+                    continue
+        except Exception:
+            self.loadCacheFromFile() #TODO Remove this later.. find backup sources
     
     """
     Returns stock prices (as strings) that are delimited by newlines ("\n").

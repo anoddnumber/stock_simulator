@@ -64,18 +64,18 @@ The cache will update if it has been more than n minutes since it has updated (s
 The stock prices will be returned in the same order as the arguments, delimited by newlines ("\n").
 """
 @app.route("/info", methods=['GET'])
-def getStockInfo():
+def get_stock_info():
     symbols = request.args.get('symbols')
     if symbols is None:
         return 'No symbols were in the get request'
-    return getStockInfoHelper([x.strip() for x in symbols.split(',')])
+    return get_stock_info_helper([x.strip() for x in symbols.split(',')])
 
 """
 Returns stock prices that are delimited by newlines ("\n").
 
 symbols - an array of stock symbols (that are strings)
 """
-def getStockInfoHelper(symbols):
+def get_stock_info_helper(symbols):
     if symbols is None:
         return None
     cache.update(5)
@@ -88,7 +88,7 @@ and whose values are the stock symbols' names and prices.
 TODO: retreive the NASDAQ file daily (currently called stock_symbols.txt) and generate the json file daily (currently called parsed_symbols.json).
 """
 @app.route("/stockSymbolsMap", methods=['GET'])
-def getStockSymbolMap():
+def get_stock_symbol_map():
     print "getStockSymbolMap"
     cache.update(5)
     return json.dumps(cache.json, sort_keys=True)
@@ -99,14 +99,14 @@ It takes in a username, password and email, does verifications, and saves the in
 or raises an error if there is an issue.
 """
 @app.route("/createAccount", methods=['POST'])
-def createAccount():
+def create_account():
     username = request.form['username']
     password = request.form['password']
     email = request.form['email']
     print username
     print password
     print email
-    print "createAccount()"
+    print "create_account()"
 
     user_dict = {'username' : username,
                 'password' : password,
@@ -119,11 +119,13 @@ def createAccount():
     try:
         UsersDbAccess.create_user(user)
     except DuplicateUsernameError:
-        error = 'Username already taken.'
+        template = env.get_template('index.html')
+        return template.render(createAccountError='Username already taken.')
     except DuplicateEmailError:
-        error = 'Email already taken.'
-    template = env.get_template('index.html')
-    return template.render(createAccountError=error)
+        template = env.get_template('index.html')
+        return template.render(createAccountError='Email already taken.')
+    session['username'] = user.username
+    return redirect(url_for('the_app'))
 
 """
 Logs the user in. Verifies that the given username and password match the ones in the database.
@@ -132,24 +134,22 @@ TODO: Cookies
 @app.route("/login", methods=['POST'])
 def login():
     print 'login'
-    #logout() then login as the new user.
     print "request: " + str(request)
     email = request.form['email']
     user = UsersDbAccess.get_user_by_email(email)
 
-    #username = request.form['inputEmail']
-    # password = request.form['password']
-    # user = UsersDbAccess.getUserByUsername(username)
-    # if not user:
-    #     raise InvalidUsage('Wrong username or password', status_code=400)
-    #
-    # if password == user.password:
-    #     print 'Username and password match'
-    # else:
-    #     print 'Wrong password'
-    #     raise InvalidUsage('Wrong username or password', status_code=400)
-    #
-    #print 'username: ' + str(username)
+    password = request.form['password']
+    if not user:
+        raise InvalidUsage('Wrong username or password', status_code=400)
+
+    if password == user.password:
+        print 'Username and password match'
+    else:
+        print 'Wrong password'
+        template = env.get_template('index.html')
+        return template.render(loginError='Email and password do not match up.')
+
+    #session.pop('username', None) #this probably isn't needed..
     session['username'] = user.username
     return redirect(url_for('the_app'))
 
@@ -164,7 +164,7 @@ def logout():
 
 
 @app.route("/buyStock", methods=['POST'])
-def buyStock():
+def buy_stock():
     print 'buyStock'
     
     username = session.get('username')
@@ -178,36 +178,36 @@ def buyStock():
     try:
         symbol = request.form['symbol']
         quantity = int(request.form['quantity'])
-        stockPrice = float(request.form['stockPrice'])
-    except ValueError, e:
+        stock_price = float(request.form['stockPrice'])
+    except ValueError:
         return "Error reading arguments"
     
-    if symbol is None or quantity is None or stockPrice is None:
+    if symbol is None or quantity is None or stock_price is None:
         return 'Missing at least one argument: symbol, quantity, stockPrice required. No optional arguments.'
 
     # check if the price that the user wants to buy the stock for is the same as the server's stock price
-    stocksMap = cache.json
-    symbolMap = stocksMap.get(symbol)
-    if symbolMap is None:
+    stocks_map = cache.json
+    symbol_map = stocks_map.get(symbol)
+    if symbol_map is None:
        return "Invalid symbol"
-    serverStockPrice = float(symbolMap.get("price"))
+    server_stock_price = float(symbol_map.get("price"))
 
-    print "stockPrice: " + str(type(stockPrice))
-    print "serverStockPrice: " + str(type(serverStockPrice))
-    if stockPrice != serverStockPrice:
+    print "stockPrice: " + str(type(stock_price))
+    print "serverStockPrice: " + str(type(server_stock_price))
+    if stock_price != server_stock_price:
        return "Stock price changed, please try again."
     
     # check if quantity is a positive integer
-    if stockPrice < 0 or quantity < 0:
+    if stock_price < 0 or quantity < 0:
         return "stock price or quantity less than 0"
         
-    totalCost = quantity * stockPrice
+    total_cost = quantity * stock_price
     # check that the user has enough cash to buy the stocks requested
-    if totalCost >= user.cash:
+    if total_cost >= user.cash:
         return "Not enough cash"
     
     # buy the stock
-    return UsersDbAccess.addStockToUser(user.username, symbol, stockPrice, quantity)
+    return UsersDbAccess.addStockToUser(user.username, symbol, stock_price, quantity)
 
 
 @app.route("/sellStock", methods=['POST'])
@@ -223,11 +223,11 @@ def sell_stock():
     try:
         symbol = request.form['symbol']
         quantity = int(request.form['quantity'])
-        stockPrice = float(request.form['stockPrice'])
+        stock_price = float(request.form['stockPrice'])
     except ValueError, e:
         return "Error reading arguments"
     
-    if symbol is None or quantity is None or stockPrice is None:
+    if symbol is None or quantity is None or stock_price is None:
         return 'Missing at least one argument: symbol, quantity, stockPrice required. No optional arguments.'
 
     stocks_map = cache.json
@@ -236,10 +236,10 @@ def sell_stock():
         return "Invalid symbol"
     server_stock_price = float(symbol_map.get("price"))
 
-    if stockPrice < 0 or quantity < 0:
+    if stock_price < 0 or quantity < 0:
         return "stock price or quantity less than 0"
 
-    if stockPrice != server_stock_price:
+    if stock_price != server_stock_price:
         return "Stock price changed, please try again."
 
     # sell the stock
@@ -247,15 +247,15 @@ def sell_stock():
 
 
 @app.route("/getUserInfo", methods=['GET'])
-def getUserInfo():
+def get_user_info():
     username = session.get('username')
     if username is None:
         return 'Not logged in, cannot retreive information.'
     user = UsersDbAccess.getUserByUsername(username)
     if user is None:
         return 'Could not find the current user in the database.'
-    dict = {'cash' : user.getRoundedCash(), 'stocks_owned' : user.stocks}
-    return json.dumps(dict, sort_keys=True)
+    user_dict = {'cash' : user.getRoundedCash(), 'stocks_owned' : user.stocks}
+    return json.dumps(user_dict, sort_keys=True)
 
 """
 This method is used to send error messages to the client.

@@ -68,7 +68,17 @@ var stockSymbolsMap;
 
             getPercentDifference : function(oldNum, newNum) {
                 return (newNum - oldNum)/oldNum * 100;
-            }
+            },
+
+            sortObj : function(obj, sortFunc) {
+                var array = $.map(obj, function(value, key) {
+                    return [{"stock_symbol" : key, "stock_info" : value}];
+                });
+
+                array.sort(sortFunc);
+
+                return array;
+            },
         }
 
         return {
@@ -77,6 +87,7 @@ var stockSymbolsMap;
             insertRowByValues : utility.insertRowByValues,
             isPositiveInteger : utility.isPositiveInteger,
             getPercentDifference : utility.getPercentDifference,
+            sortObj : utility.sortObj,
         };
     };
 })(jQuery);

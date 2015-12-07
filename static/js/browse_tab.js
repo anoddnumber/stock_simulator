@@ -125,6 +125,7 @@ var config = {
                     browseTab.insertRowBySymbol(symbols[i]);
                 }
             },
+
             /**
              * Inserts the symbol's values into the stocks table.
              * This includes the stock's Symbol, Name, and Price
@@ -157,21 +158,34 @@ var config = {
                     maxPrice = Number.MAX_VALUE;
                 }
 
-                console.log("stock...map: " + JSON.stringify(stockSymbolsMap));
                 var keys = Object.keys(stockSymbolsMap);
-                var keysToShow = [];
+                var filteredArray = [];
 
                 keys.forEach(function(value, index, arr) {
-                    console.log("value thing: " + JSON.stringify(stockSymbolsMap[value]));
                     var price = stockSymbolsMap[value].price;
                     if (price >= minPrice && price <= maxPrice) {
-                        keysToShow.push(value);
+                        filteredArray.push(value);
                     }
                 });
 
+                filteredArray.sort(function(a, b) {
+                    return stockSymbolsMap[a].price - stockSymbolsMap[b].price;
+                })
+
+                curPage = 0;
+                browseTab.displayStocks(filteredArray);
+            },
+
+            sort : function(obj, sortFunc) {
+                var sortedArray = Utility.sortObj(obj, sortFunc);
+
+                var keysToShow = [];
+                for (var i = 0; i < sortedArray.length; i++) {
+                    keysToShow.push(sortedArray[i].stock_symbol);
+                }
+
                 curPage = 0;
                 browseTab.displayStocks(keysToShow);
-                console.log("keysToShow in filterStocks: " + keysToShow);
             },
 
             //TODO: add an update method for the browseTab
@@ -185,7 +199,8 @@ var config = {
             showNextPage : browseTab.showNextPage,
             search : browseTab.search,
             displayStocks : browseTab.displayStocks,
-            filterStocks : browseTab.filterStocks
+            filterStocks : browseTab.filterStocks,
+            sort : browseTab.sort,
         };
     };
 })(jQuery);
@@ -196,7 +211,11 @@ $( document ).ready(function() {
 
     ApiClient.updateCache();
 //    setTimeout(function(){ BrowseTab.filterStocks(200); }, 1000);
-
+//    setTimeout(function(){
+//        BrowseTab.sort(stockSymbolsMap, function(a, b) {
+//            return a.stock_info.price - b.stock_info.price;
+//        });
+//    }, 1000);
 
     /**
      * Moves to and displays the previous page of stocks.

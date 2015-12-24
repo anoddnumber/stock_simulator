@@ -80,17 +80,23 @@ var config = {
              * stockSymbols - an array of stock symbols (that are strings)
              */
             displayStocks : function(stockSymbols) {
-                var table = $('#stocks_table')[0]; //grab the DOM element (0 indexed element of a jQuery object)
                 var begin = curPage * config.numStocksPerPage;
                 var end = (curPage + 1) * config.numStocksPerPage;
                 var displayedKeys = stockSymbols.slice(begin, end);
                 curSymbols = stockSymbols;
-                table.innerHTML = "";
+
+                if (! browseTabTableSortManager) {
+                    browseTabTableSortManager = $.TableSortManager({
+                        data : Utility.filterByKeys(stockSymbolsMap, curSymbols),
+                    });
+                }
+
+                var tableBody = $('#stocks_table tbody')[0]; //grab the DOM element (0 indexed element of a jQuery object)
+                tableBody.innerHTML = "";
                 if (displayedKeys.length > 0) {
-                    Utility.insertRowByValues('stocks_table', ["Symbol", "Name", "Stock Price", "Buy"]);
                     browseTab.insertRowsBySymbols(displayedKeys);
                 } else {
-                    Utility.insertRowByValue('stocks_table', "Nothing found, please try again.");
+                    Utility.insertRowByValue('stocks_table tbody', "Nothing found, please try again.");
                 }
 
                 browseTab.updateButtons();
@@ -139,7 +145,7 @@ var config = {
                 var buttonId = 'buy' + symbol + 'Button';
                 var buyButton = '<button id="' + buttonId + '" type="button">Buy</button>';
 
-                Utility.insertRowByValues('stocks_table', [symbol, name, price, buyButton]);
+                Utility.insertRowByValues('stocks_table tbody', [symbol, name, price, buyButton]);
 
                 //add the on click event after inserting the button into the table
                 $( "#stocks_table #" + buttonId ).on( "click", function() {
@@ -176,9 +182,7 @@ var config = {
                 browseTab.displayStocks(filteredArray);
             },
 
-            sort : function(obj, sortFunc) {
-                var sortedArray = Utility.sortObj(obj, sortFunc);
-
+            displaySortedArray : function(sortedArray) {
                 var keysToShow = [];
                 for (var i = 0; i < sortedArray.length; i++) {
                     keysToShow.push(sortedArray[i].stock_symbol);
@@ -200,22 +204,17 @@ var config = {
             search : browseTab.search,
             displayStocks : browseTab.displayStocks,
             filterStocks : browseTab.filterStocks,
-            sort : browseTab.sort,
+            displaySortedArray : browseTab.displaySortedArray,
         };
     };
 })(jQuery);
 
 
 var BrowseTab = $.BrowseTab();
-$( document ).ready(function() {
+var browseTabTableSortManager;
 
+$( document ).ready(function() {
     ApiClient.updateCache();
-//    setTimeout(function(){ BrowseTab.filterStocks(200); }, 1000);
-//    setTimeout(function(){
-//        BrowseTab.sort(stockSymbolsMap, function(a, b) {
-//            return a.stock_info.price - b.stock_info.price;
-//        });
-//    }, 1000);
 
     /**
      * Moves to and displays the previous page of stocks.
@@ -271,6 +270,30 @@ $( document ).ready(function() {
         // stop the form from submitting the normal way and refreshing the page
         event.preventDefault();
     });
+
+    $("#symbol-column-link").click(function(e) {
+        e.preventDefault();
+        var sortedArray = browseTabTableSortManager.sort("Symbol", function(a, b) {
+            return a.stock_symbol.localeCompare(b.stock_symbol);
+        });
+        BrowseTab.displaySortedArray(sortedArray);
+    })
+
+    $("#name-column-link").click(function(e) {
+        e.preventDefault();
+        var sortedArray = browseTabTableSortManager.sort("Name", function(a, b) {
+            return a.stock_info.name.localeCompare(b.stock_info.name);
+        });
+        BrowseTab.displaySortedArray(sortedArray);
+    })
+
+    $("#stock-column-link").click(function(e) {
+        e.preventDefault();
+        var sortedArray = browseTabTableSortManager.sort("Stock Price", function(a, b) {
+            return a.stock_info.price - b.stock_info.price;
+        });
+        BrowseTab.displaySortedArray(sortedArray);
+    })
 });
 
 

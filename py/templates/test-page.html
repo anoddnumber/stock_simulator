@@ -10,7 +10,7 @@
 <script src="js/utility.js"></script>
 <script src="js/profile_tab.js"></script>
 <script src="js/top_bar.js"></script>
-<script src="js/login.js"></script>
+<script src="js/table_sort_manager.js"></script>
 <!-- required for tabs -->
 <script src="bootstrap-3.3.6/dist/js/bootstrap.js"></script>
 
@@ -83,7 +83,17 @@
                 Search: <input id="stockSearchBar" autocomplete="off" type="text" name="searchbar" size="100">
                 </form>
 
-                <table id="stocks_table" class="table table-hover"></table>
+                <table id="stocks_table" class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th><a id="symbol-column-link" href="#">Symbol</a></th>
+                            <th><a id="name-column-link" href="#">Name</a></th>
+                            <th><a id="stock-column-link" href="#">Stock Price</a></th>
+                            <th><a id="buy-column-link" href="#">Buy</a></th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
                 <button id="previousStocksButton" type="button">Previous</button>
                 <button id="nextStocksButton" type="button">Next</button>
                 <br><br>
@@ -101,108 +111,6 @@
             <div role="tabpanel" class="tab-pane" id="statistics">TODO</div>
             <div role="tabpanel" class="tab-pane" id="settings">TODO</div>
           </div>
-
-
-
-
-        <!--<nav id="tabs">-->
-
-          <!--&lt;!&ndash; Nav tabs &ndash;&gt;-->
-          <!--<ul class="nav nav-tabs" role="tablist">-->
-            <!--<li role="presentation" class="active">-->
-                <!--<a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a>-->
-            <!--</li>-->
-            <!--<li role="presentation">-->
-                <!--<a href="#stocks" aria-controls="stocks" role="tab" data-toggle="tab">Stocks</a>-->
-            <!--</li>-->
-            <!--<li role="presentation">-->
-                <!--<a href="#statistics" aria-controls="statistics" role="tab" data-toggle="tab">Statistics</a>-->
-            <!--</li>-->
-            <!--<li role="presentation">-->
-                <!--<a href="#settings" aria-controls="settings" role="tab" data-toggle="tab">Settings</a>-->
-            <!--</li>-->
-          <!--</ul>-->
-
-          <!--&lt;!&ndash; Tab panes &ndash;&gt;-->
-          <!--<div class="tab-content">-->
-            <!--<div role="tabpanel" class="tab-pane active" id="profile">-->
-                <!--<form id="searchProfileForm">-->
-                <!--Search: <input id="profileSearchBar" autocomplete="off" type="text" name="searchbar" size="100">-->
-                <!--</form>-->
-
-                <!--<table id="profile_table"></table>-->
-            <!--</div>-->
-
-
-            <!--<div role="tabpanel" class="tab-pane" id="stocks">-->
-                <!--<form id="searchStocksForm">-->
-                <!--Search: <input id="stockSearchBar" autocomplete="off" type="text" name="searchbar" size="100">-->
-                <!--</form>-->
-
-                <!--<table id="stocks_table"></table>-->
-                <!--<button id="previousStocksButton" type="button">Previous</button>-->
-                <!--<button id="nextStocksButton" type="button">Next</button>-->
-                <!--<br><br>-->
-
-                <!--<div id="previewBuyStockBox">-->
-                    <!--Available Cash: <span id="previewBuyStockCash"></span> <br>-->
-                    <!--Stock Name: <span id="previewBuyStockSymolName"></span> <br>-->
-                    <!--Price: <span id="previewBuyStockPrice"></span> <br>-->
-                    <!--Quantity: <input id="previewBuyStockQuantity" autocomplete="off" type="text" name="quantitybar" size="10"> <br>-->
-                    <!--Total Price: <span id="previewBuyStockTotalPrice">0.00</span> <br>-->
-                    <!--<button id="previewBuyStocksBuyButton" type="button">Confirm Buy</button>-->
-                <!--</div>-->
-            <!--</div>-->
-
-            <!--<div role="tabpanel" class="tab-pane" id="statistics">TODO</div>-->
-            <!--<div role="tabpanel" class="tab-pane" id="settings">TODO</div>-->
-          <!--</div>-->
-
-        <!--</nav>-->
-
-
-
-
-
-
-
-
-
-
-        <!-- TODO change names to "*Tab" -->
-        <!--
-        <div id="tabs">
-            <div id="loginPage">
-                <div id="errorBox"></div>
-                <div id="login">
-                    Login:
-                    <form id="loginForm">
-                        Username: <input type="text" name="username" maxLength="20" size="50"><br>
-                        Password: <input type="password" name="password" autocomplete="off" maxLength="30" size="50"><br>
-                        <input type="submit" value="Login">
-                    </form>
-                </div>
-
-                <div id="createAccount">
-                    Create Account:
-                    <form id="createAccountForm">
-                        Username: <input type="text" name="username" maxLength="20" size="50"><br>
-                        Password: <input type="password" name="password" autocomplete="off" maxLength="30" size="50"><br>
-                        Retype Password: <input type="password" name="retypePassword" autocomplete="off" maxLength="30" size="50"><br>
-                        Email: <input type="text" name="email" maxLength="30" size="50"><br>
-                        <input type="submit" value="Create Account">
-                    </form>
-                </div>
-                <a href="#" id="loginLink">Login</a>
-                <a href="#" id="createAccountLink">Create Account</a>
-            </div>
-
-            <div id="stockTablePage">
-
-
-            </div>
-        </div>
-        -->
     </div>
 </body>
 

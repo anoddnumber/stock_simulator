@@ -1,5 +1,6 @@
 import json
 import datetime
+import time
 from decimal import Decimal
 
 from py.exceptions.invalid_usage import InvalidUsage
@@ -96,6 +97,7 @@ class Cache:
                 self.__addResultsToNewCache(newJson, keysToSend, names)
                 keysToSend = []
                 names = []
+                time.sleep(1)
             keysToSend.append(key)
             names.append(symbolNameJson[key])
         self.__addResultsToNewCache(newJson, keysToSend, names)

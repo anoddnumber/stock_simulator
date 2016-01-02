@@ -52,6 +52,10 @@ var config = {
                 });
 
                 curPage = 0;
+                if (browseTabTableSortManager) {
+                    browseTabTableSortManager.setSortedColumn($('#symbol-column-link').text());
+                    browseTabTableSortManager.setForward(true);
+                }
                 browseTab.displayStocks(keysToShow);
             },
 
@@ -88,7 +92,11 @@ var config = {
                 if (! browseTabTableSortManager) {
                     browseTabTableSortManager = $.TableSortManager({
                         data : Utility.filterByKeys(stockSymbolsMap, curSymbols),
+                        sortedColumn : $('#symbol-column-link').text(),
+                        forward : true,
                     });
+                } else {
+                    browseTabTableSortManager.updateData(Utility.filterByKeys(stockSymbolsMap, curSymbols));
                 }
 
                 var tableBody = $('#stocks_table tbody')[0]; //grab the DOM element (0 indexed element of a jQuery object)
@@ -179,6 +187,10 @@ var config = {
                 })
 
                 curPage = 0;
+                if (browseTabTableSortManager) {
+                    browseTabTableSortManager.setSortedColumn($('#symbol-column-link').text());
+                    browseTabTableSortManager.setForward(true);
+                }
                 browseTab.displayStocks(filteredArray);
             },
 
@@ -273,7 +285,7 @@ $( document ).ready(function() {
 
     $("#symbol-column-link").click(function(e) {
         e.preventDefault();
-        var sortedArray = browseTabTableSortManager.sort("Symbol", function(a, b) {
+        var sortedArray = browseTabTableSortManager.sort($('#symbol-column-link').text(), function(a, b) {
             return a.stock_symbol.localeCompare(b.stock_symbol);
         });
         BrowseTab.displaySortedArray(sortedArray);
@@ -281,7 +293,7 @@ $( document ).ready(function() {
 
     $("#name-column-link").click(function(e) {
         e.preventDefault();
-        var sortedArray = browseTabTableSortManager.sort("Name", function(a, b) {
+        var sortedArray = browseTabTableSortManager.sort($('#name-column-link').text(), function(a, b) {
             return a.stock_info.name.localeCompare(b.stock_info.name);
         });
         BrowseTab.displaySortedArray(sortedArray);
@@ -289,7 +301,7 @@ $( document ).ready(function() {
 
     $("#stock-column-link").click(function(e) {
         e.preventDefault();
-        var sortedArray = browseTabTableSortManager.sort("Stock Price", function(a, b) {
+        var sortedArray = browseTabTableSortManager.sort($('#stock-column-link').text(), function(a, b) {
             return a.stock_info.price - b.stock_info.price;
         });
         BrowseTab.displaySortedArray(sortedArray);

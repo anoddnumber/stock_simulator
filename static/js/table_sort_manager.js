@@ -16,9 +16,6 @@
             * The sortFunc will automatically be toggled.
             */
             sort : function(colName, sortFunc) {
-                console.log("colName: " + colName);
-                console.log("tableSortManager.options.forward: " + tableSortManager.options.forward);
-                console.log("tableSortManager.options.sortedColumn: " + tableSortManager.options.sortedColumn);
                 if (tableSortManager.options.sortedColumn === colName) {
                     if (tableSortManager.options.forward) {
                         tableSortManager.options.forward = false;
@@ -30,19 +27,31 @@
                     tableSortManager.options.forward = true;
                 }
 
-                console.log("tableSortManager.options.forward 2: " + tableSortManager.options.forward);
-                console.log("tableSortManager.options.data: " + tableSortManager.options.data);
-
                 var sortedArray = Utility.sortObj(tableSortManager.options.data, sortFunc);
                 if ( ! tableSortManager.options.forward) {
                     return sortedArray.reverse();
                 }
                 return sortedArray;
             },
+
+            updateData : function(data) {
+                tableSortManager.options.data = data;
+            },
+
+            setSortedColumn : function(colName) {
+                tableSortManager.options.sortedColumn = colName;
+            },
+
+            setForward : function(boolean) {
+                tableSortManager.options.forward = boolean;
+            }
         }
 
         return {
             sort : tableSortManager.sort,
+            updateData : tableSortManager.updateData,
+            setSortedColumn : tableSortManager.setSortedColumn,
+            setForward : tableSortManager.setForward,
         };
     };
 })(jQuery);

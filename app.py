@@ -49,7 +49,7 @@ def the_app():
             cash = str(user.getRoundedCash())
 
     username = cgi.escape(username)
-    template = env.get_template('test-page.html') #TODO change name
+    template = env.get_template('simulator.html') #TODO change name
     return template.render(username=username, cash=cash)
 
 """

@@ -27,12 +27,12 @@
             <h1>Stock Meister</h1>
             <p>Buy, Sell, Dominate.</p>
         </div>
-        <div>{{createAccountError}}{{loginError}}</div>
 
       <!-- Note: each input should have a label associated with it for screen readers (to assist the handicapped).
            The labels will not show up on the screen.
       -->
        <div class="container" id="loginDiv" {% if createAccountError is defined %} hidden {% endif %}>
+           <div>{{loginError}}</div>
           <form class="form-signin" action="login" method="post">
 
             <label for="inputEmail" class="sr-only">Email address</label>
@@ -51,6 +51,7 @@
        </div> <!-- /container -->
 
       <div class="container" id="createAccountDiv" {% if createAccountError is not defined %} hidden {% endif %}>
+          <div>{{createAccountError}}</div>
           <form class="form-signin" action="createAccount" method="post">
 
             <label for="createAccountInputEmail" class="sr-only">Email address</label>

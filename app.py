@@ -85,7 +85,7 @@ def get_stock_info_helper(symbols):
 This service returns a json formatted string whose keys are available stock symbols
 and whose values are the stock symbols' names and prices.
 
-TODO: retreive the NASDAQ file daily (currently called stock_symbols.txt) and generate the json file daily (currently called parsed_symbols.json).
+TODO: retrieve the NASDAQ file daily (currently called stock_symbols.txt) and generate the json file daily (currently called parsed_symbols.json).
 """
 @app.route("/stockSymbolsMap", methods=['GET'])
 def get_stock_symbol_map():
@@ -140,7 +140,9 @@ def login():
 
     password = request.form['password']
     if not user:
-        raise InvalidUsage('Wrong username or password', status_code=400)
+        print 'User does not exist'
+        template = env.get_template('index.html')
+        return template.render(loginError='Email and password do not match up.')
 
     if password == user.password:
         print 'Username and password match'

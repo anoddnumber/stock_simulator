@@ -74,7 +74,10 @@
 			</div><!-- /.navbar-collapse -->
 		</nav>
 
+        <!-- All the tab markup will be in here -->
         <div class="tab-content">
+
+            <!-- Profile Tab -->
             <div role="tabpanel" class="tab-pane active" id="profile">
                 <form id="searchProfileForm">
                 Search: <input id="profileSearchBar" autocomplete="off" type="text" name="searchbar" size="100">
@@ -98,7 +101,7 @@
                 </table>
             </div>
 
-
+            <!-- Stocks Tab -->
             <div role="tabpanel" class="tab-pane" id="stocks">
                 <form id="searchStocksForm">
                 Search: <input id="stockSearchBar" autocomplete="off" type="text" name="searchbar" size="100">
@@ -109,6 +112,8 @@
                         <tr>
                             <th><a id="symbol-column-link" href="#">Symbol</a></th>
                             <th><a id="name-column-link" href="#">Name</a></th>
+                            <th><a id="daily-percent-change-column-link" href="#">Daily Percent Change</a></th>
+                            <th><a id="daily-price-change-column-link" href="#">Daily Price Change</a></th>
                             <th><a id="stock-column-link" href="#">Stock Price</a></th>
                             <th><a id="buy-column-link" href="#">Buy</a></th>
                         </tr>

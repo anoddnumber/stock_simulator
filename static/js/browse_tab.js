@@ -36,11 +36,11 @@ var config = {
 
                 keys.forEach(function(value, index, arr) {
                     var info = stockSymbolsMap[value];
-                    var infoKeys = Object.keys(info);
+                    var keysToSearch = ['daily_percent_change', 'daily_price_change', 'name', 'price'];
                     var flag = false;
 
-                    for (var i = 0; i < infoKeys.length; i++) {
-                        if (info[infoKeys[i]].toString().match(regEx)) {
+                    for (var i = 0; i < keysToSearch.length; i++) {
+                        if (info[keysToSearch[i]].toString().match(regEx)) {
                             flag = true;
                             break;
                         }
@@ -149,11 +149,14 @@ var config = {
             insertRowBySymbol : function(symbol) {
                 var info = stockSymbolsMap[symbol];
                 var name = info['name'];
+                var dailyPercentChange = info.daily_percent_change;
+                var dailyPriceChange = info.daily_price_change;
                 var price = info.price;
                 var buttonId = 'buy' + symbol + 'Button';
                 var buyButton = '<button id="' + buttonId + '" type="button">Buy</button>';
 
-                Utility.insertRowByValues('stocks_table tbody', [symbol, name, price, buyButton]);
+                Utility.insertRowByValues('stocks_table tbody', [symbol, name, dailyPercentChange, dailyPriceChange,
+                 price, buyButton]);
 
                 //add the on click event after inserting the button into the table
                 $( "#stocks_table #" + buttonId ).on( "click", function() {

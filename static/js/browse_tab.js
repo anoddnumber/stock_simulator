@@ -302,6 +302,24 @@ $( document ).ready(function() {
         BrowseTab.displaySortedArray(sortedArray);
     })
 
+    $("#daily-percent-change-column-link").click(function(e) {
+        e.preventDefault();
+        var sortedArray = browseTabTableSortManager.sort($('#daily-percent-change-column-link').text(), function(a, b) {
+            var one = a.stock_info.daily_percent_change.replace("%","");
+            var two = b.stock_info.daily_percent_change.replace("%","");
+            return Number(one) - Number(two);
+        });
+        BrowseTab.displaySortedArray(sortedArray);
+    })
+
+    $("#daily-price-change-column-link").click(function(e) {
+        e.preventDefault();
+        var sortedArray = browseTabTableSortManager.sort($('#daily-price-change-column-link').text(), function(a, b) {
+            return a.stock_info.daily_price_change - b.stock_info.daily_price_change;
+        });
+        BrowseTab.displaySortedArray(sortedArray);
+    })
+
     $("#stock-column-link").click(function(e) {
         e.preventDefault();
         var sortedArray = browseTabTableSortManager.sort($('#stock-column-link').text(), function(a, b) {

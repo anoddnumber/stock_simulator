@@ -1,5 +1,7 @@
 from urllib2 import Request, urlopen, URLError
-from invalid_usage import InvalidUsage
+
+from py.exceptions.invalid_usage import InvalidUsage
+
 
 class YahooStockAPI:
     '''
@@ -18,11 +20,11 @@ class YahooStockAPI:
         for s in self.ss:
             symbols += s + '+'
         request = Request('http://finance.yahoo.com/d/quotes.csv?s=' + symbols + '&f=' + self.info)
-        
+
         try:
             response = urlopen(request)
             text = response.read()
             return text
         except URLError, e:
             print 'Error in sending/receiving request/reply: ', e
-            raise InvalidUsage('There was an error retreiving stock information. Please try again.', status_code=503)
+            raise InvalidUsage('There was an error retrieving stock information. Please try again.', status_code=503)

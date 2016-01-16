@@ -1,5 +1,4 @@
 var config = {
-    numStocksPerPage : 10,
     numMinutesToUpdate : 5,
 };
 
@@ -14,9 +13,6 @@ var config = {
 
             /**
              * Displays all of the given stock symbols in a paginated view.
-             * Meaning that the first n stocks will appear on the first page where n is config.numStocksPerPage
-             * The other stocks will be displayed on the following pages when the user presses the next button.
-             * Updates the Previous and Next buttons at the end.
              *
              * stockSymbols - an array of stock symbols (that are strings)
              */

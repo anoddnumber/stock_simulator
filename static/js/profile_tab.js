@@ -43,10 +43,6 @@
                 }
                 $('#profile_table').DataTable();
             },
-
-            search : function() {
-
-            },
          }
          return {
             update : profileTab.updatePage,
@@ -59,44 +55,4 @@ var ProfileTab = $.ProfileTab();
 
 
 $( document ).ready(function() {
-    /**
-     * Finds out which stocks/stock names have matches with the searched value.
-     * Then displays those stocks with the queried stock information.
-     */
-    $("#profileSearchBar").keyup(function() {
-        ProfileTab.search();
-    });
-
-    /**
-     * Do nothing when the searchProfileForm is submitted.
-     * Searching should be done on the keyup event.
-     */
-    $('#searchProfileForm').submit(function(event) {
-        // stop the form from submitting the normal way and refreshing the page
-        event.preventDefault();
-    });
-
-//    $("#symbol-column-link").click(function(e) {
-//        e.preventDefault();
-//        var sortedArray = browseTabTableSortManager.sort($('#symbol-column-link').text(), function(a, b) {
-//            return a.stock_symbol.localeCompare(b.stock_symbol);
-//        });
-//        BrowseTab.displaySortedArray(sortedArray);
-//    })
-//
-//    $("#name-column-link").click(function(e) {
-//        e.preventDefault();
-//        var sortedArray = browseTabTableSortManager.sort($('#name-column-link').text(), function(a, b) {
-//            return a.stock_info.name.localeCompare(b.stock_info.name);
-//        });
-//        BrowseTab.displaySortedArray(sortedArray);
-//    })
-//
-//    $("#stock-column-link").click(function(e) {
-//        e.preventDefault();
-//        var sortedArray = browseTabTableSortManager.sort($('#stock-column-link').text(), function(a, b) {
-//            return a.stock_info.price - b.stock_info.price;
-//        });
-//        BrowseTab.displaySortedArray(sortedArray);
-//    })
 });

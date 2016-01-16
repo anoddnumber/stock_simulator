@@ -69,34 +69,6 @@ var stockSymbolsMap;
             getPercentDifference : function(oldNum, newNum) {
                 return (newNum - oldNum)/oldNum * 100;
             },
-
-            sortObj : function(obj, sortFunc) {
-                var array = $.map(obj, function(value, key) {
-                    return [{"stock_symbol" : key, "stock_info" : value}];
-                });
-
-                array.sort(sortFunc);
-
-                return array;
-            },
-
-            filterByKeys : function(obj, keep) {
-                // Avoid issues with `{hasOwnProperty: 5}`
-                var hasOwnProperty = ({}).hasOwnProperty;
-                if (!(typeof obj === 'object' && keep)) {
-                    return Ext.clone(obj);
-                }
-
-                var result = {};
-                for (var i = 0, len = keep.length; i < len; i++) {
-                    var key = keep[i];
-                    if (hasOwnProperty.call(obj, key)) {
-                        result[key] = obj[key];
-                    }
-                }
-
-                return result;
-            },
         }
 
         return {
@@ -105,8 +77,6 @@ var stockSymbolsMap;
             insertRowByValues : utility.insertRowByValues,
             isPositiveInteger : utility.isPositiveInteger,
             getPercentDifference : utility.getPercentDifference,
-            sortObj : utility.sortObj,
-            filterByKeys : utility.filterByKeys,
         };
     };
 })(jQuery);

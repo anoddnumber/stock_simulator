@@ -54,6 +54,7 @@
                         console.log(data);
                         $('#usernameBox').text("Not logged in");
                         $('#cashBox').text("");
+                        //TODO redirect to login page
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         TopBar.showErrorFromJqXHR(jqXHR);
@@ -106,12 +107,12 @@
                             userInfo = JSON.parse(data);
                             $('#cashBox').text('Cash: $' + userInfo.cash);
                             $('#previewBuyStockCash').text('$' + userInfo.cash);
+                            console.log("userInfo: " + JSON.stringify(userInfo));
 
                             //TODO: Update stocks in profile page
                             ProfileTab.update(userInfo)
                         } catch (err){
-                            //not logged in, thus the response is not in JSON format
-                            console.log("not logged in");
+                            console.log("getting user info error: " + err);
                         }
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
@@ -121,7 +122,7 @@
                 });
             },
 
-                        /**
+            /**
              * Stores a map of stock symbols (the keys) to an object with stock information .
              * Also updates the lastUpdatedDate variable.
              *
@@ -138,6 +139,7 @@
                         console.log("successfully got the stock symbols map!");
                         stockSymbolsMap = JSON.parse(data);
                         lastUpdatedDate = stockSymbolsMap['last_updated'];
+//                        console.log("stockSymbolsMap: " + JSON.stringify(stockSymbolsMap));
 
                         var lastUpdatedTime = Date.parse(lastUpdatedDate);
                         var currentTime = Date.now();
@@ -156,12 +158,7 @@
                         delete stockSymbolsMap['last_updated'];
 
                         //TODO: create a displayStocksHelper that takes in a list of symbols to display
-                        //displayStocks will then have no parameters and defaults to curSymbols or Object.keys(stockSymbolsMap)
-                        if ( ! BrowseTab.getCurSymbols()) {
-                            BrowseTab.displayStocks(Object.keys(stockSymbolsMap));
-                        } else {
-                            BrowseTab.displayStocks(BrowseTab.getCurSymbols());
-                        }
+                        BrowseTab.displayStocks(Object.keys(stockSymbolsMap));
 
                     },
                     error : function() {

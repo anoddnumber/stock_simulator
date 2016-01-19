@@ -47,6 +47,28 @@ var stockSymbolsMap;
             },
 
             /**
+            *   Inserts an entire table in all at once. Uses an array and strings to build up the table
+            *   for efficiency.
+            *
+            *   values - 2d array, each array is a row in the table
+            */
+            insertEntireTableBody : function(tableElem, values) {
+                var result = new Array(), index = -1;
+
+                for (var i = 0; i < values.length; i++) {
+                    var row = values[i];
+                    result.push('<tr>');
+                    for (var j = 0; j < row.length; j++) {
+                        result.push('<td>');
+                        result.push(row[j]);
+                        result.push('</td>');
+                    }
+                    result.push('</tr>');
+                }
+                tableElem.innerHTML = result.join('');
+            },
+
+            /**
              * Replaces all the characters that match "find" in "str" with "replace"
              * @param {Object} find - the characters to replace
              * @param {Object} replace - the character to replace with
@@ -77,6 +99,7 @@ var stockSymbolsMap;
             insertRowByValues : utility.insertRowByValues,
             isPositiveInteger : utility.isPositiveInteger,
             getPercentDifference : utility.getPercentDifference,
+            insertEntireTableBody : utility.insertEntireTableBody,
         };
     };
 })(jQuery);

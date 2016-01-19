@@ -22,9 +22,37 @@ var config = {
 
                 var tableBody = $('#stocks_table tbody')[0]; //grab the DOM element (0 indexed element of a jQuery object)
                 tableBody.innerHTML = "";
-                browseTab.insertRowsBySymbols(stockSymbols);
+
+                var rows = browseTab.buildTable(stockSymbols);
+                Utility.insertEntireTableBody($('#stocks_table tbody')[0], rows);
 
                 $('#stocks_table').DataTable();
+            },
+
+            /**
+            *   Builds the stocks table and returns the rows in a 2d array
+            *   where each array represents a row in the table.
+            *
+            *   symbols - an array of stock symbols
+            */
+            buildTable : function(symbols) {
+                var rows = new Array();
+                for (var i = 0; i < symbols.length; i++) {
+                    var symbol = symbols[i];
+
+                    var info = stockSymbolsMap[symbol];
+                    var name = info['name'];
+                    var dailyPercentChange = info.daily_percent_change;
+                    var dailyPriceChange = info.daily_price_change;
+                    var price = info.price;
+
+                    var buttonId = 'buy' + symbol + 'Button';
+                    var buyButton = '<button id="' + buttonId + '" type="button">Buy</button>';
+
+                    var row = [symbol, name, dailyPercentChange, dailyPriceChange, price, buyButton];
+                    rows.push(row);
+                }
+                return rows;
             },
 
              /**
@@ -36,30 +64,6 @@ var config = {
                 for (var i = 0; i < symbols.length; i++) {
                     browseTab.insertRowBySymbol(symbols[i]);
                 }
-            },
-
-            /**
-             * Inserts the symbol's values into the stocks table.
-             * This includes the stock's Symbol, Name, and Price
-             *
-             * symbol - the symbol to get information from (i.e. AMZN)
-             */
-            insertRowBySymbol : function(symbol) {
-                var info = stockSymbolsMap[symbol];
-                var name = info['name'];
-                var dailyPercentChange = info.daily_percent_change;
-                var dailyPriceChange = info.daily_price_change;
-                var price = info.price;
-                var buttonId = 'buy' + symbol + 'Button';
-                var buyButton = '<button id="' + buttonId + '" type="button">Buy</button>';
-
-                Utility.insertRowByValues('stocks_table tbody', [symbol, name, dailyPercentChange, dailyPriceChange,
-                 price, buyButton]);
-
-                //add the on click event after inserting the button into the table
-                $( "#stocks_table #" + buttonId ).on( "click", function() {
-                    browseTab.previewBuyStock(symbol);
-                });
             },
 
             previewBuyStock : function(symbol) {

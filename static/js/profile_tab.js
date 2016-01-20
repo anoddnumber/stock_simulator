@@ -11,6 +11,21 @@
                 var tableBody = $("#profile_table tbody")[0]; //grab the DOM element (0 indexed element of a jQuery object)
                 tableBody.innerHTML = "";
 
+                var rows = profileTab.buildTable(userData);
+                Utility.insertEntireTableBody($('#profile_table tbody')[0], rows);
+
+                $('#profile_table').DataTable();
+            },
+
+            /**
+            *   Builds the profile table and returns the rows in a 2d array
+            *   where each array represents a row in the table.
+            *
+            *   userData - an object containing user data
+            */
+            buildTable : function(userData) {
+                var rows = new Array();
+
                 var keys = Object.keys(userData.stocks_owned);
                 for (var i = 0; i < keys.length; i++) {
                     var symbol = keys[i];
@@ -38,10 +53,10 @@
 
                     var row = [symbol, totalQuantity, avgPrice, currentPrice, priceDifference, percentDifference,
                     dayPriceDifference, dayPercentDifference, currentTotalValue]
-
-                    Utility.insertRowByValues("profile_table tbody", row);
+                    rows.push(row);
                 }
-                $('#profile_table').DataTable();
+
+                return rows;
             },
          }
          return {

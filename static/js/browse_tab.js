@@ -7,6 +7,8 @@ var config = {
 */
 (function($) {
     $.BrowseTab = function(options) {
+        var buttonSymbols = new Array(); //TODO will be removed later...
+
         var browseTab = {
             options : $.extend({
             }, options),
@@ -25,6 +27,15 @@ var config = {
 
                 var rows = browseTab.buildTable(stockSymbols);
                 Utility.insertEntireTableBody($('#stocks_table tbody')[0], rows);
+
+                for (var i = 0; i < buttonSymbols.length; i++) {
+                    var symbol = buttonSymbols[i];
+                    var buttonId = 'buy' + symbol + 'Button';
+                    //add the on click event after inserting the button into the table
+                    $( "#stocks_table #" + buttonId ).on( "click", function() {
+                        browseTab.previewBuyStock(symbol);
+                    });
+                }
 
                 $('#stocks_table').DataTable();
             },
@@ -47,6 +58,7 @@ var config = {
                     var price = info.price;
 
                     var buttonId = 'buy' + symbol + 'Button';
+                    buttonSymbols.push(symbol);
                     var buyButton = '<button id="' + buttonId + '" type="button">Buy</button>';
 
                     var row = [symbol, name, dailyPercentChange, dailyPriceChange, price, buyButton];
@@ -55,15 +67,10 @@ var config = {
                 return rows;
             },
 
-             /**
-             * Inserts multiple rows of stock information into the stocks table.
-             *
-             * symbols - an array of stock symbols (that are strings)
-             */
-            insertRowsBySymbols : function(symbols) {
-                for (var i = 0; i < symbols.length; i++) {
-                    browseTab.insertRowBySymbol(symbols[i]);
-                }
+            previewBuyStock : function(symbol) {
+                $('#previewBuyStockCash').text('$' + userInfo.cash);
+                $('#previewBuyStockSymolName').text(symbol);
+                $('#previewBuyStockPrice').text(stockSymbolsMap[symbol].price);
             },
 
             previewBuyStock : function(symbol) {

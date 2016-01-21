@@ -61,62 +61,13 @@
 
             <!-- Profile Tab -->
             <div role="tabpanel" class="tab-pane active" id="profile">
-                <table id="profile_table" class="display">
-                    <thead>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Amount Owned</th>
-                            <th>Price Bought</th>
-                            <th>Current Price</th>
-                            <th>Price Difference</th>
-                            <th>Percent Difference</th>
-                            <th>Day Price Difference</th>
-                            <th>Day Percent Difference</th>
-                            <th>Total Value</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                    <tfoot>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Amount Owned</th>
-                            <th>Price Bought</th>
-                            <th>Current Price</th>
-                            <th>Price Difference</th>
-                            <th>Percent Difference</th>
-                            <th>Day Price Difference</th>
-                            <th>Day Percent Difference</th>
-                            <th>Total Value</th>
-                        </tr>
-                    </tfoot>
-                </table>
+                {% include 'profile_table.html' %}
+                {% include 'buy_stock_page.html' %}
             </div>
 
             <!-- Stocks Tab -->
             <div role="tabpanel" class="tab-pane" id="stocks">
-                <table id="stocks_table" class="display">
-                    <thead>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Name</th>
-                            <th>Daily Percent Change</th>
-                            <th>Daily Price Change</th>
-                            <th>Stock Price</th>
-                            <th>Buy</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                    <tfoot>
-                        <tr>
-                            <th>Symbol</th>
-                            <th>Name</th>
-                            <th>Daily Percent Change</th>
-                            <th>Daily Price Change</th>
-                            <th>Stock Price</th>
-                            <th>Buy</th>
-                        </tr>
-                    </tfoot>
-                </table>
+                {% include 'stocks_table.html' %}
                 <br><br>
 
                 <div id="previewBuyStockBox">

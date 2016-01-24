@@ -30,14 +30,18 @@ var config = {
 
                 for (var i = 0; i < buttonSymbols.length; i++) {
                     var symbol = buttonSymbols[i];
-                    var buttonId = 'buy' + symbol + 'Button';
-                    //add the on click event after inserting the button into the table
-                    $( "#stocks_table #" + buttonId ).on( "click", function() {
-                        browseTab.previewBuyStock(symbol);
-                    });
+                    browseTab.enableButton(symbol);
                 }
 
                 $('#stocks_table').DataTable();
+            },
+
+            enableButton: function(symbol) {
+                var buttonId = 'buy' + symbol + 'Button';
+                //add the on click event after inserting the button into the table
+                $( "#stocks_table #" + buttonId ).on( "click", function() {
+                    browseTab.previewBuyStock(symbol);
+                });
             },
 
             /**
@@ -65,12 +69,6 @@ var config = {
                     rows.push(row);
                 }
                 return rows;
-            },
-
-            previewBuyStock : function(symbol) {
-                $('#previewBuyStockCash').text('$' + userInfo.cash);
-                $('#previewBuyStockSymolName').text(symbol);
-                $('#previewBuyStockPrice').text(stockSymbolsMap[symbol].price);
             },
 
             previewBuyStock : function(symbol) {

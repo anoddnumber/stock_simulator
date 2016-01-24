@@ -25,7 +25,6 @@
                         ApiClient.updateUserData();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        TopBar.showErrorFromJqXHR(jqXHR);
                         console.log("error, did not login");
                     }
                 });
@@ -41,7 +40,6 @@
                         ApiClient.updateUserData();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        TopBar.showErrorFromJqXHR(jqXHR);
                         console.log("error, did not login");
                     }
                 });
@@ -57,7 +55,6 @@
                         //TODO redirect to login page
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        TopBar.showErrorFromJqXHR(jqXHR);
                         console.log("error, did not log out");
                     }
                 });
@@ -71,7 +68,7 @@
                         console.log("successfully created account!");
                     },
                     error: function(jqXHR, textStatus, errorThrown ) {
-                        TopBar.showErrorFromJqXHR(jqXHR);
+                        console.log("error when creating an account");
                     }
                 });
             },
@@ -99,24 +96,22 @@
             },
 
             updateUserData : function() {
-                console.log("updateUserData");
                 $.ajax("/getUserInfo", {
                     method: "GET",
                     success: function(data) {
                         try {
                             userInfo = JSON.parse(data);
-                            $('#cashBox').text('Cash: $' + userInfo.cash);
-                            $('#previewBuyStockCash').text('$' + userInfo.cash);
-                            console.log("userInfo: " + JSON.stringify(userInfo));
-
-                            //TODO: Update stocks in profile page
-                            ProfileTab.update(userInfo)
                         } catch (err){
                             console.log("getting user info error: " + err);
                         }
+                        $('#cashBox').text('Cash: $' + userInfo.cash);
+                        $('#previewBuyStockCash').text('$' + userInfo.cash);
+                        console.log("userInfo: " + JSON.stringify(userInfo));
+
+                        //TODO: Update stocks in profile page
+                        ProfileTab.update(userInfo)
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
-                        TopBar.showErrorFromJqXHR(jqXHR);
                         console.log("error, did not retrieve user data");
                     }
                 });
@@ -157,7 +152,6 @@
                         //the last_updated date should not be shown to the user
                         delete stockSymbolsMap['last_updated'];
 
-                        //TODO: create a displayStocksHelper that takes in a list of symbols to display
                         BrowseTab.displayStocks(Object.keys(stockSymbolsMap));
 
                     },

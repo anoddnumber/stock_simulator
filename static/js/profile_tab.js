@@ -24,6 +24,8 @@
             *   userData - an object containing user data
             */
             buildTable : function(userData) {
+                if (userData == undefined || userData.stocks_owned == undefined) return [];
+
                 var rows = new Array();
 
                 var keys = Object.keys(userData.stocks_owned);

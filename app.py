@@ -42,7 +42,7 @@ def the_app():
     if username is None:
         return redirect(url_for('root'))
     else:
-        user = UsersDbAccess.getUserByUsername(username)
+        user = UsersDbAccess.get_user_by_username(username)
         if user is None:
             return redirect(url_for('root'))
         else:
@@ -173,7 +173,7 @@ def buy_stock():
     if username is None:
         return 'Not logged in, cannot buy stock.'
     
-    user = UsersDbAccess.getUserByUsername(username)
+    user = UsersDbAccess.get_user_by_username(username)
     if user is None:
         return 'User with username ' + username + ' not found in database.'
 
@@ -218,7 +218,7 @@ def sell_stock():
     if username is None:
         return 'Not logged in, cannot sell stock.' 
     
-    user = UsersDbAccess.getUserByUsername(username)
+    user = UsersDbAccess.get_user_by_username(username)
     if user is None:
         return 'User with username ' + username + ' not found in database.'
 
@@ -252,8 +252,8 @@ def sell_stock():
 def get_user_info():
     username = session.get('username')
     if username is None:
-        return 'Not logged in, cannot retreive information.'
-    user = UsersDbAccess.getUserByUsername(username)
+        return 'Not logged in, cannot retrieve information.'
+    user = UsersDbAccess.get_user_by_username(username)
     if user is None:
         return 'Could not find the current user in the database.'
     user_dict = {'cash' : user.getRoundedCash(), 'stocks_owned' : user.stocks}

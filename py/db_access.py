@@ -21,7 +21,7 @@ class UsersDbAccess:
     @staticmethod
     def create_user(user):
         print 'createUser'
-        userInDB = UsersDbAccess.getUserByUsername(user.username)
+        userInDB = UsersDbAccess.get_user_by_username(user.username)
         if userInDB is not None:
             print "User already exists. Choose another username."
             raise DuplicateUsernameError('Username already taken.')
@@ -33,10 +33,10 @@ class UsersDbAccess:
         return "Successful"
 
     @staticmethod
-    def getUserByUsername(username):
-        userDict = UsersDbAccess.collection.find_one({"username": username})
-        if userDict is not None:
-            return User(userDict)
+    def get_user_by_username(username):
+        user_dict = UsersDbAccess.collection.find_one({"username": username})
+        if user_dict is not None:
+            return User(user_dict)
         print 'No user found with username ' + username
         return None
 

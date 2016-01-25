@@ -36,9 +36,10 @@ Returns a page where the user can buy/sell stocks as well as information regardi
 @app.route("/stockInfo", methods=['GET'])
 def stock_info():
     symbol = cgi.escape(request.args.get('symbol'))
+    price = get_stock_info_helper([symbol])
 
     template = env.get_template('stock_info_page.html')
-    return template.render(symbol=symbol)
+    return template.render(symbol=symbol, price=price)
 
 """
 The application. Redirects to the root page if the user is not logged in.

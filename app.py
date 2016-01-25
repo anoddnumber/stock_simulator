@@ -31,6 +31,16 @@ def root():
         return redirect(url_for('the_app'))
 
 """
+Returns a page where the user can buy/sell stocks as well as information regarding the stock.
+"""
+@app.route("/stockInfo", methods=['GET'])
+def stock_info():
+    symbol = cgi.escape(request.args.get('symbol'))
+
+    template = env.get_template('stock_info_page.html')
+    return template.render(symbol=symbol)
+
+"""
 The application. Redirects to the root page if the user is not logged in.
 """
 #TODO change names

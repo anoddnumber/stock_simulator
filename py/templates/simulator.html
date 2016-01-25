@@ -20,7 +20,7 @@
 
 			<!-- Collect the nav links, forms, and other content for toggling -->
 			<div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
-				<ul class="nav navbar-nav" role="tablist">
+				<ul id="navbarTabs" class="nav navbar-nav" role="tablist">
 					<li class="active">
                         <a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a>
                     </li>
@@ -62,7 +62,7 @@
             <!-- Profile Tab -->
             <div role="tabpanel" class="tab-pane active" id="profile">
                 {% include 'profile_table.html' %}
-                {% include 'buy_stock_page.html' %}
+                <iframe id="stock_info_iframe" frameborder="0" hidden></iframe>
             </div>
 
             <!-- Stocks Tab -->

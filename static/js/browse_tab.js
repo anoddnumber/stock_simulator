@@ -116,8 +116,6 @@ $( document ).ready(function() {
             ApiClient.buyStock($("#previewBuyStockSymolName").html(), quantity);
         }
     });
-
-    $('#example').DataTable();
 });
 
 

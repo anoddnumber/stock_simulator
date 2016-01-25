@@ -1,10 +1,13 @@
 (function($) {
     $.ProfileTab = function(options) {
+        var table;
+
         var profileTab = {
              options : $.extend({
              }, options),
 
              updatePage : function(userData) {
+                //dataTable is using the old API, may need to look into if there is a newer way to do this
                 var oldTable = $('#profile_table').dataTable();
                 oldTable.fnDestroy();
 
@@ -14,7 +17,11 @@
                 var rows = profileTab.buildTable(userData);
                 Utility.insertEntireTableBody($('#profile_table tbody')[0], rows);
 
-                $('#profile_table').DataTable();
+                table = $('#profile_table').DataTable();
+            },
+
+            getTable : function() {
+                return table;
             },
 
             /**
@@ -51,10 +58,11 @@
                     var percentDifference = Utility.getPercentDifference(avgPrice, currentPrice).toFixed(2);
                     var dayPriceDifference = symbolInfo.daily_price_change;
                     var dayPercentDifference = symbolInfo.daily_percent_change;
+                    totalPriceBought = totalPriceBought.toFixed(2);
                     var currentTotalValue = (totalQuantity * currentPrice).toFixed(2);
 
                     var row = [symbol, totalQuantity, avgPrice, currentPrice, priceDifference, percentDifference,
-                    dayPriceDifference, dayPercentDifference, currentTotalValue]
+                    dayPriceDifference, dayPercentDifference, totalPriceBought, currentTotalValue]
                     rows.push(row);
                 }
 
@@ -63,6 +71,7 @@
          }
          return {
             update : profileTab.updatePage,
+            getTable : profileTab.getTable,
         };
     }
 
@@ -72,4 +81,17 @@ var ProfileTab = $.ProfileTab();
 
 
 $( document ).ready(function() {
+    $('#profile_table tbody').on('click', 'tr', function(event) {
+        table = ProfileTab.getTable();
+        $('#profile_table_wrapper').hide();
+        $('#stock_info_iframe')[0].src = "/stockInfo?symbol=" + table.row( this ).data()[0];
+        $('#stock_info_iframe').show();
+
+        $('#stock_info_iframe').load(function() {
+            $("#stock_info_iframe").contents().find('#backButton').click(function(){
+                $('#profile_table_wrapper').show();
+                $('#stock_info_iframe').hide();
+            });
+        })
+    })
 });

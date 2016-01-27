@@ -258,7 +258,6 @@ def sell_stock():
     # sell the stock
     return UsersDbAccess.sell_stocks_from_user(username, symbol, quantity, cache)
 
-
 @app.route("/getUserInfo", methods=['GET'])
 def get_user_info():
     username = session.get('username')

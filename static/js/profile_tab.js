@@ -91,6 +91,7 @@ $( document ).ready(function() {
             $("#stock_info_iframe").contents().find('#backButton').click(function(){
                 $('#profile_table_wrapper').show();
                 $('#stock_info_iframe').hide();
+                $('#stock_info_iframe')[0].src = "";
             });
         })
     })

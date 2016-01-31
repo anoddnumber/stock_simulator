@@ -3,6 +3,17 @@ body {
   background-color: #eee;
 }
 
+.tab-pane {
+    height: 100vh;
+}
+
+iframe {
+    display: block;
+    border: none;
+    height: 100vh;
+    width: 100vw;
+}
+
 #createAccount {
     display : none;
 }

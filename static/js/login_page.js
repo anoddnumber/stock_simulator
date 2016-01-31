@@ -28,14 +28,16 @@
     }
 })(jQuery);
 
-var loginPage = $.LoginPage();
+var LoginPage = $.LoginPage();
 
-$("#loginLink").click(function(e) {
-    e.preventDefault();
-    loginPage.showLogin();
-})
+$( document ).ready(function() {
+    $("#loginLink").click(function(e) {
+        e.preventDefault();
+        LoginPage.showLogin();
+    })
 
-$("#createAccountLink").click(function(e) {
-    e.preventDefault();
-    loginPage.showCreateAccount();
-})
+    $("#createAccountLink").click(function(e) {
+        e.preventDefault();
+        LoginPage.showCreateAccount();
+    })
+});

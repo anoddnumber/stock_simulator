@@ -7,6 +7,11 @@
              }, options),
 
              updatePage : function(userData) {
+                $('#stockInfoPageTotalCash').text(userData.cash);
+                profileTab.updateTable(userData);
+            },
+
+            updateTable : function(userData) {
                 //dataTable is using the old API, may need to look into if there is a newer way to do this
                 var oldTable = $('#profile_table').dataTable();
                 oldTable.fnDestroy();
@@ -83,16 +88,25 @@ var ProfileTab = $.ProfileTab();
 $( document ).ready(function() {
     $('#profile_table tbody').on('click', 'tr', function(event) {
         table = ProfileTab.getTable();
-        $('#profile_table_wrapper').hide();
-        $('#stock_info_iframe')[0].src = "/stockInfo?symbol=" + table.row( this ).data()[0];
-        $('#stock_info_iframe').show();
+        var data = table.row( this ).data();
+        var symbol = data[0];
+//        var amountOwned = data[1];
+//        var priceBought = data[2];
+        var currentPrice = data[3];
+//        var priceDifference = data[4];
+//        var dayPriceDifference = data[5];
+//        var investment = data[6];
+//        var totalValue = data[7];
+        console.log("abc");
 
-        $('#stock_info_iframe').load(function() {
-            $("#stock_info_iframe").contents().find('#backButton').click(function(){
-                $('#profile_table_wrapper').show();
-                $('#stock_info_iframe').hide();
-                $('#stock_info_iframe')[0].src = "";
-            });
+        $('#stockInfoPageStockSymbolName').text(symbol);
+        $('#stockInfoPageStockPrice').text(currentPrice);
+
+        $('#profileTableContainer').hide();
+        $('#stockInfoPage').show();
+        $('#stockInfoPageBackButton').click(function() {
+            $('#profileTableContainer').show();
+            $('#stockInfoPage').hide();
         })
     })
 });

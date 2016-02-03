@@ -77,13 +77,39 @@
              * TODO, create a central helper for all the APIs, or maybe a client.
              *  since all the success and error parts of the functions are the same..
              */
-            buyStock : function(symbol, quantity) {
+            buyStock : function(symbol, quantity, price) {
+                if (price == undefined) {
+                    price = stockSymbolsMap[symbol].price;
+                }
+
                 $.ajax("/buyStock", {
                     method: "POST",
                     data: {'symbol' : symbol,
-                            'quantity' : quantity,
-                            'stockPrice' : stockSymbolsMap[symbol].price
-                            },
+                           'quantity' : quantity,
+                           'stockPrice' : price
+                          },
+                    success: function(data) {
+                        console.log(data);
+                        ApiClient.updateUserData();
+                    },
+                    error: function(jqXHR, textStatus, errorThrown) {
+                        console.log("JSON.parse(jqXHR.responseText).message: " + jqXHR.responseText);
+                        console.log("error, did not buy stock");
+                    }
+                });
+            },
+
+            sellStock : function(symbol, quantity, price) {
+                if (price == undefined) {
+                    price = stockSymbolsMap[symbol].price;
+                }
+
+                $.ajax("/sellStock", {
+                    method: "POST",
+                    data: {'symbol' : symbol,
+                           'quantity' : quantity,
+                           'stockPrice' : price
+                          },
                     success: function(data) {
                         console.log(data);
                         ApiClient.updateUserData();
@@ -172,6 +198,7 @@
             buyStock : apiClient.buyStock,
             updateUserData : apiClient.updateUserData,
             updateCache : apiClient.updateCache,
+            sellStock : apiClient.sellStock,
         }
     }
 })(jQuery);

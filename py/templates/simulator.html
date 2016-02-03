@@ -61,49 +61,53 @@
 
         <!-- Profile Tab -->
         <div role="tabpanel" class="tab-pane active" id="profile">
-            {% include 'profile_table.html' %}
-            <iframe id="stock_info_iframe" frameborder="0" hidden></iframe>
-        </div>
-
-        <!-- Stocks Tab -->
-        <div role="tabpanel" class="tab-pane" id="stocks">
-            {% include 'stocks_table.html' %}
-            <br><br>
-
-            <div id="previewBuyStockBox">
-                Available Cash: <span id="previewBuyStockCash"></span> <br>
-                Stock Name: <span id="previewBuyStockSymolName"></span> <br>
-                Price: <span id="previewBuyStockPrice"></span> <br>
-                Quantity: <input id="previewBuyStockQuantity" autocomplete="off" type="text" name="quantitybar" size="10"> <br>
-                Total Price: <span id="previewBuyStockTotalPrice">0.00</span> <br>
-                <button id="previewBuyStocksBuyButton" type="button">Confirm Buy</button>
+            <div>
+                <div id="profileTableContainer"> {% include 'profile_table.html' %} </div>
+                {% include 'stock_info_page.html' %}
             </div>
         </div>
+            <!-- Stocks Tab -->
+            <div role="tabpanel" class="tab-pane" id="stocks">
+                {% include 'stocks_table.html' %}
+                <br><br>
 
-        <div role="tabpanel" class="tab-pane" id="statistics">TODO</div>
-        <div role="tabpanel" class="tab-pane" id="settings">TODO</div>
-      </div>
+                <div id="previewBuyStockBox">
+                    Available Cash: <span id="previewBuyStockCash"></span> <br>
+                    Stock Name: <span id="previewBuyStockSymolName"></span> <br>
+                    Price: <span id="previewBuyStockPrice"></span> <br>
+                    Quantity: <input id="previewBuyStockQuantity" autocomplete="off" type="text" name="quantitybar" size="10"> <br>
+                    Total Price: <span id="previewBuyStockTotalPrice">0.00</span> <br>
+                    <button id="previewBuyStocksBuyButton" type="button">Confirm Buy</button>
+                </div>
+            </div>
+
+            <div role="tabpanel" class="tab-pane" id="statistics">TODO</div>
+            <div role="tabpanel" class="tab-pane" id="settings">TODO</div>
+    </div>
+
+    <!-- Include all the necessary files that the html pages requires-->
+    <!-- TODO: Find a better way to import all the js files-->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+    <!-- DataTables -->
+    <script type="text/javascript" language="javascript" src="../../DataTables/datatables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../DataTables/datatables.min.css">
+
+
+    <script src="js/api_client.js"></script>
+    <script src="js/profile_tab.js"></script>
+    <script src="js/browse_tab.js"></script>
+    <script src="js/utility.js"></script>
+    <script src="js/stock_info_page.js"></script>
+
+    <!-- Bootstrap -->
+    <script src="bootstrap-3.3.6/dist/js/bootstrap.js"></script>
+    <!-- Bootstrap core CSS -->
+    <link href="../../bootstrap-3.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    <!-- Custom CSS, this should be placed after the Bootstrap core CSS to override it-->
+    <link rel="stylesheet" type="text/css" href="css/simulator.css">
 </div>
-
-<!-- Include all the necessary files that the html pages requires-->
-<!-- TODO: Find a better way to import all the js files-->
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-<script src="js/api_client.js"></script>
-<script src="js/profile_tab.js"></script>
-<script src="js/browse_tab.js"></script>
-<script src="js/utility.js"></script>
-
-<!-- DataTables -->
-<script type="text/javascript" language="javascript" src="../../DataTables/datatables.min.js"></script>
-<link rel="stylesheet" type="text/css" href="../../DataTables/datatables.min.css">
-
-<!-- Bootstrap -->
-<script src="bootstrap-3.3.6/dist/js/bootstrap.js"></script>
-<!-- Bootstrap core CSS -->
-<link href="../../bootstrap-3.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
-
-<!-- Custom CSS, this should be placed after the Bootstrap core CSS to override it-->
-<link rel="stylesheet" type="text/css" href="css/simulator.css">
 </body>
 
 </html>

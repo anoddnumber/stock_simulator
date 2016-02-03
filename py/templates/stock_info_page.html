@@ -1,8 +1,12 @@
-<div>
-    <button id="backButton" type="button">Back</button><br>
-    Stock Name: <span class="stockNameToBuy"> {{symbol}} </span><br>
-    Stock Price: <span class="stockPriceToBuy"> {{price}} </span><br>
-    Quantity: <input name="quantity" type="text" id="createAccountInputEmail"><br>
-    TODO Buy button here..<br>
-    TODO Sell button here..<br>
+<div id="stockInfoPage" hidden>
+    <button id="stockInfoPageBackButton" type="button">Back</button><br>
+
+    Available Cash: <span id="stockInfoPageTotalCash"></span> <br>
+    Stock Name: <span id="stockInfoPageStockSymbolName">{{symbol}}</span> <br>
+    Price: <span id="stockInfoPageStockPrice">{{price}}</span> <br>
+    Quantity: <input id="stockInfoPageStockQuantity" autocomplete="off" type="text" name="quantitybar" size="10"><br>
+    Total Price: <span id="stockInfoPageStockTotalPrice">0.00</span> <br>
+
+    <button id="stockInfoPageStocksBuyButton" type="button">Buy</button>
+    <button id="stockInfoPageStocksSellButton" type="button">Sell</button>
 </div>

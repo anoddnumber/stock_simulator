@@ -58,8 +58,9 @@ class UsersDbAccess:
         except KeyError, e:
             numStocksOwned = 0
         key = "stocks_owned." + str(symbol) + "." + pricePerStock
+
         update = {}
-        update[key] = numStocksOwned + quantity
+        update[key] = int(numStocksOwned) + quantity
         update["cash"] = float(userDict['cash']) - totalCost
         UsersDbAccess.collection.update({"username": username}, {"$set" : update})
         return "success"
@@ -110,3 +111,4 @@ class UsersDbAccess:
 
         update["cash"] = float(user_dict['cash']) + quantity * float(cache.get_stock_price(symbol))
         UsersDbAccess.collection.update({"username": username}, {"$set" : update})
+        return "success"

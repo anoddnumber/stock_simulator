@@ -205,8 +205,6 @@ def buy_stock():
        return "Invalid symbol"
     server_stock_price = float(symbol_map.get("price"))
 
-    print "stockPrice: " + str(type(stock_price))
-    print "serverStockPrice: " + str(type(server_stock_price))
     if stock_price != server_stock_price:
        return "Stock price changed, please try again."
     

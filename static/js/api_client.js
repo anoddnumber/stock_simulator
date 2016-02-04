@@ -179,7 +179,6 @@
                         delete stockSymbolsMap['last_updated'];
 
                         BrowseTab.displayStocks(Object.keys(stockSymbolsMap));
-
                     },
                     error : function() {
                         console.log("error, did not get the stock symbols map");

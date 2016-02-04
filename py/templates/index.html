@@ -65,11 +65,11 @@
        </div> <!-- /container -->
 
        <div>
-           <div id="accountLinks">
-             <a id="createAccountLink" href="#" {% if createAccountError is defined %} hidden {% endif %}>
+           <div id="accountLinks" {% if createAccountError is defined %} hidden {% endif %}>
+             <a id="createAccountLink" href="#">
               Don't have an account? Create one here.
              </a>
-             <a id="forgotPasswordLink" href="#" {% if createAccountError is defined %} hidden {% endif %}>
+             <a id="forgotPasswordLink" href="#">
                Forgot password?
              </a>
            </div>

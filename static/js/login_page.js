@@ -5,7 +5,7 @@
              }, options),
 
              showCreateAccount : function() {
-                $('#createAccountLink').hide();
+                $('#accountLinks').hide();
                 $('#loginLink').show();
 
                 $('#loginDiv').hide();
@@ -14,7 +14,7 @@
 
              showLogin : function() {
                 $('#loginLink').hide();
-                $('#createAccountLink').show();
+                $('#accountLinks').show();
 
                 $('#createAccountDiv').hide();
                 $('#loginDiv').show();

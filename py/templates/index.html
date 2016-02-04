@@ -24,7 +24,9 @@
            The labels will not show up on the screen.
       -->
        <div class="container" id="loginDiv" {% if createAccountError is defined %} hidden {% endif %}>
-           <div>{{loginError}}</div>
+           <div class="alert alert-danger" role="alert" id="error" {% if loginError is not defined %} hidden {% endif %}>
+               {{loginError}}
+           </div>
           <form class="form-signin" action="login" method="post">
 
             <label for="inputEmail" class="sr-only">Email address</label>
@@ -63,12 +65,17 @@
        </div> <!-- /container -->
 
        <div>
-         <a id="createAccountLink" href="#" {% if createAccountError is defined %} hidden {% endif %}>
-             Don't have an account? Create one here.
-         </a>
-         <a id="loginLink" href="#" {% if createAccountError is not defined %} hidden {% endif %}>
+           <div id="accountLinks">
+             <a id="createAccountLink" href="#" {% if createAccountError is defined %} hidden {% endif %}>
+              Don't have an account? Create one here.
+             </a>
+             <a id="forgotPasswordLink" href="#" {% if createAccountError is defined %} hidden {% endif %}>
+               Forgot password?
+             </a>
+           </div>
+           <a id="loginLink" href="#" {% if createAccountError is not defined %} hidden {% endif %}>
              Already have an account? Login here.
-         </a>
+           </a>
        </div>
     </div>
 

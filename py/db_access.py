@@ -91,8 +91,8 @@ class UsersDbAccess:
         # we now know for sure that the user owns enough stock.
         for key in user_stock_symbol_info:
             num_stocks_of_price = int(user_stock_symbol_info[key])
-            if num_stocks_of_price >= quantity:
-                user_stock_symbol_info[key] = str(num_stocks_of_price - quantity)
+            if num_stocks_of_price > quantity:
+                user_stock_symbol_info[key] = num_stocks_of_price - quantity
                 break
             else:
                 quantity -= num_stocks_of_price

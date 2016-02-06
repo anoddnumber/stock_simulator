@@ -130,6 +130,8 @@
                         } catch (err){
                             console.log("getting user info error: " + err);
                         }
+
+                        $('.stockInfoPageTotalCash').text(userInfo.cash);
                         $('#cashBox').text('Cash: $' + userInfo.cash);
                         $('#previewBuyStockCash').text('$' + userInfo.cash);
                         console.log("userInfo: " + JSON.stringify(userInfo));

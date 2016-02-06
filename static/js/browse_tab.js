@@ -8,6 +8,7 @@ var config = {
 (function($) {
     $.BrowseTab = function(options) {
         var buttonSymbols = new Array(); //TODO will be removed later...
+        var table;
 
         var browseTab = {
             options : $.extend({
@@ -33,7 +34,11 @@ var config = {
                     browseTab.enableButton(symbol);
                 }
 
-                $('#stocks_table').DataTable();
+                table = $('#stocks_table').DataTable();
+            },
+
+            getTable : function() {
+                return table;
             },
 
             enableButton: function(symbol) {
@@ -83,6 +88,7 @@ var config = {
         return {
             displayStocks : browseTab.displayStocks,
             displaySortedArray : browseTab.displaySortedArray,
+            getTable : browseTab.getTable,
         };
     };
 })(jQuery);
@@ -118,6 +124,24 @@ $( document ).ready(function() {
             ApiClient.buyStock($("#previewBuyStockSymolName").html(), quantity);
         }
     });
+
+    $('#stocks_table tbody').on('click', 'tr', function(event) {
+        table = BrowseTab.getTable();
+        var data = table.row( this ).data();
+        var symbol = data[0];
+
+        StockInfoPage.populatePage(symbol, '#stocks');
+
+        $('#stockTableContainer').hide();
+        $('#stocks .stockInfoPage').show();
+    })
+
+    $('#stocks .stockInfoPageBackButton').click(function() {
+        $('#stockTableContainer').show();
+        $('#stocks .stockInfoPage').hide();
+    })
+
+    StockInfoPage.setupButtons('#stocks');
 });
 
 

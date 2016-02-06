@@ -68,17 +68,8 @@
         </div>
             <!-- Stocks Tab -->
             <div role="tabpanel" class="tab-pane" id="stocks">
-                {% include 'stocks_table.html' %}
-                <br><br>
-
-                <div id="previewBuyStockBox">
-                    Available Cash: <span id="previewBuyStockCash"></span> <br>
-                    Stock Name: <span id="previewBuyStockSymolName"></span> <br>
-                    Price: <span id="previewBuyStockPrice"></span> <br>
-                    Quantity: <input id="previewBuyStockQuantity" autocomplete="off" type="text" name="quantitybar" size="10"> <br>
-                    Total Price: <span id="previewBuyStockTotalPrice">0.00</span> <br>
-                    <button id="previewBuyStocksBuyButton" type="button">Confirm Buy</button>
-                </div>
+                <div id="stockTableContainer"> {% include 'stocks_table.html' %} </div>
+                {% include 'stock_info_page.html' %}
             </div>
 
             <div role="tabpanel" class="tab-pane" id="statistics">TODO</div>

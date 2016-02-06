@@ -7,7 +7,6 @@
              }, options),
 
              updatePage : function(userData) {
-                $('#stockInfoPageTotalCash').text(userData.cash);
                 profileTab.updateTable(userData);
             },
 
@@ -90,32 +89,17 @@ $( document ).ready(function() {
         table = ProfileTab.getTable();
         var data = table.row( this ).data();
         var symbol = data[0];
-//        var amountOwned = data[1];
-//        var priceBought = data[2];
-        var currentPrice = data[3];
-//        var priceDifference = data[4];
-//        var dayPriceDifference = data[5];
-//        var investment = data[6];
-//        var totalValue = data[7];
 
-        $('#stockInfoPageStockSymbolName').text(symbol);
-
-        var stockInfo = userInfo.stocks_owned[symbol];
-        var totalNumOfStock = 0;
-        for(var key in stockInfo) {
-            var value = stockInfo[key];
-            totalNumOfStock += value;
-        }
-        $('#stockInfoPageAmountOwned').text(totalNumOfStock);
-
-
-        $('#stockInfoPageStockPrice').text(currentPrice);
+        StockInfoPage.populatePage(symbol, '#profile');
 
         $('#profileTableContainer').hide();
-        $('#stockInfoPage').show();
-        $('#stockInfoPageBackButton').click(function() {
-            $('#profileTableContainer').show();
-            $('#stockInfoPage').hide();
-        })
+        $('#profile .stockInfoPage').show();
     })
+
+    $('#profile .stockInfoPageBackButton').click(function() {
+        $('#profileTableContainer').show();
+        $('#profile .stockInfoPage').hide();
+    })
+
+    StockInfoPage.setupButtons('#profile');
 });

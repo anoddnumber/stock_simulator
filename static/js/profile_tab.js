@@ -97,9 +97,18 @@ $( document ).ready(function() {
 //        var dayPriceDifference = data[5];
 //        var investment = data[6];
 //        var totalValue = data[7];
-        console.log("abc");
 
         $('#stockInfoPageStockSymbolName').text(symbol);
+
+        var stockInfo = userInfo.stocks_owned[symbol];
+        var totalNumOfStock = 0;
+        for(var key in stockInfo) {
+            var value = stockInfo[key];
+            totalNumOfStock += value;
+        }
+        $('#stockInfoPageAmountOwned').text(totalNumOfStock);
+
+
         $('#stockInfoPageStockPrice').text(currentPrice);
 
         $('#profileTableContainer').hide();

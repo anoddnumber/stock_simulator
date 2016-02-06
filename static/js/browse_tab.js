@@ -93,7 +93,6 @@ var config = {
     };
 })(jQuery);
 
-
 var BrowseTab = $.BrowseTab();
 
 $( document ).ready(function() {

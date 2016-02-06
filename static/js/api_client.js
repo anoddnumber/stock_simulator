@@ -170,7 +170,6 @@
                         var numMillisecondsToUpdate = config.numMinutesToUpdate * 60 * 1000;
                         var delay = lenientTime + numMillisecondsToUpdate - (currentTime - lastUpdatedTime);
 
-
                         if (delay < 0) {
                             setTimeout(apiClient.updateCache, numMillisecondsToUpdate);
                         } else {

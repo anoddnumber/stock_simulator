@@ -91,7 +91,9 @@ var config = {
 var BrowseTab = $.BrowseTab();
 
 $( document ).ready(function() {
-    ApiClient.updateCache();
+    ApiClient.updateCache(function() {
+        ApiClient.updateUserData();
+    });
 
     /**
      * Computes the total amount of money required to buy the number of stocks

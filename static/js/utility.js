@@ -106,7 +106,6 @@ var stockSymbolsMap;
 
 var Utility = $.Utility();
 $( document ).ready(function() {
-    ApiClient.updateUserData();
 });
 
 /*

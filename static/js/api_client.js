@@ -154,7 +154,7 @@
              * }
              * Updates the cache: TODO move to global area
              */
-            updateCache : function() {
+            updateCache : function(onSuccess) {
                 $.ajax("/stockSymbolsMap", {
                     success : function(data) {
                         console.log("successfully got the stock symbols map!");
@@ -177,6 +177,10 @@
 
                         //the last_updated date should not be shown to the user
                         delete stockSymbolsMap['last_updated'];
+
+                        if (onSuccess) {
+                            onSuccess();
+                        }
 
                         BrowseTab.displayStocks(Object.keys(stockSymbolsMap));
                     },

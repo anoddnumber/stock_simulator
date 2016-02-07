@@ -81,6 +81,7 @@
 
 
 })(jQuery);
+
 var ProfileTab = $.ProfileTab();
 
 

@@ -73,6 +73,7 @@ var config = {
                     var row = [symbol, name, dailyPercentChange, dailyPriceChange, price, buyButton];
                     rows.push(row);
                 }
+                
                 return rows;
             },
 

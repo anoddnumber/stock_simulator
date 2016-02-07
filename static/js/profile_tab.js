@@ -81,8 +81,8 @@
 
 
 })(jQuery);
-var ProfileTab = $.ProfileTab();
 
+var ProfileTab = $.ProfileTab();
 
 $( document ).ready(function() {
     $('#profile_table tbody').on('click', 'tr', function(event) {

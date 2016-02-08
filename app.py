@@ -103,7 +103,10 @@ def get_stock_symbol_map():
     print "getStockSymbolMap"
     seconds_left = cache.update(5)
 
-    info_dict = {'stockSymbolsMap' : cache.json, 'delay' : seconds_left * 1000}
+    lenient_time = 2 #give extra time for the server to update before the client calls again
+    delay = seconds_left + lenient_time
+
+    info_dict = {'stockSymbolsMap' : cache.json, 'delay' : delay * 1000}
     return jsonify(info_dict)
 
 """

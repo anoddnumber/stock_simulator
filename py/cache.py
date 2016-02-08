@@ -43,7 +43,7 @@ class Cache:
     def getLastUpdatedDate(self):
         if self.parsed_json is None:
             return None
-        last_updated_date = datetime.datetime.strptime(self.parsed_json['last_updated'], "%Y-%m-%d %H:%M:%S.%f")
+        last_updated_date = datetime.datetime.strptime(self.parsed_json['last_updated'], "%Y-%m-%dT%H:%M:%S.%f")
         return last_updated_date
     
     """
@@ -101,7 +101,7 @@ class Cache:
             keysToSend.append(key)
             names.append(symbolNameJson[key])
         self.__addResultsToNewCache(newJson, keysToSend, names)
-        newJson['last_updated'] = str(datetime.datetime.now())
+        newJson['last_updated'] = str(datetime.datetime.now().isoformat())
         
         return newJson
     

@@ -101,8 +101,10 @@ TODO: retrieve the NASDAQ file daily (currently called stock_symbols.txt) and ge
 @app.route("/stockSymbolsMap", methods=['GET'])
 def get_stock_symbol_map():
     print "getStockSymbolMap"
-    cache.update(5)
-    return json.dumps(cache.json, sort_keys=True)
+    seconds_left = cache.update(5)
+
+    info_dict = {'stockSymbolsMap' : cache.json, 'delay' : seconds_left * 1000}
+    return jsonify(info_dict)
 
 """
 This service creates an account for the user.

@@ -51,18 +51,26 @@ class Cache:
     or if there is no last updated date found (Either the cache does not exist or is corrupted).
     
     timeInMinutes - the number of minutes that should have passed before actually updating the cache
+    returns the number of seconds until the next expected update
     """
     def update(self, timeInMinutes = 0):
         last_updated_date = self.getLastUpdatedDate()
         if last_updated_date is not None:
+            print 'timeInMinutes: ' + str(timeInMinutes)
             limit = datetime.timedelta(minutes = timeInMinutes)
-            difference = datetime.datetime.now() - last_updated_date
+            difference = datetime.datetime.utcnow() - last_updated_date
+
             if difference > limit:
                 self.__updateCache()
+                return timeInMinutes * 60
+            else:
+                seconds = (limit - difference).total_seconds()
+                return seconds
         else:
             print 'no last_updated_date found'
             self.__updateCache()
-            
+            return timeInMinutes * 60
+
     """
     Finds what symbols should be updated. Updates the parsed_json field, which holds the cache data as a variable.
     Updates the cache.json file.
@@ -101,7 +109,7 @@ class Cache:
             keysToSend.append(key)
             names.append(symbolNameJson[key])
         self.__addResultsToNewCache(newJson, keysToSend, names)
-        newJson['last_updated'] = str(datetime.datetime.now().isoformat())
+        newJson['last_updated'] = str(datetime.datetime.utcnow().isoformat())
         
         return newJson
     
@@ -172,7 +180,7 @@ class Cache:
             json_string += line
         
         newJson = json.loads(json_string)
-        newJson['last_updated'] = str(datetime.datetime.now())
+        newJson['last_updated'] = str(datetime.datetime.utcnow())
         self.parsed_json = newJson
         
         

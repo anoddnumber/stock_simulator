@@ -159,22 +159,14 @@
             updateCache : function(onSuccess) {
                 $.ajax("/stockSymbolsMap", {
                     success : function(data) {
-                        console.log("successfully got the stock symbols map!");
-                        stockSymbolsMap = JSON.parse(data);
-                        lastUpdatedDate = stockSymbolsMap['last_updated'];
-//                        console.log("stockSymbolsMap: " + JSON.stringify(stockSymbolsMap));
+                        stockSymbolsMap = data.stockSymbolsMap;
+                        var delay = data.delay;
 
-                        var lastUpdatedTime = Date.parse(lastUpdatedDate);
-                        var currentTime = Date.now();
-                        var lenientTime = 2000; //give the server more time to update, in milliseconds
-                        var numMillisecondsToUpdate = config.numMinutesToUpdate * 60 * 1000;
-                        var delay = lenientTime + numMillisecondsToUpdate - (currentTime - lastUpdatedTime);
-
-                        if (delay < 0) {
-                            setTimeout(apiClient.updateCache, numMillisecondsToUpdate);
-                        } else {
-                            setTimeout(apiClient.updateCache, delay);
+                        //in case the delay is undefined, we don't want to continually call updateCache
+                        if ( ! delay) {
+                            delay = config.numMinutesToUpdate * 60 * 1000; //in milliseconds
                         }
+                        setTimeout(apiClient.updateCache, delay);
 
                         //the last_updated date should not be shown to the user
                         delete stockSymbolsMap['last_updated'];

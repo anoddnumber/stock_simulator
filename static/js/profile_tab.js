@@ -3,46 +3,43 @@
         var table;
 
         var profileTab = {
-             options : $.extend({
-             }, options),
+            options : $.extend({
+            }, options),
 
-             updatePage : function(userData) {
-                profileTab.updateTable(userData);
+            updatePage : function() {
+                if (table) {
+                    profileTab.updateTable();
+                } else {
+                    profileTab.createTable();
+                }
             },
 
-            updateTable : function(userData) {
-                //dataTable is using the old API, may need to look into if there is a newer way to do this
-                var oldTable = $('#profile_table').dataTable();
-                oldTable.fnDestroy();
-
-                var tableBody = $("#profile_table tbody")[0]; //grab the DOM element (0 indexed element of a jQuery object)
-                tableBody.innerHTML = "";
-
-                var rows = profileTab.buildTable(userData);
-                Utility.insertEntireTableBody($('#profile_table tbody')[0], rows);
-
+            //TODO probably a better way to do this with DataTables
+            createTable : function() {
                 table = $('#profile_table').DataTable();
+                var rows = profileTab.buildTable();
+                table.rows.add(rows);
+                table.draw(false);
             },
 
-            getTable : function() {
-                return table;
+            updateTable : function() {
+                table.rows().every( function () {
+                    var d = this.data();
+
+                    d.counter++; // update data source for the row
+
+                    this.invalidate(); // invalidate the data DataTables has cached for this row
+                    var symbol = d[0];
+                    //TODO: some reason the table redraws on "this.data(row data here)" as well
+                    //Seems like a datatable bug. Should only be redrawing on table.draw(false);
+                    this.data(profileTab.getRow(symbol));
+                } );
+
+                table.draw(false);
             },
 
-            /**
-            *   Builds the profile table and returns the rows in a 2d array
-            *   where each array represents a row in the table.
-            *
-            *   userData - an object containing user data
-            */
-            buildTable : function(userData) {
-                if (userData == undefined || userData.stocks_owned == undefined) return [];
-
-                var rows = new Array();
-
-                var keys = Object.keys(userData.stocks_owned);
-                for (var i = 0; i < keys.length; i++) {
-                    var symbol = keys[i];
-                    var symbolData = userData.stocks_owned[symbol];
+            getRow : function(symbol) {
+                    var symbolData = userInfo.stocks_owned[symbol];
                     var pricesBought = Object.keys(symbolData);
                     var totalPriceBought = 0;
                     var totalQuantity = 0;
@@ -67,19 +64,37 @@
 
                     var row = [symbol, totalQuantity, avgPrice, currentPrice, priceDifference, percentDifference,
                     dayPriceDifference, dayPercentDifference, totalPriceBought, currentTotalValue]
+
+                    return row;
+            },
+
+            getTable : function() {
+                return table;
+            },
+
+            /**
+            *   Builds the profile table and returns the rows in a 2d array
+            *   where each array represents a row in the table.
+            */
+            buildTable : function() {
+                var rows = new Array();
+
+                var keys = Object.keys(userInfo.stocks_owned);
+                for (var i = 0; i < keys.length; i++) {
+                    var symbol = keys[i];
+                    var row = profileTab.getRow(symbol);
                     rows.push(row);
                 }
 
                 return rows;
             },
          }
+
          return {
             update : profileTab.updatePage,
             getTable : profileTab.getTable,
         };
     }
-
-
 })(jQuery);
 
 var ProfileTab = $.ProfileTab();

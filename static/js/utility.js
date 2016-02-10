@@ -100,6 +100,7 @@ var stockSymbolsMap;
             isPositiveInteger : utility.isPositiveInteger,
             getPercentDifference : utility.getPercentDifference,
             insertEntireTableBody : utility.insertEntireTableBody,
+            replaceAll : utility.replaceAll,
         };
     };
 })(jQuery);

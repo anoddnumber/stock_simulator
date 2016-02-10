@@ -1,3 +1,7 @@
+var config = {
+    numMinutesToUpdate : .1,
+};
+
 /**
 * The API Client contains methods to help call the backend API.
 */
@@ -159,6 +163,7 @@
             updateCache : function(onSuccess) {
                 $.ajax("/stockSymbolsMap", {
                     success : function(data) {
+                        console.log("got the new cache");
                         stockSymbolsMap = data.stockSymbolsMap;
                         var delay = data.delay;
 
@@ -175,7 +180,7 @@
                             onSuccess();
                         }
 
-                        BrowseTab.displayStocks(Object.keys(stockSymbolsMap));
+                        BrowseTab.updatePage();
                     },
                     error : function() {
                         console.log("error, did not get the stock symbols map");

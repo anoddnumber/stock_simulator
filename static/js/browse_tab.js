@@ -1,7 +1,3 @@
-var config = {
-    numMinutesToUpdate : 5,
-};
-
 /**
 * This defines an anonymous function that is executed right away with jQuery as the argument.
 */
@@ -14,31 +10,36 @@ var config = {
             options : $.extend({
             }, options),
 
-            /**
-             * Displays all of the given stock symbols in a paginated view.
-             *
-             * stockSymbols - an array of stock symbols (that are strings)
-             */
-            displayStocks : function(stockSymbols) {
-                var oldTable = $('#stocks_table').dataTable();
-                oldTable.fnDestroy();
-
-                var tableBody = $('#stocks_table tbody')[0]; //grab the DOM element (0 indexed element of a jQuery object)
-                tableBody.innerHTML = "";
-
-                var rows = browseTab.buildTable(stockSymbols);
-                Utility.insertEntireTableBody($('#stocks_table tbody')[0], rows);
-
-                for (var i = 0; i < buttonSymbols.length; i++) {
-                    var symbol = buttonSymbols[i];
-                    browseTab.enableButton(symbol);
+            updatePage : function() {
+                if (table) {
+                    browseTab.updateTable();
+                } else {
+                    browseTab.createTable();
                 }
-
-                table = $('#stocks_table').DataTable();
             },
 
-            getTable : function() {
-                return table;
+            //TODO probably a better way to do this with DataTables
+            createTable : function() {
+                table = $('#stocks_table').DataTable();
+                var rows = browseTab.buildTable();
+                table.rows.add(rows);
+                table.draw(false);
+            },
+
+            updateTable : function() {
+                table.rows().every( function () {
+                    var d = this.data();
+
+                    d.counter++; // update data source for the row
+
+                    this.invalidate(); // invalidate the data DataTables has cached for this row
+                    var symbol = d[0];
+                    //TODO: some reason the table redraws on "this.data(row data here)" as well
+                    //Seems like a datatable bug. Should only be redrawing on table.draw(false);
+                    this.data(browseTab.getRow(symbol));
+                } );
+
+                table.draw(false);
             },
 
             enableButton: function(symbol) {
@@ -49,28 +50,37 @@ var config = {
                 });
             },
 
+            getRow : function(symbol) {
+                var info = stockSymbolsMap[symbol];
+                var name = info['name'];
+                var dailyPercentChange = info.daily_percent_change;
+                var dailyPriceChange = info.daily_price_change;
+                var price = info.price;
+
+                var buttonId = 'buy' + symbol + 'Button';
+                buttonSymbols.push(symbol);
+                var buyButton = '<button id="' + buttonId + '" type="button">Buy</button>';
+
+                var row = [symbol, name, dailyPercentChange, dailyPriceChange, price, buyButton];
+                return row;
+            },
+
+            getTable : function() {
+                return table;
+            },
+
             /**
             *   Builds the stocks table and returns the rows in a 2d array
             *   where each array represents a row in the table.
             *
             *   symbols - an array of stock symbols
             */
-            buildTable : function(symbols) {
+            buildTable : function() {
+                var symbols = Object.keys(stockSymbolsMap);
                 var rows = new Array();
                 for (var i = 0; i < symbols.length; i++) {
                     var symbol = symbols[i];
-
-                    var info = stockSymbolsMap[symbol];
-                    var name = info['name'];
-                    var dailyPercentChange = info.daily_percent_change;
-                    var dailyPriceChange = info.daily_price_change;
-                    var price = info.price;
-
-                    var buttonId = 'buy' + symbol + 'Button';
-                    buttonSymbols.push(symbol);
-                    var buyButton = '<button id="' + buttonId + '" type="button">Buy</button>';
-
-                    var row = [symbol, name, dailyPercentChange, dailyPriceChange, price, buyButton];
+                    var row = browseTab.getRow(symbol);
                     rows.push(row);
                 }
                 
@@ -87,7 +97,7 @@ var config = {
         }
 
         return {
-            displayStocks : browseTab.displayStocks,
+            updatePage : browseTab.updatePage,
             displaySortedArray : browseTab.displaySortedArray,
             getTable : browseTab.getTable,
         };

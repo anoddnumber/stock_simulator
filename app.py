@@ -130,7 +130,6 @@ def create_account():
                 'cash' : config.get('defaultCash'),
                 'stocks_owned' : {} }
     user = User(user_dict)
-    error = ''
 
     try:
         UsersDbAccess.create_user(user)
@@ -160,7 +159,7 @@ def login():
         template = env.get_template('index.html')
         return template.render(loginError='Email and password do not match up.')
 
-    if password == user.password:
+    if user.check_password(password):
         print 'Username and password match'
     else:
         print 'Wrong password'

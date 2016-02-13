@@ -21,8 +21,8 @@ class UsersDbAccess:
     @staticmethod
     def create_user(user):
         print 'createUser'
-        userInDB = UsersDbAccess.get_user_by_username(user.username)
-        if userInDB is not None:
+        user_in_db = UsersDbAccess.get_user_by_username(user.username)
+        if user_in_db is not None:
             print "User already exists. Choose another username."
             raise DuplicateUsernameError('Username already taken.')
         elif UsersDbAccess.get_user_by_email(user.email) is not None:

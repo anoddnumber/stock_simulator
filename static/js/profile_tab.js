@@ -103,6 +103,10 @@ $( document ).ready(function() {
     $('#profile_table tbody').on('click', 'tr', function(event) {
         table = ProfileTab.getTable();
         var data = table.row( this ).data();
+        if (! data) {
+            return;
+        }
+
         var symbol = data[0];
 
         StockInfoPage.populatePage(symbol, '#profile');

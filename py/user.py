@@ -48,5 +48,5 @@ class User():
                 "password" : self.password_hash,
                 "email" : self.email,
                 "cash" : self.cash,
-                "stocks" : self.stocks
+                "stocks_owned" : self.stocks
                 }

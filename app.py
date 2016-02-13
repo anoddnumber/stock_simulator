@@ -55,6 +55,7 @@ def the_app():
     else:
         user = UsersDbAccess.get_user_by_username(username)
         if user is None:
+            session.pop('username', None)
             return redirect(url_for('root'))
         else:
             cash = str(user.getRoundedCash())

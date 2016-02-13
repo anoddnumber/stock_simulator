@@ -36,7 +36,7 @@ class UsersDbAccess:
     def get_user_by_username(username):
         user_dict = UsersDbAccess.collection.find_one({"username": username})
         if user_dict is not None:
-            return User(user_dict)
+            return User(user_dict, True)
         print 'No user found with username ' + username
         return None
 
@@ -44,7 +44,7 @@ class UsersDbAccess:
     def get_user_by_email(email):
         user_dict = UsersDbAccess.collection.find_one({"email": email})
         if user_dict is not None:
-            return User(user_dict)
+            return User(user_dict, True)
         print 'No user found with email ' + email
         return None
 

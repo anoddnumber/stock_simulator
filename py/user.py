@@ -2,13 +2,16 @@ from decimal import Decimal
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class User():
-    def __init__(self, dict):
-        self._username = dict.get('username')
-        self._pw_hash = generate_password_hash(dict.get('password'))
-        self._email = dict.get('email')
-        self._cash = dict.get('cash')
-        self._stocks = dict.get('stocks_owned')
-        
+    def __init__(self, user_dict, load_from_db = False):
+        self._username = user_dict.get('username')
+        if load_from_db:
+            self._pw_hash = user_dict.get('password')
+        else:
+            self._pw_hash = generate_password_hash(user_dict.get('password'))
+        self._email = user_dict.get('email')
+        self._cash = user_dict.get('cash')
+        self._stocks = user_dict.get('stocks_owned')
+
     @property
     def username(self):
         return self._username

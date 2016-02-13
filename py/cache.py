@@ -53,23 +53,29 @@ class Cache:
     timeInMinutes - the number of minutes that should have passed before actually updating the cache
     returns the number of seconds until the next expected update
     """
-    def update(self, timeInMinutes = 0):
-        last_updated_date = self.getLastUpdatedDate()
+    def update(self, time_in_minutes = 0):
+        time_in_seconds = time_in_minutes * 60
+        try:
+            last_updated_date = self.getLastUpdatedDate()
+        except ValueError as e:
+            print 'last_updated_date has bad format - updating cache to fix it'
+            self.__updateCache()
+            return time_in_seconds
+
         if last_updated_date is not None:
-            print 'timeInMinutes: ' + str(timeInMinutes)
-            limit = datetime.timedelta(minutes = timeInMinutes)
+            limit = datetime.timedelta(minutes = time_in_minutes)
             difference = datetime.datetime.utcnow() - last_updated_date
 
             if difference > limit:
                 self.__updateCache()
-                return timeInMinutes * 60
+                return time_in_seconds
             else:
                 seconds = (limit - difference).total_seconds()
                 return seconds
         else:
             print 'no last_updated_date found'
             self.__updateCache()
-            return timeInMinutes * 60
+            return time_in_seconds
 
     """
     Finds what symbols should be updated. Updates the parsed_json field, which holds the cache data as a variable.

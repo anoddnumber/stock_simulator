@@ -141,7 +141,7 @@ var config = {
                         console.log("userInfo: " + JSON.stringify(userInfo));
 
                         //TODO: Update stocks in profile page
-                        ProfileTab.update(userInfo)
+                        ProfileTab.update();
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         console.log("error, did not retrieve user data");

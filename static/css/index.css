@@ -9,7 +9,7 @@ body {
     text-align: center;
 }
 
-#error {
+.error {
     padding: 10px;
     margin: auto;
     width: 40%;

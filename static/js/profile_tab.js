@@ -8,7 +8,12 @@
 
             updatePage : function() {
                 if (table) {
-                    profileTab.updateTable();
+                    var numRows = Object.keys(userInfo.stocks_owned).length;
+                    if (numRows != table.rows().count()) {
+                        profileTab.createTable();
+                    } else {
+                        profileTab.updateTable();
+                    }
                 } else {
                     profileTab.createTable();
                 }
@@ -17,9 +22,11 @@
             //TODO probably a better way to do this with DataTables
             createTable : function() {
                 table = $('#profile_table').DataTable();
+                table.clear();
+
                 var rows = profileTab.buildTable();
                 table.rows.add(rows);
-                table.draw(false);
+                table.draw(true);
             },
 
             updateTable : function() {

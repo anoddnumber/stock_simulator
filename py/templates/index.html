@@ -24,7 +24,7 @@
            The labels will not show up on the screen.
       -->
        <div class="container" id="loginDiv" {% if createAccountError is defined %} hidden {% endif %}>
-           <div class="alert alert-danger" role="alert" id="error" {% if loginError is not defined %} hidden {% endif %}>
+           <div class="alert alert-danger error" role="alert" {% if loginError is not defined %} hidden {% endif %}>
                {{loginError}}
            </div>
           <form class="form-signin" action="login" method="post">
@@ -45,7 +45,9 @@
        </div> <!-- /container -->
 
       <div class="container" id="createAccountDiv" {% if createAccountError is not defined %} hidden {% endif %}>
-          <div>{{createAccountError}}</div>
+          <div class="alert alert-danger error" role="alert" {% if createAccountError is not defined %} hidden {% endif %}>
+              {{createAccountError}}
+          </div>
           <form class="form-signin" action="createAccount" method="post">
 
             <label for="createAccountInputEmail" class="sr-only">Email address</label>

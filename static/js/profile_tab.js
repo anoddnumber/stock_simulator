@@ -107,6 +107,8 @@
 var ProfileTab = $.ProfileTab();
 
 $( document ).ready(function() {
+    $('#profile_table').DataTable();
+
     $('#profile_table tbody').on('click', 'tr', function(event) {
         table = ProfileTab.getTable();
         var data = table.row( this ).data();

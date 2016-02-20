@@ -9,15 +9,15 @@
             <th>Buy</th>
         </tr>
     </thead>
-    <tbody></tbody>
-    <tfoot>
+    <tbody>
+        <!-- TODO: This is kinda a hack to get the spinner in the table, should find a better way-->
         <tr>
-            <th>Symbol</th>
-            <th>Name</th>
-            <th>Daily Percent Change</th>
-            <th>Daily Price Change</th>
-            <th>Stock Price</th>
-            <th>Buy</th>
+            <td colspan="6">{% include 'loaders/spinner.html' %}</td>
+            <td hidden></td>
+            <td hidden></td>
+            <td hidden></td>
+            <td hidden></td>
+            <td hidden></td>
         </tr>
-    </tfoot>
+    </tbody>
 </table>

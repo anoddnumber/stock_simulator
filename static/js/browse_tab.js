@@ -21,6 +21,8 @@
             //TODO probably a better way to do this with DataTables
             createTable : function() {
                 table = $('#stocks_table').DataTable();
+                table.clear();
+
                 var rows = browseTab.buildTable();
                 table.rows.add(rows);
                 table.draw(false);
@@ -107,6 +109,8 @@
 var BrowseTab = $.BrowseTab();
 
 $( document ).ready(function() {
+    $('#stocks_table').DataTable();
+
     ApiClient.updateCache(function() {
         ApiClient.updateUserData();
     });

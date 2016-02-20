@@ -119,11 +119,19 @@ or raises an error if there is an issue.
 def create_account():
     username = request.form['username']
     password = request.form['password']
+    retype_password = request.form['retypePassword']
     email = request.form['email']
-    print username
-    print password
-    print email
+
+    #TODO remove print statements
     print "create_account()"
+    print "username: " + str(username)
+    print "email: " + str(email)
+    print "password: " + str(password)
+    print "retype password: " + str(retype_password)
+
+    if password is not retype_password:
+        template = env.get_template('index.html')
+        return template.render(createAccountError='Passwords do not match.')
 
     user_dict = {'username' : username,
                 'password' : password,

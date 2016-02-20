@@ -1,5 +1,6 @@
 import json
 import cgi
+import time
 
 from flask import Flask, session, redirect, request, jsonify, url_for
 from jinja2 import Environment, PackageLoader
@@ -108,6 +109,7 @@ def get_stock_symbol_map():
     delay = seconds_left + lenient_time
 
     info_dict = {'stockSymbolsMap' : cache.json, 'delay' : delay * 1000}
+    time.sleep(5)
     return jsonify(info_dict)
 
 """

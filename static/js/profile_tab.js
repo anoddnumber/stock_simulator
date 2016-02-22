@@ -107,7 +107,13 @@
 var ProfileTab = $.ProfileTab();
 
 $( document ).ready(function() {
-    $('#profile_table').DataTable();
+    $('#profile_table').DataTable({
+        "lengthChange" : false,
+        language: {
+            search: "_INPUT_", //Don't display any label left of the search box
+            searchPlaceholder: "Search"
+        }
+    });
 
     $('#profile_table tbody').on('click', 'tr', function(event) {
         table = ProfileTab.getTable();

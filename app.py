@@ -128,10 +128,11 @@ def create_account():
     print "create_account()"
     print "username: " + str(username)
     print "email: " + str(email)
-    print "password: " + str(password)
-    print "retype password: " + str(retype_password)
+    print "password: " + str(password) + ' random stuff'
+    print "retype password: " + str(retype_password) + ' random stuff'
 
-    if password is not retype_password:
+    # Use != instead of "is not" since we are comparing unicode, not strings
+    if password != retype_password:
         template = env.get_template('index.html')
         return template.render(createAccountError='Passwords do not match.')
 
@@ -293,6 +294,6 @@ def handle_invalid_usage(error):
     return response
             
 if __name__ == "__main__":
-    app.debug = True
+    app.debug = False
     toolbar = DebugToolbarExtension(app)
     app.run()

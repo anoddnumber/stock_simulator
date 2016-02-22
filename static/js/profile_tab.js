@@ -107,6 +107,10 @@
 var ProfileTab = $.ProfileTab();
 
 $( document ).ready(function() {
+    var profileTableContainer = $.MutuallyExclusiveContainer({
+        'selectors' : ['#profileTableContainer', '#profile .stockInfoPage']
+    });
+
     $('#profile_table').DataTable({
         "lengthChange" : false,
         language: {
@@ -125,14 +129,11 @@ $( document ).ready(function() {
         var symbol = data[0];
 
         StockInfoPage.populatePage(symbol, '#profile');
-
-        $('#profileTableContainer').hide();
-        $('#profile .stockInfoPage').show();
+        profileTableContainer.show('#profile .stockInfoPage');
     })
 
     $('#profile .stockInfoPageBackButton').click(function() {
-        $('#profileTableContainer').show();
-        $('#profile .stockInfoPage').hide();
+        profileTableContainer.show('#profileTableContainer');
     })
 
     StockInfoPage.setupButtons('#profile');

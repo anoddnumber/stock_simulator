@@ -109,6 +109,10 @@
 var BrowseTab = $.BrowseTab();
 
 $( document ).ready(function() {
+    var stocksTableContainer = $.MutuallyExclusiveContainer({
+        'selectors' : ['#stockTableContainer', '#stocks .stockInfoPage']
+    });
+
     $('#stocks_table').DataTable({
         "lengthChange" : false,
         language: {
@@ -151,14 +155,11 @@ $( document ).ready(function() {
         var symbol = data[0];
 
         StockInfoPage.populatePage(symbol, '#stocks');
-
-        $('#stockTableContainer').hide();
-        $('#stocks .stockInfoPage').show();
+        stocksTableContainer.show('#stocks .stockInfoPage');
     })
 
     $('#stocks .stockInfoPageBackButton').click(function() {
-        $('#stockTableContainer').show();
-        $('#stocks .stockInfoPage').hide();
+        stocksTableContainer.show('#stockTableContainer');
     })
 
     StockInfoPage.setupButtons('#stocks');

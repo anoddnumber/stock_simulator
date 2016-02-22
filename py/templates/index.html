@@ -32,65 +32,58 @@
             <p>Buy, Sell, Dominate.</p>
         </div>
 
-      <!-- Note: each input should have a label associated with it for screen readers (to assist the handicapped).
+        <!-- Note: each input should have a label associated with it for screen readers (to assist the handicapped).
            The labels will not show up on the screen.
-      -->
-       <div class="container" id="loginDiv" {% if createAccountError is defined %} hidden {% endif %}>
-           <div class="alert alert-danger error" role="alert" {% if loginError is not defined %} hidden {% endif %}>
+        -->
+        <div class="container" id="loginDiv" {% if createAccountError is defined %} hidden {% endif %}>
+            <div class="alert alert-danger error" role="alert" {% if loginError is not defined %} hidden {% endif %}>
                {{loginError}}
-           </div>
-          <form class="form-signin" action="login" method="post">
-
-            <label for="inputEmail" class="sr-only">Email address</label>
-            <input name="email" type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
-
-            <label for="inputPassword" class="sr-only">Password</label>
-            <input name="password" type="password" id="inputPassword" class="form-control" placeholder="Password" required>
-
-            <div class="checkbox">
-              <label>
-                <input type="checkbox" value="remember-me"> Remember me
-              </label>
             </div>
-            <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
-          </form>
-       </div> <!-- /container -->
+            <form class="form-signin" action="login" method="post">
+                <label for="inputEmail" class="sr-only">Email address</label>
+                <input name="email" type="email" id="inputEmail" class="form-control" placeholder="Email address" required autofocus>
 
-      <div class="container" id="createAccountDiv" {% if createAccountError is not defined %} hidden {% endif %}>
-          <div class="alert alert-danger error" role="alert" {% if createAccountError is not defined %} hidden {% endif %}>
+                <label for="inputPassword" class="sr-only">Password</label>
+                <input name="password" type="password" id="inputPassword" class="form-control" placeholder="Password" required>
+
+                <div class="checkbox">
+                    <label>
+                        <input type="checkbox" value="remember-me"> Remember me
+                    </label>
+                </div>
+                <button class="btn btn-lg btn-primary btn-block" type="submit">Sign in</button>
+            </form>
+            <a id="createAccountLink" href="#">
+            Don't have an account? Create one here.
+            </a>
+            <a id="forgotPasswordLink" href="#">
+            Forgot password?
+            </a>
+        </div> <!-- /container -->
+
+        <div class="container" id="createAccountDiv" {% if createAccountError is not defined %} hidden {% endif %}>
+            <div class="alert alert-danger error" role="alert" {% if createAccountError is not defined %} hidden {% endif %}>
               {{createAccountError}}
-          </div>
-          <form class="form-signin" action="createAccount" method="post">
+            </div>
+            <form class="form-signin" action="createAccount" method="post">
+                <label for="createAccountInputEmail" class="sr-only">Email address</label>
+                <input name="email" type="email" id="createAccountInputEmail" class="form-control" placeholder="Email address" required autofocus>
 
-            <label for="createAccountInputEmail" class="sr-only">Email address</label>
-            <input name="email" type="email" id="createAccountInputEmail" class="form-control" placeholder="Email address" required autofocus>
+                <label for="inputUsername" class="sr-only">Username</label>
+                <input name="username" id="inputUsername" class="form-control" placeholder="Username" required>
 
-            <label for="inputUsername" class="sr-only">Username</label>
-            <input name="username" id="inputUsername" class="form-control" placeholder="Username" required>
+                <label for="createAccountInputPassword" class="sr-only">Password</label>
+                <input name="password" type="password" id="createAccountInputPassword" class="form-control" placeholder="Password" required>
 
-            <label for="createAccountInputPassword" class="sr-only">Password</label>
-            <input name="password" type="password" id="createAccountInputPassword" class="form-control" placeholder="Password" required>
+                <label for="retypePassword" class="sr-only">Retype Password</label>
+                <input name="retypePassword" type="password" id="retypePassword" class="form-control" placeholder="Retype Password" required>
 
-            <label for="retypePassword" class="sr-only">Retype Password</label>
-            <input name="retypePassword" type="password" id="retypePassword" class="form-control" placeholder="Retype Password" required>
-
-            <button id="createAccountButton" class="btn btn-lg btn-primary btn-block" type="submit">Create Account</button>
-          </form>
-       </div> <!-- /container -->
-
-       <div>
-           <div id="accountLinks" {% if createAccountError is defined %} hidden {% endif %}>
-             <a id="createAccountLink" href="#">
-              Don't have an account? Create one here.
-             </a>
-             <a id="forgotPasswordLink" href="#">
-               Forgot password?
-             </a>
-           </div>
-           <a id="loginLink" href="#" {% if createAccountError is not defined %} hidden {% endif %}>
+                <button id="createAccountButton" class="btn btn-lg btn-primary btn-block" type="submit">Create Account</button>
+            </form>
+            <a id="loginLink" href="#">
              Already have an account? Login here.
-           </a>
-       </div>
+            </a>
+       </div> <!-- /container -->
     </div>
 
     <!-- Bootstrap core CSS -->
@@ -104,5 +97,6 @@
     <!-- Placed at the end of the document so the pages load faster -->
     <script src="../../bootstrap-3.3.6/dist/js/bootstrap.min.js"></script>
     <script src="js/login_page.js"></script>
+    <script src="js/mutually_exclusive_container.js"></script>
   </body>
 </html>

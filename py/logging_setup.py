@@ -22,4 +22,4 @@ def setup(
         logging.config.dictConfig(config)
     else:
         print "path does not exist"
-        logging.basicConfig(level=default_level)
+        logging.basicConfig(level=default_level) #prints to standard out

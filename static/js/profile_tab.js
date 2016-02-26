@@ -107,7 +107,17 @@
 var ProfileTab = $.ProfileTab();
 
 $( document ).ready(function() {
-    $('#profile_table').DataTable();
+    var profileTableContainer = $.MutuallyExclusiveContainer({
+        'selectors' : ['#profileTableContainer', '#profile .stockInfoPage']
+    });
+
+    $('#profile_table').DataTable({
+        "lengthChange" : false,
+        language: {
+            search: "_INPUT_", //Don't display any label left of the search box
+            searchPlaceholder: "Search"
+        }
+    });
 
     $('#profile_table tbody').on('click', 'tr', function(event) {
         table = ProfileTab.getTable();
@@ -119,14 +129,11 @@ $( document ).ready(function() {
         var symbol = data[0];
 
         StockInfoPage.populatePage(symbol, '#profile');
-
-        $('#profileTableContainer').hide();
-        $('#profile .stockInfoPage').show();
+        profileTableContainer.show('#profile .stockInfoPage');
     })
 
     $('#profile .stockInfoPageBackButton').click(function() {
-        $('#profileTableContainer').show();
-        $('#profile .stockInfoPage').hide();
+        profileTableContainer.show('#profileTableContainer');
     })
 
     StockInfoPage.setupButtons('#profile');

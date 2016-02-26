@@ -4,7 +4,22 @@
 
 <title>Stock Simulator</title>
 
-<body>
+<head>
+    <!--Code to prevent flash of unstyled content-->
+    <style type="text/css">
+      .js #flash {display: none;}
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script type="text/javascript">
+      $('html').addClass('js');
+      $(document).ready(function() {
+        // Stuff to do as soon as the DOM is ready
+        $('#flash').show();
+      });
+    </script>
+</head>
+
+<body id="flash">
 <div id="stock_simulator">
     <nav class="navbar navbar-default" role="navigation">
         <!-- Brand and toggle get grouped for better mobile display -->
@@ -78,7 +93,6 @@
 
     <!-- Include all the necessary files that the html pages requires-->
     <!-- TODO: Find a better way to import all the js files-->
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
 
     <!-- DataTables -->
     <script type="text/javascript" language="javascript" src="../../DataTables/datatables.min.js"></script>
@@ -90,6 +104,7 @@
     <script src="js/browse_tab.js"></script>
     <script src="js/utility.js"></script>
     <script src="js/stock_info_page.js"></script>
+    <script src="js/mutually_exclusive_container.js"></script>
 
     <!-- Bootstrap -->
     <script src="bootstrap-3.3.6/dist/js/bootstrap.js"></script>

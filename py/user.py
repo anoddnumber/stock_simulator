@@ -1,7 +1,7 @@
 from decimal import Decimal
 from werkzeug.security import generate_password_hash, check_password_hash
 
-class User():
+class User:
     def __init__(self, user_dict, load_from_db = False):
         self._username = user_dict.get('username')
         if load_from_db:
@@ -11,6 +11,11 @@ class User():
         self._email = user_dict.get('email')
         self._cash = user_dict.get('cash')
         self._stocks = user_dict.get('stocks_owned')
+
+    def __str__(self):
+        user_dictionary = self.get_dict()
+        user_dictionary.pop("password", None)
+        return str(user_dictionary)
 
     @property
     def username(self):
@@ -35,14 +40,14 @@ class User():
     def stocks(self):
         return self._stocks
     
-    def getRoundedCash(self):
+    def get_rounded_cash(self):
         if self.cash is None:
             return None
         cash = Decimal(self.cash)
         cash = '{:.2f}'.format(round(cash, 2))
         return cash
     
-    def getDict(self):
+    def get_dict(self):
         return {
                 "username" : self.username,
                 "password" : self.password_hash,

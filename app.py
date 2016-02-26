@@ -11,6 +11,8 @@ from py.user import User
 from py.exceptions.invalid_usage import InvalidUsage
 from py.cache import Cache
 from py.exceptions.create_account_errors import *
+import py.logging_setup
+import logging
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='')
@@ -23,12 +25,15 @@ The root page where the user logs into the application
 """
 @app.route("/", methods=['GET'])
 def root():
+    logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
     username = session.get('username')
-    print username
     if username is None:
+        logger.info("User that is not logged in is at the login page.")
         template = env.get_template('index.html')
         return template.render()
     else:
+        logger.info("Logged in user with username " + str(username) +
+                    " is accessing the login page. Redirecting to the stock simulator.")
         return redirect(url_for('the_app'))
 
 """
@@ -38,6 +43,9 @@ Returns a page where the user can buy/sell stocks as well as information regardi
 def stock_info():
     symbol = cgi.escape(request.args.get('symbol'))
     price = get_stock_info_helper([symbol])
+
+    logger.info("Retrieving information for stock with symbol " + str(symbol) +
+                "and price " + str(price))
 
     template = env.get_template('stock_info_page.html')
     return template.render(symbol=symbol, price=price)
@@ -49,19 +57,20 @@ The application. Redirects to the root page if the user is not logged in.
 @app.route("/theApp", methods=['GET'])
 def the_app():
     username = session.get('username')
-
-    print username
     if username is None:
+        logger.info("User not logged in, redirecting to login page.")
         return redirect(url_for('root'))
     else:
         user = UsersDbAccess.get_user_by_username(username)
         if user is None:
+            logger.error("User with username " + str(username) +
+                         " has session cookie but is not found in the database." +
+                         " Redirecting back to the login page.")
             session.pop('username', None)
             return redirect(url_for('root'))
-        else:
-            cash = str(user.getRoundedCash())
-
+    cash = str(user.get_rounded_cash())
     username = cgi.escape(username)
+    logger.info("User with username " + str(username) + " has been found in the database.")
     template = env.get_template('simulator.html') #TODO change name
     return template.render(username=username, cash=cash)
 
@@ -79,6 +88,7 @@ The stock prices will be returned in the same order as the arguments, delimited 
 @app.route("/info", methods=['GET'])
 def get_stock_info():
     symbols = request.args.get('symbols')
+    logger.info("Retrieving information for stock symbols " + str(symbols))
     if symbols is None:
         return 'No symbols were in the get request'
     return get_stock_info_helper([x.strip() for x in symbols.split(',')])
@@ -102,13 +112,14 @@ TODO: retrieve the NASDAQ file daily (currently called stock_symbols.txt) and ge
 """
 @app.route("/stockSymbolsMap", methods=['GET'])
 def get_stock_symbol_map():
-    print "getStockSymbolMap"
+    logger.info("Retrieving the stockSymbolsMap")
     seconds_left = cache.update(5)
 
     lenient_time = 2 #give extra time for the server to update before the client calls again
     delay = seconds_left + lenient_time
 
     info_dict = {'stockSymbolsMap' : cache.json, 'delay' : delay * 1000}
+
     time.sleep(5)
     return jsonify(info_dict)
 
@@ -124,14 +135,12 @@ def create_account():
     retype_password = request.form['retypePassword']
     email = request.form['email']
 
-    #TODO remove print statements
-    print "create_account()"
-    print "username: " + str(username)
-    print "email: " + str(email)
-    print "password: " + str(password)
-    print "retype password: " + str(retype_password)
+    logger.info("User trying to create an account with username " + str(username) +
+                 " and email " + str(email))
 
-    if password is not retype_password:
+    # Use != instead of "is not" since we are comparing unicode, not strings
+    if password != retype_password:
+        logger.info("User tried creating an account but failed because passwords didn't match")
         template = env.get_template('index.html')
         return template.render(createAccountError='Passwords do not match.')
 
@@ -145,9 +154,11 @@ def create_account():
     try:
         UsersDbAccess.create_user(user)
     except DuplicateUsernameError:
+        logger.info("User tried creating an account but failed because username " + str(username) + " already exists")
         template = env.get_template('index.html')
         return template.render(createAccountError='Username already taken.')
     except DuplicateEmailError:
+        logger.info("User tried creating an account but failed because " + str(email) + " already exists")
         template = env.get_template('index.html')
         return template.render(createAccountError='Email already taken.')
     session['username'] = user.username
@@ -159,21 +170,20 @@ TODO: Cookies
 """
 @app.route("/login", methods=['POST'])
 def login():
-    print 'login'
-    print "request: " + str(request)
     email = request.form['email']
     user = UsersDbAccess.get_user_by_email(email)
+    logger.info("User: " + str(user) + " tried logging in")
 
     password = request.form['password']
     if not user:
-        print 'User does not exist'
+        logger.info("User tried logging in with email " + str(email) + " but failed because no user exists for the email")
         template = env.get_template('index.html')
         return template.render(loginError='Email and password do not match up.')
 
     if user.check_password(password):
-        print 'Username and password match'
+        logger.info("Password matches, login successful.")
     else:
-        print 'Wrong password'
+        logger.info("Login failed, password incorrect.")
         template = env.get_template('index.html')
         return template.render(loginError='Email and password do not match up.')
 
@@ -186,21 +196,22 @@ Logs the user out.
 """
 @app.route("/logout", methods=['POST'])
 def logout():
-    print 'logout'
+    username = session.get('username')
+    logger.info("User " + str(username) + " logging out")
+
     session.pop('username', None)
     return redirect(url_for('root'))
 
-
 @app.route("/buyStock", methods=['POST'])
 def buy_stock():
-    print 'buyStock'
-    
     username = session.get('username')
     if username is None:
+        logger.warning("Non-logged in user tried buying stock")
         return 'Not logged in, cannot buy stock.'
     
     user = UsersDbAccess.get_user_by_username(username)
     if user is None:
+        logger.warning("User trying to buy stock has session, but has no record in database with username " + str(username))
         return 'User with username ' + username + ' not found in database.'
 
     try:
@@ -211,39 +222,52 @@ def buy_stock():
         return "Error reading arguments"
     
     if symbol is None or quantity is None or stock_price is None:
+        logger.warning("Missing argument when buying stock:\n" +
+                       "symbol: " + str(symbol) + ", " +
+                       "quantity: " + str(quantity) + ", " +
+                       "stock_price: " + str(stock_price))
         return 'Missing at least one argument: symbol, quantity, stockPrice required. No optional arguments.'
 
     # check if the price that the user wants to buy the stock for is the same as the server's stock price
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
-       return "Invalid symbol"
+        logger.warning("User tried to buy stock with symbol " + str(symbol) + " but is not in the stocks map")
+        return "Invalid symbol"
     server_stock_price = float(symbol_map.get("price"))
 
     if stock_price != server_stock_price:
-       return "Stock price changed, please try again."
+        logger.warning("User tried to buy the stock at price " + str(stock_price) + " but the server stock price was " + str(server_stock_price))
+        return "Stock price changed, please try again."
     
     # check if quantity is a positive integer
     if stock_price < 0 or quantity < 0:
+        logger.warning("The stock price is either less than 0 or the user tried to buy a negative amount of stock")
+        logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
         return "stock price or quantity less than 0"
         
     total_cost = quantity * stock_price
     # check that the user has enough cash to buy the stocks requested
     if total_cost >= user.cash:
+        logger.warning("User " + str(username) + " tried to buy more stocks than he/she can afford")
+        logger.warning("total_cost: " + str(total_cost) + ", user.cash: " + str(user.cash))
         return "Not enough cash"
-    
+
+    logger.info("User " + str(username) + " passed all validation for buying " + str(quantity) + " stocks with symbol " + str(symbol) +
+               " at a stock price of " + stock_price + ", totaling a cost of " + str(total_cost))
     # buy the stock
     return UsersDbAccess.addStockToUser(user.username, symbol, stock_price, quantity)
-
 
 @app.route("/sellStock", methods=['POST'])
 def sell_stock():
     username = session.get('username')
     if username is None:
+        logger.warning("Non-logged in user tried selling stock")
         return 'Not logged in, cannot sell stock.' 
     
     user = UsersDbAccess.get_user_by_username(username)
     if user is None:
+        logger.warning("User trying to sell stock has session, but has no record in database with username " + str(username))
         return 'User with username ' + username + ' not found in database.'
 
     try:
@@ -254,32 +278,47 @@ def sell_stock():
         return "Error reading arguments"
     
     if symbol is None or quantity is None or stock_price is None:
+        logger.warning("Missing argument when selling stock:\n" +
+                       "symbol: " + str(symbol) + ", " +
+                       "quantity: " + str(quantity) + ", " +
+                       "stock_price: " + str(stock_price))
         return 'Missing at least one argument: symbol, quantity, stockPrice required. No optional arguments.'
 
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
+        logger.warning("User tried to sell stock with symbol " + str(symbol) + " but is not in the stocks map")
         return "Invalid symbol"
     server_stock_price = float(symbol_map.get("price"))
 
     if stock_price < 0 or quantity < 0:
+        logger.warning("User " + str(username) + " tried to sell a negative amount of stock or for a negative price")
+        logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
         return "stock price or quantity less than 0"
 
     if stock_price != server_stock_price:
+        logger.warning("User tried to sell the stock at price " + str(stock_price) + " but the server stock price was " + str(server_stock_price))
         return "Stock price changed, please try again."
 
+    logger.info("User " + str(username) + " passed all validations for selling " + str(quantity) + " stocks with symbol " + str(symbol) +
+               " at a stock price of " + stock_price)
     # sell the stock
     return UsersDbAccess.sell_stocks_from_user(username, symbol, quantity, cache)
 
+#TODO Logging
 @app.route("/getUserInfo", methods=['GET'])
 def get_user_info():
     username = session.get('username')
     if username is None:
+        logger.warning("Non-logged in user tried getting user information")
         return 'Not logged in, cannot retrieve information.'
     user = UsersDbAccess.get_user_by_username(username)
     if user is None:
+        logger.warning("User trying to get user information, but has no record in database with username " + str(username))
         return 'Could not find the current user in the database.'
-    user_dict = {'cash' : user.getRoundedCash(), 'stocks_owned' : user.stocks}
+    user_dict = {'cash' : user.get_rounded_cash(), 'stocks_owned' : user.stocks}
+    logger.info("Returning user information for " + str(username))
+    logger.info("user_dict: " + str(user_dict))
     return json.dumps(user_dict, sort_keys=True)
 
 """
@@ -293,6 +332,9 @@ def handle_invalid_usage(error):
     return response
             
 if __name__ == "__main__":
-    app.debug = True
+    app.debug = False
     toolbar = DebugToolbarExtension(app)
+    py.logging_setup.setup()
+    logger = logging.getLogger()
+    logger.info("Starting server")
     app.run()

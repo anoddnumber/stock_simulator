@@ -29,7 +29,7 @@ class UsersDbAccess:
             print "Account already exists for the given email."
             raise DuplicateEmailError('Account already exists for the given email.')
         else:
-            UsersDbAccess.collection.insert_one(user.getDict())
+            UsersDbAccess.collection.insert_one(user.get_dict())
         return "Successful"
 
     @staticmethod

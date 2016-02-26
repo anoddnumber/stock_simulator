@@ -3,27 +3,9 @@
         var loginPage = {
              options : $.extend({
              }, options),
-
-             showCreateAccount : function() {
-                $('#accountLinks').hide();
-                $('#loginLink').show();
-
-                $('#loginDiv').hide();
-                $('#createAccountDiv').show();
-             },
-
-             showLogin : function() {
-                $('#loginLink').hide();
-                $('#accountLinks').show();
-
-                $('#createAccountDiv').hide();
-                $('#loginDiv').show();
-             },
         }
 
         return {
-            showCreateAccount : loginPage.showCreateAccount,
-            showLogin : loginPage.showLogin,
         };
     }
 })(jQuery);
@@ -31,13 +13,18 @@
 var LoginPage = $.LoginPage();
 
 $( document ).ready(function() {
+
+    var loginPageContainer = $.MutuallyExclusiveContainer({
+        'selectors' : ['#loginDiv', '#createAccountDiv']
+    });
+
     $("#loginLink").click(function(e) {
         e.preventDefault();
-        LoginPage.showLogin();
+        loginPageContainer.show('#loginDiv');
     })
 
     $("#createAccountLink").click(function(e) {
         e.preventDefault();
-        LoginPage.showCreateAccount();
+        loginPageContainer.show('#createAccountDiv');
     })
 });

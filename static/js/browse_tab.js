@@ -109,7 +109,17 @@
 var BrowseTab = $.BrowseTab();
 
 $( document ).ready(function() {
-    $('#stocks_table').DataTable();
+    var stocksTableContainer = $.MutuallyExclusiveContainer({
+        'selectors' : ['#stockTableContainer', '#stocks .stockInfoPage']
+    });
+
+    $('#stocks_table').DataTable({
+        "lengthChange" : false,
+        language: {
+            search: "_INPUT_", //Don't display any label left of the search box
+            searchPlaceholder: "Search"
+        }
+    });
 
     ApiClient.updateCache(function() {
         ApiClient.updateUserData();
@@ -145,14 +155,11 @@ $( document ).ready(function() {
         var symbol = data[0];
 
         StockInfoPage.populatePage(symbol, '#stocks');
-
-        $('#stockTableContainer').hide();
-        $('#stocks .stockInfoPage').show();
+        stocksTableContainer.show('#stocks .stockInfoPage');
     })
 
     $('#stocks .stockInfoPageBackButton').click(function() {
-        $('#stockTableContainer').show();
-        $('#stocks .stockInfoPage').hide();
+        stocksTableContainer.show('#stockTableContainer');
     })
 
     StockInfoPage.setupButtons('#stocks');

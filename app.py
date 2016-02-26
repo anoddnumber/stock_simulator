@@ -120,7 +120,7 @@ def get_stock_symbol_map():
 
     info_dict = {'stockSymbolsMap' : cache.json, 'delay' : delay * 1000}
 
-    # time.sleep(5)
+    time.sleep(5)
     return jsonify(info_dict)
 
 """
@@ -253,20 +253,21 @@ def buy_stock():
         logger.warning("total_cost: " + str(total_cost) + ", user.cash: " + str(user.cash))
         return "Not enough cash"
 
-    logger.info("User " + str(username) + " successfully bought " + str(quantity) + " stocks with symbol " + str(symbol) +
+    logger.info("User " + str(username) + " passed all validation for buying " + str(quantity) + " stocks with symbol " + str(symbol) +
                " at a stock price of " + stock_price + ", totaling a cost of " + str(total_cost))
     # buy the stock
     return UsersDbAccess.addStockToUser(user.username, symbol, stock_price, quantity)
 
-#TODO Logging
 @app.route("/sellStock", methods=['POST'])
 def sell_stock():
     username = session.get('username')
     if username is None:
+        logger.warning("Non-logged in user tried selling stock")
         return 'Not logged in, cannot sell stock.' 
     
     user = UsersDbAccess.get_user_by_username(username)
     if user is None:
+        logger.warning("User trying to sell stock has session, but has no record in database with username " + str(username))
         return 'User with username ' + username + ' not found in database.'
 
     try:
@@ -277,20 +278,30 @@ def sell_stock():
         return "Error reading arguments"
     
     if symbol is None or quantity is None or stock_price is None:
+        logger.warning("Missing argument when selling stock:\n" +
+                       "symbol: " + str(symbol) + ", " +
+                       "quantity: " + str(quantity) + ", " +
+                       "stock_price: " + str(stock_price))
         return 'Missing at least one argument: symbol, quantity, stockPrice required. No optional arguments.'
 
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
+        logger.warning("User tried to sell stock with symbol " + str(symbol) + " but is not in the stocks map")
         return "Invalid symbol"
     server_stock_price = float(symbol_map.get("price"))
 
     if stock_price < 0 or quantity < 0:
+        logger.warning("User " + str(username) + " tried to sell a negative amount of stock or for a negative price")
+        logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
         return "stock price or quantity less than 0"
 
     if stock_price != server_stock_price:
+        logger.warning("User tried to sell the stock at price " + str(stock_price) + " but the server stock price was " + str(server_stock_price))
         return "Stock price changed, please try again."
 
+    logger.info("User " + str(username) + " passed all validations for selling " + str(quantity) + " stocks with symbol " + str(symbol) +
+               " at a stock price of " + stock_price)
     # sell the stock
     return UsersDbAccess.sell_stocks_from_user(username, symbol, quantity, cache)
 
@@ -299,11 +310,15 @@ def sell_stock():
 def get_user_info():
     username = session.get('username')
     if username is None:
+        logger.warning("Non-logged in user tried getting user information")
         return 'Not logged in, cannot retrieve information.'
     user = UsersDbAccess.get_user_by_username(username)
     if user is None:
+        logger.warning("User trying to get user information, but has no record in database with username " + str(username))
         return 'Could not find the current user in the database.'
     user_dict = {'cash' : user.get_rounded_cash(), 'stocks_owned' : user.stocks}
+    logger.info("Returning user information for " + str(username))
+    logger.info("user_dict: " + str(user_dict))
     return json.dumps(user_dict, sort_keys=True)
 
 """
@@ -321,4 +336,5 @@ if __name__ == "__main__":
     toolbar = DebugToolbarExtension(app)
     py.logging_setup.setup()
     logger = logging.getLogger()
+    logger.info("Starting server")
     app.run()

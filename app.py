@@ -101,7 +101,7 @@ def get_stock_info_helper(symbols):
     if symbols is None:
         return None
     cache.update(5)
-    return cache.getStockPrices(symbols)
+    return cache.get_stock_prices(symbols)
 
 """
 This service returns a json formatted string whose keys are available stock symbols

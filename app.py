@@ -17,7 +17,6 @@ import logging
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='')
 app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
-cache = Cache()
 config = {'defaultCash' : 50000}
 
 """
@@ -335,6 +334,7 @@ if __name__ == "__main__":
     app.debug = False
     toolbar = DebugToolbarExtension(app)
     py.logging_setup.setup()
-    logger = logging.getLogger()
+    logger = logging.getLogger(__name__)
+    cache = Cache()
     logger.info("Starting server")
     app.run()

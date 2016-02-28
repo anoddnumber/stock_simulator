@@ -70,8 +70,14 @@ class UsersDbAccess:
 
         update = {}
         update[key] = int(num_stocks_owned) + quantity
-        update["cash"] = float(user_dict['cash']) - total_cost
+        update["cash"] = round(float(user_dict['cash']) - total_cost, 2)
+
+        self.logger.info("Updating the database for a buy transaction for username " + username)
+        self.logger.info("update: " + str(update))
+
         UsersDbAccess.collection.update({"username": username}, {"$set" : update})
+
+        self.logger.info("Stock(s) bought successfully")
         return "success"
 
     '''
@@ -122,9 +128,11 @@ class UsersDbAccess:
         update = {}
         update[key] = user_dict['stocks_owned']
 
-        update["cash"] = float(user_dict['cash']) + quantity * float(cache.get_stock_price(symbol))
-        self.logger.info("Updating the database for username " + username)
+        update["cash"] = round(float(user_dict['cash']) + quantity * float(cache.get_stock_price(symbol)), 2)
+
+        self.logger.info("Updating the database for a sell transaction for username " + username)
         self.logger.info("update: " + str(update))
+
         UsersDbAccess.collection.update({"username": username}, {"$set" : update})
 
         self.logger.info("Stock(s) sold successfully")

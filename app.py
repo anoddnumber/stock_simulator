@@ -35,14 +35,6 @@ def root():
                     " is accessing the login page. Redirecting to the stock simulator.")
         return redirect(url_for('the_app'))
 
-@application.route("/abc", methods=['GET'])
-def abc():
-    print "abc"
-    logger.info("log")
-    username = session.get('username')
-    print "hi"
-    return "some cool test"
-
 """
 Returns a page where the user can buy/sell stocks as well as information regarding the stock.
 """
@@ -312,7 +304,6 @@ def sell_stock():
     # sell the stock
     return users_db_access.sell_stocks_from_user(username, symbol, quantity, cache)
 
-#TODO Logging
 @application.route("/getUserInfo", methods=['GET'])
 def get_user_info():
     username = session.get('username')

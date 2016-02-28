@@ -2,7 +2,7 @@ from pymongo import MongoClient
 from py.exceptions.create_account_errors import DuplicateEmailError, DuplicateUsernameError
 
 from user import User
-from py.exceptions.invalid_usage import InvalidUsage
+import logging
 
 
 class DbAccess:
@@ -18,50 +18,59 @@ class UsersDbAccess:
     collectionName = "users"
     collection = db[collectionName]
 
-    @staticmethod
-    def create_user(user):
-        print 'createUser'
+    def __init__(self):
+        self.logger = logging.getLogger(__name__)
+
+    def create_user(self, user):
+        self.logger.info("Creating user: " + str(user))
         user_in_db = UsersDbAccess.get_user_by_username(user.username)
         if user_in_db is not None:
-            print "User already exists. Choose another username."
             raise DuplicateUsernameError('Username already taken.')
         elif UsersDbAccess.get_user_by_email(user.email) is not None:
-            print "Account already exists for the given email."
             raise DuplicateEmailError('Account already exists for the given email.')
         else:
+            self.logger.info("Successfully created the user")
             UsersDbAccess.collection.insert_one(user.get_dict())
         return "Successful"
 
-    @staticmethod
-    def get_user_by_username(username):
+    def get_user_by_username(self, username):
+        self.logger.info("Retrieving user from database with username " + str(username))
         user_dict = UsersDbAccess.collection.find_one({"username": username})
         if user_dict is not None:
+            self.logger.info("Successfully found user with username " + str(username))
             return User(user_dict, True)
-        print 'No user found with username ' + username
+        self.logger.info("No user found with username " + str(username))
         return None
 
-    @staticmethod
-    def get_user_by_email(email):
+    def get_user_by_email(self, email):
+        self.logger.info("Retrieving user from database with email " + str(email))
         user_dict = UsersDbAccess.collection.find_one({"email": email})
         if user_dict is not None:
+            self.logger.info("Successfully found user with email " + str(email))
             return User(user_dict, True)
         print 'No user found with email ' + email
         return None
 
-    @staticmethod
-    def addStockToUser(username, symbol, pricePerStock, quantity):
-        userDict = UsersDbAccess.collection.find_one({"username": username})
-        totalCost = pricePerStock * quantity
-        pricePerStock = str(pricePerStock).replace('.', '_')
+    def add_stock_to_user(self, username, symbol, price_per_stock, quantity):
+        self.logger.info("Adding stock to user with username " + str(username))
+        self.logger.info("Symbol: " + str(symbol) + "\n" +
+                         "Price per stock: " + str(price_per_stock) + "\n" +
+                         "Quantity: " + str(quantity))
+
+        user_dict = UsersDbAccess.collection.find_one({"username": username})
+        total_cost = price_per_stock * quantity
+        price_per_stock = str(price_per_stock).replace('.', '_')
         try:
-            numStocksOwned = userDict['stocks_owned'][symbol][pricePerStock]
+            num_stocks_owned = user_dict['stocks_owned'][symbol][price_per_stock]
         except KeyError, e:
-            numStocksOwned = 0
-        key = "stocks_owned." + str(symbol) + "." + pricePerStock
+            num_stocks_owned = 0
+        self.logger.info(str(username) + " already owns " + str(num_stocks_owned) + " of " + str(symbol) +
+                         " at price " + str(price_per_stock))
+        key = "stocks_owned." + str(symbol) + "." + price_per_stock
 
         update = {}
-        update[key] = int(numStocksOwned) + quantity
-        update["cash"] = float(userDict['cash']) - totalCost
+        update[key] = int(num_stocks_owned) + quantity
+        update["cash"] = float(user_dict['cash']) - total_cost
         UsersDbAccess.collection.update({"username": username}, {"$set" : update})
         return "success"
 
@@ -69,23 +78,27 @@ class UsersDbAccess:
     Sells stocks for a user, starting from the lowest price bought.
     If the user does not have enough stocks, none are sold and an error is returned.
     '''
-    @staticmethod
-    def sell_stocks_from_user(username, symbol, quantity, cache):
+    def sell_stocks_from_user(self, username, symbol, quantity, cache):
         user_dict = UsersDbAccess.collection.find_one({"username": username})
+        self.logger.info("Selling stocks from user with username " + str(username))
+        self.logger.info("Symbol: " + str(symbol) + "\n" +
+                         "Quantity: " + str(quantity))
 
         try:
             # the information regarding the symbol
             user_stock_symbol_info = user_dict['stocks_owned'][symbol]
         except KeyError, e:
-            return "User " + username + " does not own stock with symbol " + symbol
+            self.logger.exception("User " + str(username) + " does not own stock with symbol " + str(symbol))
+            return
 
         num_stocks_owned = 0
         for key in user_stock_symbol_info:
             num_stocks_owned += int(user_stock_symbol_info[key])
 
         if num_stocks_owned < quantity:
-            return "User " + username + " does not own enough of " + symbol + "." \
-                   + " Trying to sell " + str(quantity) + " but only owns " + str(num_stocks_owned) + "."
+            self.logger.exception("User " + str(username) + " does not own enough of " + str(symbol) + "." \
+                   + " Trying to sell " + str(quantity) + " but only owns " + str(num_stocks_owned) + ".")
+            return
 
         keys_to_remove = []
         # we now know for sure that the user owns enough stock.
@@ -110,5 +123,9 @@ class UsersDbAccess:
         update[key] = user_dict['stocks_owned']
 
         update["cash"] = float(user_dict['cash']) + quantity * float(cache.get_stock_price(symbol))
+        self.logger.info("Updating the database for username " + username)
+        self.logger.info("update: " + str(update))
         UsersDbAccess.collection.update({"username": username}, {"$set" : update})
+
+        self.logger.info("Stock(s) sold successfully")
         return "success"

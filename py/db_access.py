@@ -12,9 +12,9 @@ class DbAccess:
         self.db = self.client[dbname]
 
 class UsersDbAccess:
-    dbname = "stock_market_simulator_db"
+    db_name = "stock_market_simulator_db"
     client = MongoClient()
-    db = client[dbname]
+    db = client[db_name]
     collectionName = "users"
     collection = db[collectionName]
 

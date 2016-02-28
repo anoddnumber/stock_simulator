@@ -206,7 +206,7 @@ class Cache:
     def load_cache_from_file(self):
         # cache_path = './static/cache.json'
         cache_path = self.load_from_file_path
-        self.logger.info("loading cache from file: " + str(cache_path))
+        self.logger.info("Loading cache from file: " + str(cache_path))
         cache_file = open(cache_path, 'r')
         json_string = ''
         for line in cache_file:

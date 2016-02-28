@@ -2,6 +2,13 @@ import os
 import app
 import unittest
 import tempfile
+from pymongo import MongoClient
+
+db_name = "stock_market_simulator_db"
+client = MongoClient()
+db = client[db_name]
+collectionName = "users"
+collection = db[collectionName]
 
 class TestCase(unittest.TestCase):
 
@@ -12,6 +19,7 @@ class TestCase(unittest.TestCase):
     def tearDown(self):
         os.close(self.db_fd)
         os.unlink(app.config['DATABASE'])
+        collection.remove({"username": "test_user_name"})
 
     def login(self, email, password):
         return self.test_app.post('/login', data=dict(

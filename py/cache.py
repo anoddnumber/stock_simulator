@@ -144,7 +144,7 @@ class Cache:
         api = YahooStockAPI(keys, 'l1c1p2')
 
         try:
-            results = api.submitRequest()
+            results = api.submit_request()
             results = [x.strip() for x in results.split('\n', len(keys) - 1)]
             # self.logger.info("results from YahooStockAPI: " + str(results))
 

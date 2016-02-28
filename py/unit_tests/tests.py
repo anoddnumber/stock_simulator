@@ -12,6 +12,7 @@ collection = db[collectionName]
 
 test_user_name = "test_user_name"
 test_email = "test_email@gmail.com"
+test_password = "password"
 
 class TestCase(unittest.TestCase):
 
@@ -24,13 +25,13 @@ class TestCase(unittest.TestCase):
         os.unlink(app.config['DATABASE'])
         collection.remove({"username": test_user_name})
 
-    def login(self, email, password):
+    def login(self, email=test_email, password=test_password):
         return self.test_app.post('/login', data=dict(
             email=email,
             password=password,
         ), follow_redirects=True)
 
-    def create_account(self, email, username, password, retype_password):
+    def create_account(self, email=test_email, username=test_user_name, password=test_password, retype_password=test_password):
         return self.test_app.post('/createAccount', data=dict(
             email=email,
             username=username,
@@ -41,6 +42,9 @@ class TestCase(unittest.TestCase):
     def is_login_page(self, data):
         return 'forgotPasswordLink' in data and 'loginDiv' in data and '<div id="stock_simulator">' not in data
 
+    def is_simulator_page(self, data):
+        return '<div id="stock_simulator">' in data
+
     def test_empty_db(self):
         print "\ntest_empty_db"
         rv = self.test_app.get('/')
@@ -49,34 +53,42 @@ class TestCase(unittest.TestCase):
         assert self.is_login_page(rv.data)
         assert rv.status_code == 200
 
+    def test_login_success(self):
+        print "\ntest_login_success"
+        self.create_account()
+        rv = self.login()
+        assert not self.is_login_page(rv.data)
+        assert self.is_simulator_page(rv.data)
+        assert rv.status_code == 200
+
     def test_login_fail(self):
         print "\ntest_login_fail"
-        rv = self.login(test_email, 'randomPassword')
+        rv = self.login()
         assert 'Email and password do not match up' in rv.data
         assert rv.status_code == 200
 
     def test_create_account_success(self):
         print "\ntest_create_account_success"
-        rv = self.create_account(test_email, test_user_name, "password", "password")
+        rv = self.create_account()
 
-        assert '<div id="stock_simulator">' in rv.data
+        assert self.is_simulator_page(rv.data)
         assert rv.status_code == 200
 
     def test_create_account_fail(self):
         print "\ntest_create_account_fail"
-        rv = self.create_account(test_email, test_user_name, "password", "not_the_same_password")
+        rv = self.create_account(retype_password="not_the_same_password")
 
         assert self.is_login_page(rv.data)
         assert rv.status_code == 200
 
     def test_duplicate_create_account(self):
         print "\ntest_duplicate_create_account"
-        rv = self.create_account(test_email, test_user_name, "password", "password")
+        rv = self.create_account()
 
         assert '<div id="stock_simulator">' in rv.data
         assert rv.status_code == 200
 
-        rv = self.create_account(test_email, test_user_name, "password", "password")
+        rv = self.create_account()
 
         assert self.is_login_page(rv.data)
         assert rv.status_code == 200

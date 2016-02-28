@@ -21,7 +21,7 @@ class YahooStockAPI:
             symbols += s + '+'
 
         self.logger.info("Calling Yahoo's Finance API with " + str(self.info) + " as the parameters " +
-                         " for symbols " + str(symbols))
+                         "for symbols " + str(symbols))
         request = Request('http://finance.yahoo.com/d/quotes.csv?s=' + str(symbols) + '&f=' + str(self.info))
 
         try:

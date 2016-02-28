@@ -342,12 +342,20 @@ def init_logger():
     global logger
     py.logging_setup.setup()
     logger = logging.getLogger(__name__)
+
+def init_db():
+    global users_db_access
+    users_db_access = UsersDbAccess()
+
+def init_cache(cache_path=None):
+    global cache
+    cache = Cache(cache_path)
             
 if __name__ == "__main__":
     application.debug = False
     toolbar = DebugToolbarExtension(application)
     init_logger()
-    cache = Cache()
-    users_db_access = UsersDbAccess()
+    init_cache()
+    init_db()
     logger.info("Starting server")
     application.run()

@@ -19,15 +19,40 @@ class TestCase(unittest.TestCase):
             password=password,
         ), follow_redirects=True)
 
+    def create_account(self, email, username, password, retype_password):
+        return self.test_app.post('/createAccount', data=dict(
+            email=email,
+            username=username,
+            password=password,
+            retypePassword=retype_password,
+        ), follow_redirects=True)
+
+    def is_login_page(self, data):
+        return 'forgotPasswordLink' in data and 'loginDiv' in data and '<div id="stock_simulator">' not in data
+
     def test_empty_db(self):
         rv = self.test_app.get('/')
 
         #make sure we are on the login page
-        assert 'forgotPasswordLink' in rv.data and 'loginDiv' in rv.data
+        assert self.is_login_page(rv.data)
+        assert rv.status_code == 200
 
-    def test_login(self):
+    def test_login_fail(self):
         rv = self.login('random_test_email_that_does_not_exist@email.com', 'badPassword')
         assert 'Email and password do not match up' in rv.data
+        assert rv.status_code == 200
+
+    def test_create_account_success(self):
+        rv = self.create_account("test_account@gmail.com", "test_user_name", "password", "password")
+
+        assert '<div id="stock_simulator">' in rv.data
+        assert rv.status_code == 200
+
+    def test_create_account_fail(self):
+        rv = self.create_account("test_account@gmail.com", "test_user_name", "password", "not_the_same_password")
+
+        assert self.is_login_page(rv.data)
+        assert rv.status_code == 200
 
 if __name__ == '__main__':
     app.config['TESTING'] = True

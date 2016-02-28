@@ -23,19 +23,19 @@ class UsersDbAccess:
 
     def create_user(self, user):
         self.logger.info("Creating user: " + str(user))
-        user_in_db = UsersDbAccess.get_user_by_username(user.username)
+        user_in_db = self.get_user_by_username(user.username)
         if user_in_db is not None:
             raise DuplicateUsernameError('Username already taken.')
-        elif UsersDbAccess.get_user_by_email(user.email) is not None:
+        elif self.get_user_by_email(user.email) is not None:
             raise DuplicateEmailError('Account already exists for the given email.')
         else:
             self.logger.info("Successfully created the user")
-            UsersDbAccess.collection.insert_one(user.get_dict())
+            self.collection.insert_one(user.get_dict())
         return "Successful"
 
     def get_user_by_username(self, username):
         self.logger.info("Retrieving user from database with username " + str(username))
-        user_dict = UsersDbAccess.collection.find_one({"username": username})
+        user_dict = self.collection.find_one({"username": username})
         if user_dict is not None:
             self.logger.info("Successfully found user with username " + str(username))
             return User(user_dict, True)

@@ -10,6 +10,9 @@ db = client[db_name]
 collectionName = "users"
 collection = db[collectionName]
 
+test_user_name = "test_user_name"
+test_email = "test_email@gmail.com"
+
 class TestCase(unittest.TestCase):
 
     def setUp(self):
@@ -19,7 +22,7 @@ class TestCase(unittest.TestCase):
     def tearDown(self):
         os.close(self.db_fd)
         os.unlink(app.config['DATABASE'])
-        collection.remove({"username": "test_user_name"})
+        collection.remove({"username": test_user_name})
 
     def login(self, email, password):
         return self.test_app.post('/login', data=dict(
@@ -39,6 +42,7 @@ class TestCase(unittest.TestCase):
         return 'forgotPasswordLink' in data and 'loginDiv' in data and '<div id="stock_simulator">' not in data
 
     def test_empty_db(self):
+        print "\ntest_empty_db"
         rv = self.test_app.get('/')
 
         #make sure we are on the login page
@@ -46,18 +50,33 @@ class TestCase(unittest.TestCase):
         assert rv.status_code == 200
 
     def test_login_fail(self):
-        rv = self.login('random_test_email_that_does_not_exist@email.com', 'badPassword')
+        print "\ntest_login_fail"
+        rv = self.login(test_email, 'randomPassword')
         assert 'Email and password do not match up' in rv.data
         assert rv.status_code == 200
 
     def test_create_account_success(self):
-        rv = self.create_account("test_account@gmail.com", "test_user_name", "password", "password")
+        print "\ntest_create_account_success"
+        rv = self.create_account(test_email, test_user_name, "password", "password")
 
         assert '<div id="stock_simulator">' in rv.data
         assert rv.status_code == 200
 
     def test_create_account_fail(self):
-        rv = self.create_account("test_account@gmail.com", "test_user_name", "password", "not_the_same_password")
+        print "\ntest_create_account_fail"
+        rv = self.create_account(test_email, test_user_name, "password", "not_the_same_password")
+
+        assert self.is_login_page(rv.data)
+        assert rv.status_code == 200
+
+    def test_duplicate_create_account(self):
+        print "\ntest_duplicate_create_account"
+        rv = self.create_account(test_email, test_user_name, "password", "password")
+
+        assert '<div id="stock_simulator">' in rv.data
+        assert rv.status_code == 200
+
+        rv = self.create_account(test_email, test_user_name, "password", "password")
 
         assert self.is_login_page(rv.data)
         assert rv.status_code == 200

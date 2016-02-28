@@ -1,7 +1,6 @@
-def parseLine(line):
-    str = 'File Creation Time'
-    lenth = len(str)
-    if line == '' or line[:18] == str:
+def parse_line(line):
+    string = 'File Creation Time'
+    if line == '' or line[:18] == string:
         return None
     index = line.find(' - ')
     if index > 0:
@@ -18,7 +17,7 @@ if __name__ == "__main__":
     for i, line in enumerate(symbols):
         if i == 0:
             continue
-        parsedLine = parseLine(line)
+        parsedLine = parse_line(line)
         if parsedLine is not None:
             if lastLine is not None:
                 newFile.write(lastLine + ',\n')

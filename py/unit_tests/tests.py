@@ -8,15 +8,13 @@ db = client[db_name]
 collectionName = "users"
 collection = db[collectionName]
 
-test_user_name = "test_user_name"
-
 class TestCase(unittest.TestCase):
 
     def setUp(self):
         self.client = TestClient()
 
     def tearDown(self):
-        collection.remove({"username": test_user_name})
+        collection.remove({"username": TestClient.test_user_name})
 
     def test_empty_db(self):
         print "\ntest_empty_db"

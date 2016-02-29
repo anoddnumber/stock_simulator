@@ -174,6 +174,7 @@ class Cache:
                     continue
         except Exception:
             self.logger.exception("Error calling YahooStockAPI, loading stock data from a backup source")
+            self.load_from_file_path = './static/cache.json' #TODO remove this when self.load_cache_from_file() is removed
             self.load_cache_from_file() #TODO Remove this later..should not be in production, find backup sources
     
     """

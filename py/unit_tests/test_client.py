@@ -1,6 +1,6 @@
 import app
 
-class TestClient():
+class TestClient:
     test_user_name = "test_user_name"
     test_email = "test_email@gmail.com"
     test_password = "password"
@@ -37,3 +37,10 @@ class TestClient():
     @staticmethod
     def is_simulator_page(data):
         return '<div id="stock_simulator">' in data
+
+    @staticmethod
+    def is_redirect(data, redirect_route=None):
+        result = 'You should be redirected automatically to target URL:' in data
+        if redirect_route is not None:
+            result = result and redirect_route in data
+        return result

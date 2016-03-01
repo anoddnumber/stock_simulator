@@ -2,6 +2,7 @@ from pymongo import MongoClient
 from py.exceptions.create_account_errors import DuplicateEmailError, DuplicateUsernameError
 
 from user import User
+from db_info import DBInfo
 import logging
 
 
@@ -12,11 +13,8 @@ class DbAccess:
         self.db = self.client[dbname]
 
 class UsersDbAccess:
-    db_name = "stock_market_simulator_db"
-    client = MongoClient()
-    db = client[db_name]
-    collectionName = "users"
-    collection = db[collectionName]
+
+    collection = DBInfo.get_collection()
 
     def __init__(self):
         self.logger = logging.getLogger(__name__)

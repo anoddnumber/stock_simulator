@@ -32,7 +32,7 @@ def root():
         return template.render()
     else:
         logger.info("User " + str(username) + " is already logged in and " +
-                    " is accessing the login page. Redirecting to the stock simulator.")
+                    "is accessing the login page. Redirecting to the stock simulator.")
         return redirect(url_for('the_app'))
 
 """

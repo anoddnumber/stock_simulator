@@ -27,6 +27,9 @@ class TestClient:
             retypePassword=retype_password,
         ), follow_redirects=True)
 
+    def logout(self):
+        return self.client.post('/logout', data=dict(), follow_redirects=True)
+
     def get(self, path, follow_redirects=True):
         return self.client.get(path, follow_redirects=follow_redirects)
 

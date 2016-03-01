@@ -26,7 +26,7 @@ class TestIndex(unittest.TestCase):
         self.client.login()
         rv = self.client.get('/')
         assert not TestClient.is_login_page(rv.data)
-        assert TestClient.is_redirect(rv.data, '/theApp')
+        assert TestClient.is_simulator_page(rv.data)
 
 if __name__ == '__main__':
     unittest.main()

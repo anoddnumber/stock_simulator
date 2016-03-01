@@ -27,8 +27,8 @@ class TestClient:
             retypePassword=retype_password,
         ), follow_redirects=True)
 
-    def get(self, path):
-        return self.client.get(path)
+    def get(self, path, follow_redirects=True):
+        return self.client.get(path, follow_redirects=follow_redirects)
 
     @staticmethod
     def is_login_page(data):

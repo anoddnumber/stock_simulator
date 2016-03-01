@@ -20,9 +20,15 @@ class TestLogin(unittest.TestCase):
         assert TestClient.is_simulator_page(rv.data)
         assert rv.status_code == 200
 
-    def test_login_fail(self):
-        print "\ntest_login_fail"
+    def test_login_bad_password(self):
+        print "\ntest_login_bad_password"
         rv = self.client.login()
+        assert 'Email and password do not match up' in rv.data
+        assert rv.status_code == 200
+
+    def test_login_nonexistent_email(self):
+        print "\ntest_login_nonexistent_email"
+        rv = self.client.login('email_that_does_not_exist@asdf.fake')
         assert 'Email and password do not match up' in rv.data
         assert rv.status_code == 200
 

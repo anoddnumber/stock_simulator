@@ -41,9 +41,14 @@ class TestClient:
     def is_simulator_page(data):
         return '<div id="stock_simulator">' in data
 
+    #only useful if follow_redirects is false
     @staticmethod
     def is_redirect(data, redirect_route=None):
         result = 'You should be redirected automatically to target URL:' in data
         if redirect_route is not None:
             result = result and redirect_route in data
         return result
+
+    @staticmethod
+    def is_cookie_set(response_headers):
+        return 'Set-Cookie' in str(response_headers)

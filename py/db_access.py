@@ -93,7 +93,7 @@ class UsersDbAccess:
             user_stock_symbol_info = user_dict['stocks_owned'][symbol]
         except KeyError, e:
             self.logger.exception("User " + str(username) + " does not own stock with symbol " + str(symbol))
-            return
+            return "User does not own stock"
 
         num_stocks_owned = 0
         for key in user_stock_symbol_info:
@@ -102,17 +102,18 @@ class UsersDbAccess:
         if num_stocks_owned < quantity:
             self.logger.exception("User " + str(username) + " does not own enough of " + str(symbol) + "." \
                    + " Trying to sell " + str(quantity) + " but only owns " + str(num_stocks_owned) + ".")
-            return
+            return "User down not enough stock"
 
+        quantity_left = quantity
         keys_to_remove = []
         # we now know for sure that the user owns enough stock.
         for key in user_stock_symbol_info:
             num_stocks_of_price = int(user_stock_symbol_info[key])
-            if num_stocks_of_price > quantity:
-                user_stock_symbol_info[key] = num_stocks_of_price - quantity
+            if num_stocks_of_price > quantity_left:
+                user_stock_symbol_info[key] = num_stocks_of_price - quantity_left
                 break
             else:
-                quantity -= num_stocks_of_price
+                quantity_left -= num_stocks_of_price
                 keys_to_remove.append(key)
 
         for key in keys_to_remove:

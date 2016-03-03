@@ -31,8 +31,8 @@ def root():
         template = env.get_template('index.html')
         return template.render()
     else:
-        logger.info("Logged in user with username " + str(username) +
-                    " is accessing the login page. Redirecting to the stock simulator.")
+        logger.info("User " + str(username) + " is already logged in and " +
+                    "is accessing the login page. Redirecting to the stock simulator.")
         return redirect(url_for('the_app'))
 
 """
@@ -60,7 +60,7 @@ def the_app():
         logger.info("User not logged in, redirecting to login page.")
         return redirect(url_for('root'))
     else:
-        user = UsersDbAccess.get_user_by_username(username)
+        user = users_db_access.get_user_by_username(username)
         if user is None:
             logger.error("User with username " + str(username) +
                          " has session cookie but is not found in the database." +
@@ -151,7 +151,7 @@ def create_account():
     user = User(user_dict)
 
     try:
-        UsersDbAccess.create_user(user)
+        users_db_access.create_user(user)
     except DuplicateUsernameError:
         logger.info("User tried creating an account but failed because username " + str(username) + " already exists")
         template = env.get_template('index.html')
@@ -170,7 +170,7 @@ TODO: Cookies
 @app.route("/login", methods=['POST'])
 def login():
     email = request.form['email']
-    user = UsersDbAccess.get_user_by_email(email)
+    user = users_db_access.get_user_by_email(email)
     logger.info("User: " + str(user) + " tried logging in")
 
     password = request.form['password']
@@ -208,7 +208,7 @@ def buy_stock():
         logger.warning("Non-logged in user tried buying stock")
         return 'Not logged in, cannot buy stock.'
     
-    user = UsersDbAccess.get_user_by_username(username)
+    user = users_db_access.get_user_by_username(username)
     if user is None:
         logger.warning("User trying to buy stock has session, but has no record in database with username " + str(username))
         return 'User with username ' + username + ' not found in database.'
@@ -253,9 +253,9 @@ def buy_stock():
         return "Not enough cash"
 
     logger.info("User " + str(username) + " passed all validation for buying " + str(quantity) + " stocks with symbol " + str(symbol) +
-               " at a stock price of " + stock_price + ", totaling a cost of " + str(total_cost))
+               " at a stock price of " + str(stock_price) + ", totaling a cost of " + str(total_cost))
     # buy the stock
-    return UsersDbAccess.addStockToUser(user.username, symbol, stock_price, quantity)
+    return users_db_access.add_stock_to_user(user.username, symbol, stock_price, quantity)
 
 @app.route("/sellStock", methods=['POST'])
 def sell_stock():
@@ -264,10 +264,10 @@ def sell_stock():
         logger.warning("Non-logged in user tried selling stock")
         return 'Not logged in, cannot sell stock.' 
     
-    user = UsersDbAccess.get_user_by_username(username)
+    user = users_db_access.get_user_by_username(username)
     if user is None:
         logger.warning("User trying to sell stock has session, but has no record in database with username " + str(username))
-        return 'User with username ' + username + ' not found in database.'
+        return 'User with username ' + str(username) + ' not found in database.'
 
     try:
         symbol = request.form['symbol']
@@ -300,18 +300,17 @@ def sell_stock():
         return "Stock price changed, please try again."
 
     logger.info("User " + str(username) + " passed all validations for selling " + str(quantity) + " stocks with symbol " + str(symbol) +
-               " at a stock price of " + stock_price)
+               " at a stock price of " + str(stock_price))
     # sell the stock
-    return UsersDbAccess.sell_stocks_from_user(username, symbol, quantity, cache)
+    return users_db_access.sell_stocks_from_user(username, symbol, quantity, cache)
 
-#TODO Logging
 @app.route("/getUserInfo", methods=['GET'])
 def get_user_info():
     username = session.get('username')
     if username is None:
         logger.warning("Non-logged in user tried getting user information")
         return 'Not logged in, cannot retrieve information.'
-    user = UsersDbAccess.get_user_by_username(username)
+    user = users_db_access.get_user_by_username(username)
     if user is None:
         logger.warning("User trying to get user information, but has no record in database with username " + str(username))
         return 'Could not find the current user in the database.'
@@ -329,12 +328,25 @@ def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
     return response
+
+def init_logger():
+    global logger
+    py.logging_setup.setup()
+    logger = logging.getLogger(__name__)
+
+def init_db():
+    global users_db_access
+    users_db_access = UsersDbAccess()
+
+def init_cache(cache_path=None):
+    global cache
+    cache = Cache(cache_path)
             
 if __name__ == "__main__":
     app.debug = False
     toolbar = DebugToolbarExtension(app)
-    py.logging_setup.setup()
-    logger = logging.getLogger(__name__)
-    cache = Cache()
+    init_logger()
+    init_cache()
+    init_db()
     logger.info("Starting server")
     app.run()

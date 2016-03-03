@@ -16,13 +16,14 @@ class Cache:
     """
     Creates the cache. If the path does not exist, create it by updating the cache.
     """
-    def __init__(self):
+    def __init__(self, load_from_file_path=None):
         self.logger = logging.getLogger(__name__)
         self.logger.info("Initialized cache logger")
 
         #current directory is always /stock_simulator
         self.path = './static/cache.json' 
         self.parsed_json = None #the object that holds the cache info
+        self.load_from_file_path = load_from_file_path
 
         try:
             self.logger.info("Trying to load the cache from file")
@@ -98,8 +99,10 @@ class Cache:
         for line in parsed_symbols_file:
             json_string += line
             
-        self.parsed_json = self.__get_new_json(json.loads(json_string))
-#         self.loadCacheFromFile() #for testing purposes only
+        if self.load_from_file_path is not None:
+            self.load_cache_from_file() #for testing purposes only
+        else:
+            self.parsed_json = self.__get_new_json(json.loads(json_string))
         
         cache_file = open(self.path, 'w')
         json.dump(self.parsed_json, cache_file, indent=1, sort_keys='true')
@@ -144,7 +147,7 @@ class Cache:
         api = YahooStockAPI(keys, 'l1c1p2')
 
         try:
-            results = api.submitRequest()
+            results = api.submit_request()
             results = [x.strip() for x in results.split('\n', len(keys) - 1)]
             # self.logger.info("results from YahooStockAPI: " + str(results))
 
@@ -171,6 +174,7 @@ class Cache:
                     continue
         except Exception:
             self.logger.exception("Error calling YahooStockAPI, loading stock data from a backup source")
+            self.load_from_file_path = './static/cache.json' #TODO remove this when self.load_cache_from_file() is removed
             self.load_cache_from_file() #TODO Remove this later..should not be in production, find backup sources
     
     """
@@ -201,15 +205,16 @@ class Cache:
             raise e
     
     def load_cache_from_file(self):
-        cache_path = './static/cache.json'
-        self.logger.info("loading cache from file: " + str(cache_path))
+        # cache_path = './static/cache.json'
+        cache_path = self.load_from_file_path
+        self.logger.info("Loading cache from file: " + str(cache_path))
         cache_file = open(cache_path, 'r')
         json_string = ''
         for line in cache_file:
             json_string += line
         
         new_json = json.loads(json_string)
-        new_json['last_updated'] = str(datetime.datetime.utcnow())
+        new_json['last_updated'] = str(datetime.datetime.utcnow().isoformat())
         self.parsed_json = new_json
         
         

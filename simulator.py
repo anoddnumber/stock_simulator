@@ -15,14 +15,14 @@ import py.logging_setup
 import logging
 
 env = Environment(loader=PackageLoader('py', 'templates'))
-application = Flask(__name__, static_url_path='')
-application.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
+app = Flask(__name__, static_url_path='')
+app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 config = {'defaultCash' : 50000}
 
 """
 The root page where the user logs into the application
 """
-@application.route("/", methods=['GET'])
+@app.route("/", methods=['GET'])
 def root():
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
     username = session.get('username')
@@ -38,7 +38,7 @@ def root():
 """
 Returns a page where the user can buy/sell stocks as well as information regarding the stock.
 """
-@application.route("/stockInfo", methods=['GET'])
+@app.route("/stockInfo", methods=['GET'])
 def stock_info():
     symbol = cgi.escape(request.args.get('symbol'))
     price = get_stock_info_helper([symbol])
@@ -53,7 +53,7 @@ def stock_info():
 The application. Redirects to the root page if the user is not logged in.
 """
 #TODO change names
-@application.route("/theApp", methods=['GET'])
+@app.route("/theApp", methods=['GET'])
 def the_app():
     username = session.get('username')
     if username is None:
@@ -84,7 +84,7 @@ The method attempts to update the cache every time it is called.
 The cache will update if it has been more than n minutes since it has updated (specified in the argument, currently 15 minutes).
 The stock prices will be returned in the same order as the arguments, delimited by newlines ("\n").
 """
-@application.route("/info", methods=['GET'])
+@app.route("/info", methods=['GET'])
 def get_stock_info():
     symbols = request.args.get('symbols')
     logger.info("Retrieving information for stock symbols " + str(symbols))
@@ -109,7 +109,7 @@ and whose values are the stock symbols' names and prices.
 
 TODO: retrieve the NASDAQ file daily (currently called stock_symbols.txt) and generate the json file daily (currently called parsed_symbols.json).
 """
-@application.route("/stockSymbolsMap", methods=['GET'])
+@app.route("/stockSymbolsMap", methods=['GET'])
 def get_stock_symbol_map():
     logger.info("Retrieving the stockSymbolsMap")
     seconds_left = cache.update(5)
@@ -127,7 +127,7 @@ This service creates an account for the user.
 It takes in a username, password and email, does verifications, and saves the information to the database
 or raises an error if there is an issue.
 """
-@application.route("/createAccount", methods=['POST'])
+@app.route("/createAccount", methods=['POST'])
 def create_account():
     username = request.form['username']
     password = request.form['password']
@@ -167,7 +167,7 @@ def create_account():
 Logs the user in. Verifies that the given username and password match the ones in the database.
 TODO: Cookies
 """
-@application.route("/login", methods=['POST'])
+@app.route("/login", methods=['POST'])
 def login():
     email = request.form['email']
     user = users_db_access.get_user_by_email(email)
@@ -193,7 +193,7 @@ def login():
 """
 Logs the user out.
 """
-@application.route("/logout", methods=['POST'])
+@app.route("/logout", methods=['POST'])
 def logout():
     username = session.get('username')
     logger.info("User " + str(username) + " logging out")
@@ -201,7 +201,7 @@ def logout():
     session.pop('username', None)
     return redirect(url_for('root'))
 
-@application.route("/buyStock", methods=['POST'])
+@app.route("/buyStock", methods=['POST'])
 def buy_stock():
     username = session.get('username')
     if username is None:
@@ -257,7 +257,7 @@ def buy_stock():
     # buy the stock
     return users_db_access.add_stock_to_user(user.username, symbol, stock_price, quantity)
 
-@application.route("/sellStock", methods=['POST'])
+@app.route("/sellStock", methods=['POST'])
 def sell_stock():
     username = session.get('username')
     if username is None:
@@ -304,7 +304,7 @@ def sell_stock():
     # sell the stock
     return users_db_access.sell_stocks_from_user(username, symbol, quantity, cache)
 
-@application.route("/getUserInfo", methods=['GET'])
+@app.route("/getUserInfo", methods=['GET'])
 def get_user_info():
     username = session.get('username')
     if username is None:
@@ -323,7 +323,7 @@ def get_user_info():
 This method is used to send error messages to the client.
 Whenever an InvalidUsage is raised, this method will be executed.
 """
-@application.errorhandler(InvalidUsage)
+@app.errorhandler(InvalidUsage)
 def handle_invalid_usage(error):
     response = jsonify(error.to_dict())
     response.status_code = error.status_code
@@ -343,10 +343,10 @@ def init_cache(cache_path=None):
     cache = Cache(cache_path)
             
 if __name__ == "__main__":
-    application.debug = False
-    toolbar = DebugToolbarExtension(application)
+    app.debug = False
+    toolbar = DebugToolbarExtension(app)
     init_logger()
     init_cache()
     init_db()
     logger.info("Starting server")
-    application.run()
+    app.run()

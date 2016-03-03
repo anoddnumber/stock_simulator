@@ -1,4 +1,4 @@
-import app
+import simulator
 
 class TestClient:
     test_user_name = "test_user_name"
@@ -6,12 +6,12 @@ class TestClient:
     test_password = "password"
 
     def __init__(self):
-        app.config['TESTING'] = True
-        app.config['DEBUG'] = True
-        app.init_logger()
-        app.init_cache('./static/cache.json')
-        app.init_db()
-        self.client = app.application.test_client()
+        simulator.config['TESTING'] = True
+        simulator.config['DEBUG'] = True
+        simulator.init_logger()
+        simulator.init_cache('./static/cache.json')
+        simulator.init_db()
+        self.client = simulator.app.test_client()
 
     def login(self, email=test_email, password=test_password):
         return self.client.post('/login', data=dict(

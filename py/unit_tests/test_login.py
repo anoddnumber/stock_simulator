@@ -1,23 +1,24 @@
 import unittest
-from test_client import TestClient
+from stock_simulator_test_client import StockSimulatorTestClient
 from db_info import DBInfo
+from test_info import TestInfo
 
 collection = DBInfo.get_collection()
 
 class TestLogin(unittest.TestCase):
 
     def setUp(self):
-        self.client = TestClient()
+        self.client = StockSimulatorTestClient()
 
     def tearDown(self):
-        collection.remove({"username": TestClient.test_user_name})
+        collection.remove({"username": TestInfo.user_name})
 
     def test_login_success(self):
         print "\ntest_login_success"
         self.client.create_account()
         rv = self.client.login()
-        assert not TestClient.is_login_page(rv.data)
-        assert TestClient.is_simulator_page(rv.data)
+        assert not StockSimulatorTestClient.is_login_page(rv.data)
+        assert StockSimulatorTestClient.is_simulator_page(rv.data)
         assert rv.status_code == 200
 
     def test_login_without_account(self):
@@ -30,8 +31,8 @@ class TestLogin(unittest.TestCase):
         print "\ntest_login_bad_password"
         self.client.create_account()
         rv = self.client.login(password="bad_password")
-        assert TestClient.is_login_page(rv.data)
-        assert not TestClient.is_simulator_page(rv.data)
+        assert StockSimulatorTestClient.is_login_page(rv.data)
+        assert not StockSimulatorTestClient.is_simulator_page(rv.data)
         assert rv.status_code == 200
 
     def test_login_nonexistent_email(self):

@@ -1,9 +1,7 @@
 import unittest
 from stock_simulator_test_client import StockSimulatorTestClient
 from db_info import DBInfo
-from flask import request, session
-import simulator
-from stock_simulator_test_request_context import StockSimulatorTestRequestContext
+from flask import session
 from test_info import TestInfo
 
 collection = DBInfo.get_collection()

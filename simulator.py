@@ -204,6 +204,7 @@ def buy_stock():
         quantity = int(request.form['quantity'])
         stock_price = float(request.form['stockPrice'])
     except ValueError:
+        logger.warning("User trying to buy stock but there was an error trying to read the arguments")
         return "Error reading arguments"
     
     if symbol is None or quantity is None or stock_price is None:
@@ -259,7 +260,8 @@ def sell_stock():
         symbol = request.form['symbol']
         quantity = int(request.form['quantity'])
         stock_price = float(request.form['stockPrice'])
-    except ValueError, e:
+    except ValueError:
+        logger.warning("User trying to sell stock but there was an error trying to read the arguments")
         return "Error reading arguments"
     
     if symbol is None or quantity is None or stock_price is None:

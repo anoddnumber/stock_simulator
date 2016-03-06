@@ -21,7 +21,9 @@ class BaseUnitTest(unittest.TestCase):
         rv = self.client.get('/getUserInfo')
         user_dict = ast.literal_eval(rv.data)
 
+        print "expect stocks owned to be " + str(user_dict.get('stocks_owned'))
+
         assert user_dict.get('stocks_owned') == stocks_owned
-        assert float(user_dict.get('cash')) == cash
+        assert float(user_dict.get('cash')) == round(cash, 2)
 
         return user_dict

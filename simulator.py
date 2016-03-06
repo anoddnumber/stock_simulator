@@ -229,7 +229,7 @@ def buy_stock():
     if stock_price < 0 or quantity < 0:
         logger.warning("The stock price is either less than 0 or the user tried to buy a negative amount of stock")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return "stock price or quantity less than 0"
+        return "Stock price or quantity less than 0"
         
     total_cost = quantity * stock_price
     # check that the user has enough cash to buy the stocks requested

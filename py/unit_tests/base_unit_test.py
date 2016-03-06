@@ -2,6 +2,7 @@ import unittest
 from stock_simulator_test_client import StockSimulatorTestClient
 from db_info import DBInfo
 from test_info import TestInfo
+import ast
 
 collection = DBInfo.get_collection()
 
@@ -15,3 +16,12 @@ class BaseUnitTest(unittest.TestCase):
         print "Tearing down a unit test"
         collection.remove({"username": TestInfo.user_name})
         print "\n"
+
+    def assert_user_info(self, stocks_owned, cash):
+        rv = self.client.get('/getUserInfo')
+        user_dict = ast.literal_eval(rv.data)
+
+        assert user_dict.get('stocks_owned') == stocks_owned
+        assert float(user_dict.get('cash')) == cash
+
+        return user_dict

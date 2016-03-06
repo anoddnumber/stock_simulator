@@ -11,16 +11,15 @@ class TestBuyStock(BaseUnitTest):
         self.client.create_account()
 
         symbol = "AMZN"
+        starting_cash = simulator.config.get("defaultCash")
         quantity = 1
         price = self.client.get_stock_info(symbol).data
 
-        starting_cash = simulator.config.get("defaultCash")
         self.assert_user_info({}, starting_cash)
 
         rv = self.client.buy_stock(symbol, quantity, price)
 
         assert "Success" in rv.data
-
         self.assert_user_info({"AMZN" : {price.replace(".", "_") : quantity} },
                               starting_cash - quantity * float(price))
 
@@ -40,7 +39,6 @@ class TestBuyStock(BaseUnitTest):
         rv = self.client.buy_stock(symbol, max_quantity_possible, price)
 
         assert "Success" in rv.data
-
         self.assert_user_info({"AMZN" : {price.replace(".", "_") : max_quantity_possible} },
                               starting_cash - max_quantity_possible * float(price))
 
@@ -54,8 +52,8 @@ class TestBuyStock(BaseUnitTest):
         rv = self.client.buy_stock(symbol, 1, price)
         assert "Not logged in, cannot buy stock." in rv.data
 
-    def test_bad_quantity(self):
-        print "test_bad_quantity"
+    def test_buy_bad_quantity(self):
+        print "test_buy_bad_quantity"
         self.client.create_account()
 
         symbol = "AMZN"

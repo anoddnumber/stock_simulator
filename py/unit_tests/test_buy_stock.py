@@ -1,19 +1,12 @@
 import unittest
-from stock_simulator_test_client import StockSimulatorTestClient
 from db_info import DBInfo
-from test_info import TestInfo
 import ast
+from base_unit_test import BaseUnitTest
 
 collection = DBInfo.get_collection()
 
 #TODO: Test buying a stock at different prices (somewhat difficult to test this..)
-class TestBuyStock(unittest.TestCase):
-
-    def setUp(self):
-        self.client = StockSimulatorTestClient()
-
-    def tearDown(self):
-        collection.remove({"username": TestInfo.user_name})
+class TestBuyStock(BaseUnitTest):
 
     def test_basic_buy(self):
         print "\ntest_basic_buy"
@@ -40,7 +33,6 @@ class TestBuyStock(unittest.TestCase):
 
         price = price.replace(".", "_")
         assert user_dict.get('stocks_owned').get(symbol).get(price) == 1
-
 
 if __name__ == '__main__':
     unittest.main()

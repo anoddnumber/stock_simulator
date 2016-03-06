@@ -1,20 +1,14 @@
 import unittest
 from stock_simulator_test_client import StockSimulatorTestClient
 from db_info import DBInfo
-from test_info import TestInfo
+from base_unit_test import BaseUnitTest
 
 collection = DBInfo.get_collection()
 
-class TestIndexPage(unittest.TestCase):
-
-    def setUp(self):
-        self.client = StockSimulatorTestClient()
-
-    def tearDown(self):
-        collection.remove({"username": TestInfo.user_name})
+class TestIndexPage(BaseUnitTest):
 
     def test_basic(self):
-        print "\ntest_basic"
+        print "test_basic"
         rv = self.client.get('/')
 
         #make sure we are on the login page
@@ -22,7 +16,7 @@ class TestIndexPage(unittest.TestCase):
         assert rv.status_code == 200
 
     def test_logged_in(self):
-        print "\ntest_logged_in"
+        print "test_logged_in"
         self.client.create_account()
         self.client.login()
         rv = self.client.get('/')

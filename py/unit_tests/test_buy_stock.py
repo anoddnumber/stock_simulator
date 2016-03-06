@@ -68,6 +68,41 @@ class TestBuyStock(BaseUnitTest):
 
         self.assert_user_info({}, starting_cash)
 
+    def test_bad_symbol(self):
+        print "test_bad_symbol"
+        self.client.create_account()
+
+        symbol = "bad_symbol"
+
+        # negative quantity
+        rv = self.client.buy_stock(symbol, 1, 1)
+        assert "Invalid symbol" in rv.data
+
+    def test_bad_stock_price(self):
+        print "test_bad_stock_price"
+        self.client.create_account()
+
+        symbol = "AMZN"
+
+        rv = self.client.get_stock_info(symbol)
+        price = rv.data
+        bad_price = float(price) - 1
+
+        user_dict = self.assert_user_info({}, simulator.config.get("defaultCash"))
+        starting_cash = float(user_dict.get('cash'))
+
+        # price does not equal server's price
+        rv = self.client.buy_stock(symbol, 1, bad_price)
+        assert "Stock price changed, please try again." in rv.data
+
+        self.assert_user_info({}, starting_cash)
+
+        # pass in negative price
+        rv = self.client.buy_stock(symbol, 1, -1)
+
+        assert "Stock price or quantity less than 0" in rv.data
+
+        self.assert_user_info({}, starting_cash)
 
 if __name__ == '__main__':
     unittest.main()

@@ -221,16 +221,16 @@ def buy_stock():
         return "Invalid symbol"
     server_stock_price = float(symbol_map.get("price"))
 
-    if stock_price != server_stock_price:
-        logger.warning("User tried to buy the stock at price " + str(stock_price) + " but the server stock price was " + str(server_stock_price))
-        return "Stock price changed, please try again."
-    
-    # check if quantity is a positive integer
+    # check if the passed in stock price and quantity are positive
     if stock_price < 0 or quantity < 0:
         logger.warning("The stock price is either less than 0 or the user tried to buy a negative amount of stock")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
         return "Stock price or quantity less than 0"
-        
+
+    if stock_price != server_stock_price:
+        logger.warning("User tried to buy the stock at price " + str(stock_price) + " but the server stock price was " + str(server_stock_price))
+        return "Stock price changed, please try again."
+
     total_cost = quantity * stock_price
     # check that the user has enough cash to buy the stocks requested
     if total_cost >= user.cash:

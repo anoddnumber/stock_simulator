@@ -31,9 +31,19 @@ def root():
         template = env.get_template('index.html')
         return template.render()
     else:
-        logger.info("User " + str(username) + " is already logged in and " +
-                    "is accessing the login page. Redirecting to the stock simulator.")
-        return redirect(url_for('the_app'))
+        user = users_db_access.get_user_by_username(username)
+        if user is None:
+            logger.error("User with username " + str(username) +
+                         " has session cookie but is not found in the database." +
+                         " Displaying the login page.")
+            session.pop('username', None)
+            template = env.get_template('index.html')
+            return template.render()
+        cash = str(user.get_rounded_cash())
+        username = cgi.escape(username)
+        logger.info("User with username " + str(username) + " has been found in the database.")
+        template = env.get_template('simulator.html') #TODO change name
+        return template.render(username=username, cash=cash)
 
 """
 Returns a page where the user can buy/sell stocks as well as information regarding the stock.
@@ -48,30 +58,6 @@ def stock_info():
 
     template = env.get_template('stock_info_page.html')
     return template.render(symbol=symbol, price=price)
-
-"""
-The application. Redirects to the root page if the user is not logged in.
-"""
-#TODO change names
-@app.route("/theApp", methods=['GET'])
-def the_app():
-    username = session.get('username')
-    if username is None:
-        logger.info("User not logged in, redirecting to login page.")
-        return redirect(url_for('root'))
-    else:
-        user = users_db_access.get_user_by_username(username)
-        if user is None:
-            logger.error("User with username " + str(username) +
-                         " has session cookie but is not found in the database." +
-                         " Redirecting back to the login page.")
-            session.pop('username', None)
-            return redirect(url_for('root'))
-    cash = str(user.get_rounded_cash())
-    username = cgi.escape(username)
-    logger.info("User with username " + str(username) + " has been found in the database.")
-    template = env.get_template('simulator.html') #TODO change name
-    return template.render(username=username, cash=cash)
 
 """
 Gets the stock prices of the passed in symbols.
@@ -114,7 +100,7 @@ def get_stock_symbol_map():
     logger.info("Retrieving the stockSymbolsMap")
     seconds_left = cache.update(5)
 
-    lenient_time = 2 #give extra time for the server to update before the client calls again
+    lenient_time = 2 # give extra time for the server to update before the client calls again
     delay = seconds_left + lenient_time
 
     info_dict = {'stockSymbolsMap' : cache.json, 'delay' : delay * 1000}
@@ -161,7 +147,7 @@ def create_account():
         template = env.get_template('index.html')
         return template.render(createAccountError='Email already taken.')
     session['username'] = user.username
-    return redirect(url_for('the_app'))
+    return redirect(url_for('root'))
 
 """
 Logs the user in. Verifies that the given username and password match the ones in the database.
@@ -188,7 +174,7 @@ def login():
 
     #session.pop('username', None) #this probably isn't needed..
     session['username'] = user.username
-    return redirect(url_for('the_app'))
+    return redirect(url_for('root'))
 
 """
 Logs the user out.

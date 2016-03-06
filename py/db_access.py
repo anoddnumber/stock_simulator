@@ -100,7 +100,7 @@ class UsersDbAccess:
             num_stocks_owned += int(user_stock_symbol_info[key])
 
         if num_stocks_owned < quantity:
-            self.logger.exception("User " + str(username) + " does not own enough of " + str(symbol) + "." \
+            self.logger.warning("User " + str(username) + " does not own enough of " + str(symbol) + "." \
                    + " Trying to sell " + str(quantity) + " but only owns " + str(num_stocks_owned) + ".")
             return "User down not enough stock"
 

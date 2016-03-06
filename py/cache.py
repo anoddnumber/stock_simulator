@@ -183,7 +183,7 @@ class Cache:
     symbols - an array of symbols whose stock prices will be returned
     """
     def get_stock_prices(self, symbols):
-        self.logger.exception("Retrieving stock prices for the following symbols: " + str(symbols))
+        self.logger.info("Retrieving stock prices for the following symbols: " + str(symbols))
         prices = ''
         for i, symbol in enumerate(symbols):
             try:

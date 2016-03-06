@@ -11,38 +11,28 @@ class TestBuyStock(BaseUnitTest):
         self.client.create_account()
 
         symbol = "AMZN"
+        quantity = 1
+        price = self.client.get_stock_info(symbol).data
 
-        rv = self.client.get_stock_info(symbol)
-        price = rv.data
+        starting_cash = simulator.config.get("defaultCash")
+        self.assert_user_info({}, starting_cash)
 
-        rv = self.client.get('/getUserInfo')
-        user_dict = ast.literal_eval(rv.data)
+        rv = self.client.buy_stock(symbol, quantity, price)
 
-        assert user_dict.get('stocks_owned') == {}
-        starting_cash = float(user_dict.get('cash'))
+        assert "Success" in rv.data
 
-        self.client.buy_stock(symbol, 1, price)
-
-        rv = self.client.get('/getUserInfo')
-        user_dict = ast.literal_eval(rv.data)
-
-        assert user_dict.get('stocks_owned') != {}
-        assert float(user_dict.get('cash')) == starting_cash - float(price)
-
-        price = price.replace(".", "_")
-        assert user_dict.get('stocks_owned').get(symbol).get(price) == 1
+        self.assert_user_info({"AMZN" : {price.replace(".", "_") : quantity} },
+                              starting_cash - quantity * float(price))
 
     def test_buy_as_much_as_possible(self):
         print "test_buy_as_much_as_possible"
         self.client.create_account()
 
         symbol = "AMZN"
+        starting_cash = simulator.config.get("defaultCash")
 
         rv = self.client.get_stock_info(symbol)
         price = rv.data
-
-        user_dict = self.assert_user_info({}, simulator.config.get("defaultCash"))
-        starting_cash = float(user_dict.get('cash'))
 
         self.assert_user_info({}, starting_cash)
 
@@ -69,25 +59,22 @@ class TestBuyStock(BaseUnitTest):
         self.client.create_account()
 
         symbol = "AMZN"
-
-        rv = self.client.get_stock_info(symbol)
-        price = rv.data
-
-        user_dict = self.assert_user_info({}, simulator.config.get("defaultCash"))
-        starting_cash = float(user_dict.get('cash'))
-
-        # negative quantity
-        rv = self.client.buy_stock(symbol, -1, price)
-        assert "Stock price or quantity less than 0" in rv.data
+        starting_cash = simulator.config.get("defaultCash")
+        price = self.client.get_stock_info(symbol).data
 
         self.assert_user_info({}, starting_cash)
 
+        # negative quantity
+        rv = self.client.buy_stock(symbol, -1, price)
+
+        assert "Stock price or quantity less than 0" in rv.data
+        self.assert_user_info({}, starting_cash)
+
         # too much quantity
-        too_much_quantity = int(starting_cash / float(price) + 1)
+        too_much_quantity = int(float(starting_cash) / float(price) + 1)
         rv = self.client.buy_stock(symbol, too_much_quantity, price)
 
         assert "Not enough cash" in rv.data
-
         self.assert_user_info({}, starting_cash)
 
     def test_bad_symbol(self):
@@ -105,25 +92,22 @@ class TestBuyStock(BaseUnitTest):
         self.client.create_account()
 
         symbol = "AMZN"
-
-        rv = self.client.get_stock_info(symbol)
-        price = rv.data
+        starting_cash = simulator.config.get("defaultCash")
+        price = self.client.get_stock_info(symbol).data
         bad_price = float(price) - 1
 
-        user_dict = self.assert_user_info({}, simulator.config.get("defaultCash"))
-        starting_cash = float(user_dict.get('cash'))
+        self.assert_user_info({}, starting_cash)
 
         # price does not equal server's price
         rv = self.client.buy_stock(symbol, 1, bad_price)
-        assert "Stock price changed, please try again." in rv.data
 
+        assert "Stock price changed, please try again." in rv.data
         self.assert_user_info({}, starting_cash)
 
         # pass in negative price
         rv = self.client.buy_stock(symbol, 1, -1)
 
         assert "Stock price or quantity less than 0" in rv.data
-
         self.assert_user_info({}, starting_cash)
 
 if __name__ == '__main__':

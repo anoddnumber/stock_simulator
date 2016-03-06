@@ -76,7 +76,7 @@ class UsersDbAccess:
         UsersDbAccess.collection.update({"username": username}, {"$set" : update})
 
         self.logger.info("Stock(s) bought successfully")
-        return "success"
+        return "Success"
 
     '''
     Sells stocks for a user, starting from the lowest price bought.

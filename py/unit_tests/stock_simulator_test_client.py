@@ -42,6 +42,16 @@ class StockSimulatorTestClient:
     def logout(self):
         return self.client.post('/logout', data=dict(), follow_redirects=True)
 
+    def buy_stock(self, symbol, quantity, stock_price):
+        return self.client.post('/buyStock', data=dict(
+            symbol=symbol,
+            quantity=quantity,
+            stockPrice=stock_price,
+        ), follow_redirects=True)
+
+    def get_stock_info(self, symbols):
+        return self.client.get('/info?symbols=' + str(symbols))
+
     def get(self, path, follow_redirects=True):
         return self.client.get(path, follow_redirects=follow_redirects)
 

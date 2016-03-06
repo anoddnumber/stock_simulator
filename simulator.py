@@ -248,7 +248,7 @@ def sell_stock():
     username = session.get('username')
     if username is None:
         logger.warning("Non-logged in user tried selling stock")
-        return 'Not logged in, cannot sell stock.' 
+        return 'Not logged in, cannot sell stock.'
     
     user = users_db_access.get_user_by_username(username)
     if user is None:
@@ -279,7 +279,7 @@ def sell_stock():
     if stock_price < 0 or quantity < 0:
         logger.warning("User " + str(username) + " tried to sell a negative amount of stock or for a negative price")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return "stock price or quantity less than 0"
+        return "Stock price or quantity less than 0"
 
     if stock_price != server_stock_price:
         logger.warning("User tried to sell the stock at price " + str(stock_price) + " but the server stock price was " + str(server_stock_price))

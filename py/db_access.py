@@ -135,4 +135,4 @@ class UsersDbAccess:
         UsersDbAccess.collection.update({"username": username}, {"$set" : update})
 
         self.logger.info("Stock(s) sold successfully")
-        return "success"
+        return "Success"

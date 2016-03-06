@@ -49,6 +49,13 @@ class StockSimulatorTestClient:
             stockPrice=stock_price,
         ), follow_redirects=True)
 
+    def sell_stock(self, symbol, quantity, stock_price):
+        return self.client.post('/sellStock', data=dict(
+            symbol=symbol,
+            quantity=quantity,
+            stockPrice=stock_price,
+        ), follow_redirects=True)
+
     def get_stock_info(self, symbols):
         return self.client.get('/info?symbols=' + str(symbols))
 

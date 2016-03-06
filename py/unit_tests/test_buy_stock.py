@@ -1,9 +1,6 @@
 import unittest
-from db_info import DBInfo
 import ast
 from base_unit_test import BaseUnitTest
-
-collection = DBInfo.get_collection()
 
 #TODO: Test buying a stock at different prices (somewhat difficult to test this..)
 class TestBuyStock(BaseUnitTest):

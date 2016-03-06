@@ -1,11 +1,8 @@
 import unittest
 from stock_simulator_test_client import StockSimulatorTestClient
-from db_info import DBInfo
 from flask import session
 from test_info import TestInfo
 from base_unit_test import BaseUnitTest
-
-collection = DBInfo.get_collection()
 
 class TestLogout(BaseUnitTest):
 

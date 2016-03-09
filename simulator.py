@@ -13,6 +13,8 @@ from py.cache import Cache
 from py.exceptions.create_account_errors import *
 import py.logging_setup
 import logging
+import urllib
+import urllib2
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='')
@@ -119,6 +121,24 @@ def create_account():
     password = request.form['password']
     retype_password = request.form['retypePassword']
     email = request.form['email']
+
+    if not config.get("DEBUG"):
+        captcha = request.form['g-recaptcha-response']
+
+        logger.info("captcha: " + str(captcha))
+        data = urllib.urlencode({'secret' : '6Lf7ZBoTAAAAAHIKbm4AnecJxycyM5PIjmWt3eO_',
+                             'response'  : captcha})
+        u = urllib2.urlopen('https://www.google.com/recaptcha/api/siteverify', data)
+        google_response = u.read()
+        logger.info("Google responded to captcha with " + str(google_response))
+
+        google_json = json.loads(google_response)
+        logger.info('google_json.get("success"): ' + str(google_json.get("success")))
+
+        if not google_json.get("success"):
+            logger.warning("User tried creating an account but failed because reCaptcha failed")
+            template = env.get_template('index.html')
+            return template.render(createAccountError='Failed to create an account, please try again.')
 
     logger.info("User trying to create an account with username " + str(username) +
                  " and email " + str(email))

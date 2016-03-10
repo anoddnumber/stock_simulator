@@ -1,13 +1,34 @@
 <div class="stockInfoPage" hidden>
-    <button class="stockInfoPageBackButton" type="button">Back</button><br>
 
-    Available Cash: <span class="stockInfoPageTotalCash"></span><br>
-    Amount Owned: <span class="stockInfoPageAmountOwned"></span><br>
-    Stock Name: <span class="stockInfoPageStockSymbolName">{{symbol}}</span><br>
-    Price: <span class="stockInfoPageStockPrice">{{price}}</span><br>
-    Quantity: <input class="stockInfoPageStockQuantity" autocomplete="off" type="text" name="quantitybar" size="10"><br>
-    Total Price: <span class="stockInfoPageStockTotalPrice">0.00</span><br>
+    <div class="row">
+      <div class="col-xs-12 availableCash">
+          Available Cash: <span class="stockInfoPageTotalCash"></span><br>
+      </div>
+      <div class="col-xs-6 column1">
+          <button class="stockInfoPageBackButton" type="button">Back</button><br>
+          <div class="stockName"> Company Name (<span class="stockInfoPageStockSymbolName">{{symbol}}</span>)<br></div>
+          <div class ="stockPrice"><span class="stockInfoPageStockPrice">{{price}}</span> Up/Down Arrow (% Diff)<br></div>
+          <!--Insert Graph-->
+          <img src="..." class="graph"><br>
+          <!--Day Week Month Year Link-->
+          <a href="url">Day</a>
+          <a href="url">Week</a>
+          <a href="url">Month</a>
+          <a href="url">Year</a><br>
+          Open<br>
+          High<br>
+          Low<br>
+      </div>
+      <div class="col-xs-6 column2">
+          <br><br>
+          Amount Owned: <span class="stockInfoPageAmountOwned"></span><br>
+          <button class="stockInfoPageStocksBuyButton buySell" type="button">Buy</button>
+          <button class="stockInfoPageStocksSellButton buySell" type="button">Sell</button><br>
+          Quantity: <input class="stockInfoPageStockQuantity" autocomplete="off" type="text" name="quantitybar" size="10"><br>
+          Commission: <br>
+          Total Price: <span class="stockInfoPageStockTotalPrice">0.00</span><br>
+          <button class="stockInfoPageStocksConfirmButton" type="button">Confirm</button>
+      </div>
+    </div>
 
-    <button class="stockInfoPageStocksBuyButton" type="button">Buy</button>
-    <button class="stockInfoPageStocksSellButton" type="button">Sell</button>
 </div>

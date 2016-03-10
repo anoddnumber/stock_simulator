@@ -64,7 +64,7 @@ class Cache:
         time_in_seconds = time_in_minutes * 60
         try:
             last_updated_date = self.get_last_updated_date()
-        except ValueError as e:
+        except (KeyError, ValueError):
             self.logger.exception("last_updated_date has bad format - updating cache to fix it")
             self.__update_cache()
             return time_in_seconds
@@ -83,7 +83,7 @@ class Cache:
                 self.logger.info("Still waiting " + str(seconds) + " seconds until cache will update")
                 return seconds
         else:
-            self.warning("no last_updated_date found in cache, updating the cache")
+            self.logger.warning("no last_updated_date found in cache, updating the cache")
             self.__update_cache()
             return time_in_seconds
 
@@ -183,7 +183,7 @@ class Cache:
     symbols - an array of symbols whose stock prices will be returned
     """
     def get_stock_prices(self, symbols):
-        self.logger.exception("Retrieving stock prices for the following symbols: " + str(symbols))
+        self.logger.info("Retrieving stock prices for the following symbols: " + str(symbols))
         prices = ''
         for i, symbol in enumerate(symbols):
             try:

@@ -13,6 +13,8 @@ from py.cache import Cache
 from py.exceptions.create_account_errors import *
 import py.logging_setup
 import logging
+import urllib
+import urllib2
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='')
@@ -31,9 +33,19 @@ def root():
         template = env.get_template('index.html')
         return template.render()
     else:
-        logger.info("User " + str(username) + " is already logged in and " +
-                    "is accessing the login page. Redirecting to the stock simulator.")
-        return redirect(url_for('the_app'))
+        user = users_db_access.get_user_by_username(username)
+        if user is None:
+            logger.error("User with username " + str(username) +
+                         " has session cookie but is not found in the database." +
+                         " Displaying the login page.")
+            session.pop('username', None)
+            template = env.get_template('index.html')
+            return template.render()
+        cash = str(user.get_rounded_cash())
+        username = cgi.escape(username)
+        logger.info("User with username " + str(username) + " has been found in the database.")
+        template = env.get_template('simulator.html') #TODO change name
+        return template.render(username=username, cash=cash)
 
 """
 Returns a page where the user can buy/sell stocks as well as information regarding the stock.
@@ -48,30 +60,6 @@ def stock_info():
 
     template = env.get_template('stock_info_page.html')
     return template.render(symbol=symbol, price=price)
-
-"""
-The application. Redirects to the root page if the user is not logged in.
-"""
-#TODO change names
-@app.route("/theApp", methods=['GET'])
-def the_app():
-    username = session.get('username')
-    if username is None:
-        logger.info("User not logged in, redirecting to login page.")
-        return redirect(url_for('root'))
-    else:
-        user = users_db_access.get_user_by_username(username)
-        if user is None:
-            logger.error("User with username " + str(username) +
-                         " has session cookie but is not found in the database." +
-                         " Redirecting back to the login page.")
-            session.pop('username', None)
-            return redirect(url_for('root'))
-    cash = str(user.get_rounded_cash())
-    username = cgi.escape(username)
-    logger.info("User with username " + str(username) + " has been found in the database.")
-    template = env.get_template('simulator.html') #TODO change name
-    return template.render(username=username, cash=cash)
 
 """
 Gets the stock prices of the passed in symbols.
@@ -114,7 +102,7 @@ def get_stock_symbol_map():
     logger.info("Retrieving the stockSymbolsMap")
     seconds_left = cache.update(5)
 
-    lenient_time = 2 #give extra time for the server to update before the client calls again
+    lenient_time = 2 # give extra time for the server to update before the client calls again
     delay = seconds_left + lenient_time
 
     info_dict = {'stockSymbolsMap' : cache.json, 'delay' : delay * 1000}
@@ -129,10 +117,38 @@ or raises an error if there is an issue.
 """
 @app.route("/createAccount", methods=['POST'])
 def create_account():
-    username = request.form['username']
+    username = request.form['username'].strip()
     password = request.form['password']
     retype_password = request.form['retypePassword']
-    email = request.form['email']
+    email = request.form['email'].strip()
+
+    if not config.get("DEBUG"):
+        captcha = request.form['g-recaptcha-response']
+
+        logger.info("captcha: " + str(captcha))
+        data = urllib.urlencode({'secret' : '6Lf7ZBoTAAAAAHIKbm4AnecJxycyM5PIjmWt3eO_',
+                             'response'  : captcha})
+        u = urllib2.urlopen('https://www.google.com/recaptcha/api/siteverify', data)
+        google_response = u.read()
+        logger.info("Google responded to captcha with " + str(google_response))
+
+        google_json = json.loads(google_response)
+        logger.info('google_json.get("success"): ' + str(google_json.get("success")))
+
+        if not google_json.get("success"):
+            logger.warning("User tried creating an account but failed because reCaptcha failed")
+            template = env.get_template('index.html')
+            return template.render(createAccountError='Failed to create an account, please try again.')
+
+    if username == "" or password == "" or email == "":
+        logger.warning("User tried to create account with either a blank username, password, or email")
+        template = env.get_template('index.html')
+        return template.render(createAccountError='Invalid username, password, or email.')
+
+    if " " in username:
+        logger.warning("User tried to create an account with a space in it.")
+        template = env.get_template('index.html')
+        return template.render(createAccountError='Username cannot contain spaces.')
 
     logger.info("User trying to create an account with username " + str(username) +
                  " and email " + str(email))
@@ -161,7 +177,7 @@ def create_account():
         template = env.get_template('index.html')
         return template.render(createAccountError='Email already taken.')
     session['username'] = user.username
-    return redirect(url_for('the_app'))
+    return redirect(url_for('root'))
 
 """
 Logs the user in. Verifies that the given username and password match the ones in the database.
@@ -188,7 +204,7 @@ def login():
 
     #session.pop('username', None) #this probably isn't needed..
     session['username'] = user.username
-    return redirect(url_for('the_app'))
+    return redirect(url_for('root'))
 
 """
 Logs the user out.
@@ -218,6 +234,7 @@ def buy_stock():
         quantity = int(request.form['quantity'])
         stock_price = float(request.form['stockPrice'])
     except ValueError:
+        logger.warning("User trying to buy stock but there was an error trying to read the arguments")
         return "Error reading arguments"
     
     if symbol is None or quantity is None or stock_price is None:
@@ -235,16 +252,16 @@ def buy_stock():
         return "Invalid symbol"
     server_stock_price = float(symbol_map.get("price"))
 
-    if stock_price != server_stock_price:
-        logger.warning("User tried to buy the stock at price " + str(stock_price) + " but the server stock price was " + str(server_stock_price))
-        return "Stock price changed, please try again."
-    
-    # check if quantity is a positive integer
+    # check if the passed in stock price and quantity are positive
     if stock_price < 0 or quantity < 0:
         logger.warning("The stock price is either less than 0 or the user tried to buy a negative amount of stock")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return "stock price or quantity less than 0"
-        
+        return "Stock price or quantity less than 0"
+
+    if stock_price != server_stock_price:
+        logger.warning("User tried to buy the stock at price " + str(stock_price) + " but the server stock price was " + str(server_stock_price))
+        return "Stock price changed, please try again."
+
     total_cost = quantity * stock_price
     # check that the user has enough cash to buy the stocks requested
     if total_cost >= user.cash:
@@ -262,7 +279,7 @@ def sell_stock():
     username = session.get('username')
     if username is None:
         logger.warning("Non-logged in user tried selling stock")
-        return 'Not logged in, cannot sell stock.' 
+        return 'Not logged in, cannot sell stock.'
     
     user = users_db_access.get_user_by_username(username)
     if user is None:
@@ -273,7 +290,8 @@ def sell_stock():
         symbol = request.form['symbol']
         quantity = int(request.form['quantity'])
         stock_price = float(request.form['stockPrice'])
-    except ValueError, e:
+    except ValueError:
+        logger.warning("User trying to sell stock but there was an error trying to read the arguments")
         return "Error reading arguments"
     
     if symbol is None or quantity is None or stock_price is None:
@@ -293,7 +311,7 @@ def sell_stock():
     if stock_price < 0 or quantity < 0:
         logger.warning("User " + str(username) + " tried to sell a negative amount of stock or for a negative price")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return "stock price or quantity less than 0"
+        return "Stock price or quantity less than 0"
 
     if stock_price != server_stock_price:
         logger.warning("User tried to sell the stock at price " + str(stock_price) + " but the server stock price was " + str(server_stock_price))

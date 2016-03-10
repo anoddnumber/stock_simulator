@@ -30,6 +30,28 @@ class TestCreateAccount(BaseUnitTest):
         assert StockSimulatorTestClient.is_login_page(rv.data)
         assert rv.status_code == 200
 
+    def test_create_account_with_username_only_spaces(self):
+        print "test_create_account_with_empty_password"
+        self.client.create_account()
+
+        #same email, different username, different password
+        rv = self.client.create_account(username="  ")
+
+        assert "Invalid username, password, or email." in rv.data
+        assert StockSimulatorTestClient.is_login_page(rv.data)
+        assert rv.status_code == 200
+
+    def test_create_account_with_space_in_username(self):
+        print "test_create_account_with_space_in_username"
+        self.client.create_account()
+
+        #same email, different username, different password
+        rv = self.client.create_account(username="test test")
+
+        assert "Username cannot contain spaces." in rv.data
+        assert StockSimulatorTestClient.is_login_page(rv.data)
+        assert rv.status_code == 200
+
     def test_same_username(self):
         print "test_same_username"
         self.client.create_account()

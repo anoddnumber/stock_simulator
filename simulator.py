@@ -117,10 +117,10 @@ or raises an error if there is an issue.
 """
 @app.route("/createAccount", methods=['POST'])
 def create_account():
-    username = request.form['username']
+    username = request.form['username'].strip()
     password = request.form['password']
     retype_password = request.form['retypePassword']
-    email = request.form['email']
+    email = request.form['email'].strip()
 
     if not config.get("DEBUG"):
         captcha = request.form['g-recaptcha-response']
@@ -139,6 +139,16 @@ def create_account():
             logger.warning("User tried creating an account but failed because reCaptcha failed")
             template = env.get_template('index.html')
             return template.render(createAccountError='Failed to create an account, please try again.')
+
+    if username == "" or password == "" or email == "":
+        logger.warning("User tried to create account with either a blank username, password, or email")
+        template = env.get_template('index.html')
+        return template.render(createAccountError='Invalid username, password, or email.')
+
+    if " " in username:
+        logger.warning("User tried to create an account with a space in it.")
+        template = env.get_template('index.html')
+        return template.render(createAccountError='Username cannot contain spaces.')
 
     logger.info("User trying to create an account with username " + str(username) +
                  " and email " + str(email))

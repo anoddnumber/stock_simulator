@@ -115,6 +115,10 @@ a:visited{
     font-size: 35px;
 }
 
+.stockInfoPageStockSymbolName {
+    font-size: 35px;
+}
+
 .stockPrice {
     font-size: 25px;
 }

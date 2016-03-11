@@ -5,14 +5,19 @@
              }, options),
 
              populatePage : function(symbol, parent) {
-                $(parent + ' .stockInfoPageStockSymbolName').text(symbol);
+                $(parent + ' .stockInfoPageStockSymbolName').text("(" + symbol + ")");
 
-                var stockInfo = userInfo.stocks_owned[symbol];
+                var userStockMap = userInfo.stocks_owned[symbol]; //shows what prices the user bought the stock at
                 var totalNumOfStock = 0;
-                for(var key in stockInfo) {
-                    var value = stockInfo[key];
+                var stockInfo = stockSymbolsMap[symbol];
+                var stockName = stockInfo['name'];
+
+                for(var key in userStockMap) {
+                    var value = userStockMap[key];
                     totalNumOfStock += value;
                 }
+                
+                $(parent + ' .stockName').text(stockName);
                 $(parent + ' .stockInfoPageAmountOwned').text(totalNumOfStock);
 
                 var currentPrice = stockSymbolsMap[symbol].price;

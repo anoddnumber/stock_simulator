@@ -94,6 +94,43 @@ a:visited{
 }
 
 
+/* Stock Info Page */
+.availableCash {
+    text-align: right;
+    font-size: 20px;
+    padding-right: 45px;
+}
+
+.stockInfoPage {
+    padding-left: 28px;
+    font-size: 17px;
+}
+
+.stockInfoPageBackButton {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.stockName {
+    font-size: 35px;
+}
+
+.stockPrice {
+    font-size: 25px;
+}
+
+.buySell {
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
+
+.stockInfoPageStocksConfirmButton {
+    font-size: 18px;
+    margin-top: 10px;
+    margin-left: 130px;
+}
+
+
 /* Horizontal loading bar */
 #fountainG{
     position:relative;

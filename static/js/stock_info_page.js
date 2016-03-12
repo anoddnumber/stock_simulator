@@ -11,6 +11,9 @@
                 var totalNumOfStock = 0;
                 var stockInfo = stockSymbolsMap[symbol];
                 var stockName = stockInfo['name'];
+                var stockPercentChange = stockInfo['daily_percent_change']
+                var stockPriceChange = stockInfo['daily_price_change']
+                var currentPrice = stockInfo['price'];
 
                 for(var key in userStockMap) {
                     var value = userStockMap[key];
@@ -18,9 +21,9 @@
                 }
                 
                 $(parent + ' .stockName').text(stockName);
+                $(parent + ' .stockPercentChange').text(stockPercentChange);
+                $(parent + ' .stockPriceChange').text(stockPriceChange);
                 $(parent + ' .stockInfoPageAmountOwned').text(totalNumOfStock);
-
-                var currentPrice = stockSymbolsMap[symbol].price;
                 $(parent + ' .stockInfoPageStockPrice').text(currentPrice);
             },
 

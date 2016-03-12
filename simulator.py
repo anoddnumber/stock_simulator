@@ -253,8 +253,8 @@ def buy_stock():
     server_stock_price = float(symbol_map.get("price"))
 
     # check if the passed in stock price and quantity are positive
-    if stock_price < 0 or quantity < 0:
-        logger.warning("The stock price is either less than 0 or the user tried to buy a negative amount of stock")
+    if stock_price <= 0 or quantity <= 0:
+        logger.warning("The stock price is either less than or equal to 0 or the user tried to zero or fewer amount of stock")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
         return "Stock price or quantity less than 0"
 

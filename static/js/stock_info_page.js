@@ -33,8 +33,8 @@
                     var price = $(parent + ' .stockInfoPageStockPrice').text().trim();
                     quantity = Utility.isPositiveInteger(value);
                     if (quantity) {
-                        var symbol = $(parent + " .stockInfoPageStockSymbolName").html();
-                        ApiClient.buyStock($(parent + " .stockInfoPageStockSymbolName").html(), quantity, price);
+                        var symbol = $(parent + " .stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
+                        ApiClient.buyStock(symbol, quantity, price);
                     } else {
                         //TODO show error
                     }
@@ -45,8 +45,8 @@
                     var price = $(parent + ' .stockInfoPageStockPrice').text().trim();
                     quantity = Utility.isPositiveInteger(value);
                     if (quantity) {
-                        var symbol = $(parent + " .stockInfoPageStockSymbolName").html();
-                        ApiClient.sellStock($(parent + " .stockInfoPageStockSymbolName").html(), quantity, price);
+                        var symbol = $(parent + " .stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
+                        ApiClient.sellStock(symbol, quantity, price);
                     } else {
                         //TODO show error
                     }

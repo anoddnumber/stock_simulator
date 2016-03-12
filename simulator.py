@@ -11,6 +11,8 @@ from py.user import User
 from py.exceptions.invalid_usage import InvalidUsage
 from py.cache import Cache
 from py.exceptions.create_account_errors import *
+from werkzeug.serving import run_simple
+
 import py.logging_setup
 import logging
 import urllib
@@ -367,4 +369,4 @@ if __name__ == "__main__":
     init_cache()
     init_db()
     logger.info("Starting server")
-    app.run()
+    run_simple('localhost', 5000, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))

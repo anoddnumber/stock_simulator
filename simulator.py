@@ -11,6 +11,8 @@ from py.user import User
 from py.exceptions.invalid_usage import InvalidUsage
 from py.cache import Cache
 from py.exceptions.create_account_errors import *
+from werkzeug.serving import run_simple
+
 import py.logging_setup
 import logging
 import urllib
@@ -253,8 +255,8 @@ def buy_stock():
     server_stock_price = float(symbol_map.get("price"))
 
     # check if the passed in stock price and quantity are positive
-    if stock_price < 0 or quantity < 0:
-        logger.warning("The stock price is either less than 0 or the user tried to buy a negative amount of stock")
+    if stock_price <= 0 or quantity <= 0:
+        logger.warning("The stock price is either less than or equal to 0 or the user tried to zero or fewer amount of stock")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
         return "Stock price or quantity less than 0"
 
@@ -367,4 +369,4 @@ if __name__ == "__main__":
     init_cache()
     init_db()
     logger.info("Starting server")
-    app.run()
+    run_simple('localhost', 5000, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))

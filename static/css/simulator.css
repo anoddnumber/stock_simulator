@@ -3,6 +3,10 @@ body {
   background-color: #eee;
 }
 
+tr {
+    cursor : pointer;
+}
+
 .tab-pane {
     height: 100vh;
 }

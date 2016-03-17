@@ -11,6 +11,9 @@
                 var totalNumOfStock = 0;
                 var stockInfo = stockSymbolsMap[symbol];
                 var stockName = stockInfo['name'];
+                var stockPercentChange = stockInfo['daily_percent_change']
+                var stockPriceChange = stockInfo['daily_price_change']
+                var currentPrice = stockInfo['price'];
 
                 for(var key in userStockMap) {
                     var value = userStockMap[key];
@@ -18,9 +21,9 @@
                 }
                 
                 $(parent + ' .stockName').text(stockName);
+                $(parent + ' .stockPercentChange').text(stockPercentChange);
+                $(parent + ' .stockPriceChange').text(stockPriceChange);
                 $(parent + ' .stockInfoPageAmountOwned').text(totalNumOfStock);
-
-                var currentPrice = stockSymbolsMap[symbol].price;
                 $(parent + ' .stockInfoPageStockPrice').text(currentPrice);
             },
 
@@ -30,8 +33,8 @@
                     var price = $(parent + ' .stockInfoPageStockPrice').text().trim();
                     quantity = Utility.isPositiveInteger(value);
                     if (quantity) {
-                        var symbol = $(parent + " .stockInfoPageStockSymbolName").html();
-                        ApiClient.buyStock($(parent + " .stockInfoPageStockSymbolName").html(), quantity, price);
+                        var symbol = $(parent + " .stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
+                        ApiClient.buyStock(symbol, quantity, price);
                     } else {
                         //TODO show error
                     }
@@ -42,8 +45,8 @@
                     var price = $(parent + ' .stockInfoPageStockPrice').text().trim();
                     quantity = Utility.isPositiveInteger(value);
                     if (quantity) {
-                        var symbol = $(parent + " .stockInfoPageStockSymbolName").html();
-                        ApiClient.sellStock($(parent + " .stockInfoPageStockSymbolName").html(), quantity, price);
+                        var symbol = $(parent + " .stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
+                        ApiClient.sellStock(symbol, quantity, price);
                     } else {
                         //TODO show error
                     }

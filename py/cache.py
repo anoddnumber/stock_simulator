@@ -164,13 +164,15 @@ class Cache:
                     decimal = Decimal(float(decimal))
                     daily_percent_change = daily_percent_change.replace('"','')
                     price = str('{:.2f}'.format(round(decimal, 2)))
-                    new_json[key] = {"name": str(name), "price" : price, "daily_price_change" : daily_price_change,
+                    if float(price) > 0:
+                        new_json[key] = {"name": str(name), "price" : price, "daily_price_change" : daily_price_change,
                                     "daily_percent_change" : daily_percent_change}
                 except ValueError as e:
                     self.logger.exception("Error while adding a stock to the new cache.\n" +
                                           "key: " + str(key) + "\n" +
                                           "name: " + str(name) + "\n" +
                                           "line: " + str(line))
+                    #TODO remove that stock from parsed_symbols.json
                     continue
         except Exception:
             self.logger.exception("Error calling YahooStockAPI, loading stock data from a backup source")

@@ -9,22 +9,31 @@
           <span class="stockName"></span> <span class="stockInfoPageStockSymbolName"></span><br>
           <div class ="stockPrice"><span class="stockInfoPageStockPrice"></span> Up/Down Arrow (% Diff)<br></div>
           <!--Insert Graph-->
-          <img src="..." class="graph"><br>
+          <img src="../../resources/images/Graph_Placeholder.jpg" class="graph"><br>
           <!--Day Week Month Year Link-->
           <a href="url">Day</a>
           <a href="url">Week</a>
           <a href="url">Month</a>
-          <a href="url">Year</a><br>
+          <a href="url">Year</a><br><br>
           Open<br>
           High<br>
           Low<br>
       </div>
       <div class="col-xs-6 column2">
-          <br><br>
+          <br><br><br>
           Amount Owned: <span class="stockInfoPageAmountOwned"></span><br>
-          <button class="stockInfoPageStocksBuyButton buySell" type="button">Buy</button>
-          <button class="stockInfoPageStocksSellButton buySell" type="button">Sell</button><br>
-          Quantity: <input class="stockInfoPageStockQuantity" autocomplete="off" type="text" name="quantitybar" size="10"><br>
+<!--          <button class="stockInfoPageStocksBuyButton buySell" type="button">Buy</button>
+          <button class="stockInfoPageStocksSellButton buySell" type="button">Sell</button><br> -->
+          <form action="action_page.php">
+            <input type="radio" name="market" value="buy" checked> Buy
+            <input type="radio" name="market" value="sell"> Sell
+<!--            <input type="submit"> -->
+          </form>
+          <form class="slider"> Quantity:<br><br>
+            <input type="range" name="foo" min="0" max="100" style="width: 250px;">
+            <output for="foo" onforminput="value = foo.valueAsNumber;"></output>
+            <input class="stockInfoPageStockQuantity" autocomplete="off" type="text" name="quantitybar" size="10">
+          </form>
           Commission: <br>
           Total Price: <span class="stockInfoPageStockTotalPrice">0.00</span><br>
           <button class="stockInfoPageStocksConfirmButton" type="button">Confirm</button>

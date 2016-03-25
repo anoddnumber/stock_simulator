@@ -17,51 +17,51 @@ import py.logging_setup
 import logging
 import urllib
 import urllib2
+from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='')
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = '/info'
+
 app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 config = {'defaultCash' : 50000}
 
 """
 The root page where the user logs into the application
 """
+
 @app.route("/", methods=['GET'])
 def root():
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
-    username = session.get('username')
-    if username is None:
+
+    if current_user.is_authenticated:
+        logger.info("User with username " + str(current_user.username) + " is already authenticated.")
+        cash = str(current_user.get_rounded_cash())
+        username = cgi.escape(current_user.username)
+
+        template = env.get_template('simulator.html') #TODO change name
+        return template.render(username=username, cash=cash)
+    else:
         logger.info("User that is not logged in is at the login page.")
         template = env.get_template('index.html')
         return template.render()
-    else:
-        user = users_db_access.get_user_by_username(username)
-        if user is None:
-            logger.error("User with username " + str(username) +
-                         " has session cookie but is not found in the database." +
-                         " Displaying the login page.")
-            session.pop('username', None)
-            template = env.get_template('index.html')
-            return template.render()
-        cash = str(user.get_rounded_cash())
-        username = cgi.escape(username)
-        logger.info("User with username " + str(username) + " has been found in the database.")
-        template = env.get_template('simulator.html') #TODO change name
-        return template.render(username=username, cash=cash)
 
-"""
-Returns a page where the user can buy/sell stocks as well as information regarding the stock.
-"""
-@app.route("/stockInfo", methods=['GET'])
-def stock_info():
-    symbol = cgi.escape(request.args.get('symbol'))
-    price = get_stock_info_helper([symbol])
-
-    logger.info("Retrieving information for stock with symbol " + str(symbol) +
-                "and price " + str(price))
-
-    template = env.get_template('stock_info_page.html')
-    return template.render(symbol=symbol, price=price)
+# """
+# Returns a page where the user can buy/sell stocks as well as information regarding the stock.
+# """
+# @app.route("/stockInfo", methods=['GET'])
+# def stock_info():
+#     symbol = cgi.escape(request.args.get('symbol'))
+#     price = get_stock_info_helper([symbol])
+#
+#     logger.info("Retrieving information for stock with symbol " + str(symbol) +
+#                 "and price " + str(price))
+#
+#     template = env.get_template('stock_info_page.html')
+#     return template.render(symbol=symbol, price=price)
 
 """
 Gets the stock prices of the passed in symbols.
@@ -199,6 +199,7 @@ def login():
 
     if user.check_password(password):
         logger.info("Password matches, login successful.")
+        login_user(user)
     else:
         logger.info("Login failed, password incorrect.")
         template = env.get_template('index.html')
@@ -213,10 +214,7 @@ Logs the user out.
 """
 @app.route("/logout", methods=['POST'])
 def logout():
-    username = session.get('username')
-    logger.info("User " + str(username) + " logging out")
-
-    session.pop('username', None)
+    logout_user()
     return redirect(url_for('root'))
 
 @app.route("/buyStock", methods=['POST'])
@@ -339,6 +337,11 @@ def get_user_info():
     logger.info("user_dict: " + str(user_dict))
     return json.dumps(user_dict, sort_keys=True)
 
+@login_manager.user_loader
+def load_user(user_id):
+   logger.info("loading user with user_id: " + str(user_id))
+   return users_db_access.get_user_by_id(user_id)
+
 """
 This method is used to send error messages to the client.
 Whenever an InvalidUsage is raised, this method will be executed.
@@ -368,5 +371,6 @@ if __name__ == "__main__":
     init_logger()
     init_cache()
     init_db()
+
     logger.info("Starting server")
-    run_simple('localhost', 5000, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))
+    run_simple('localhost', 5000, app, ssl_context=('./ssl_key.crt', './ssl_key.key')) #use HTTPS in devo

@@ -2,6 +2,7 @@ import unittest
 import ast
 from base_unit_test import BaseUnitTest
 import simulator
+from stock_simulator_test_client import StockSimulatorTestClient
 
 #TODO: Test buying a stock at different prices (somewhat difficult to test this..)
 class TestBuyStock(BaseUnitTest):
@@ -50,7 +51,7 @@ class TestBuyStock(BaseUnitTest):
         price = rv.data
 
         rv = self.client.buy_stock(symbol, 1, price)
-        assert "Not logged in, cannot buy stock." in rv.data
+        assert StockSimulatorTestClient.is_login_page(rv.data)
 
     def test_buy_bad_quantity(self):
         print "test_buy_bad_quantity"
@@ -134,7 +135,6 @@ class TestBuyStock(BaseUnitTest):
         # missing symbol
         rv = self.client.buy_stock("", quantity, price)
 
-        print "rv.data: " + rv.data
         assert "Invalid symbol" in rv.data
         self.assert_user_info({}, starting_cash)
 

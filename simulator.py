@@ -2,7 +2,7 @@ import json
 import cgi
 import time
 
-from flask import Flask, session, redirect, request, jsonify, url_for
+from flask import Flask, redirect, request, jsonify, url_for
 from jinja2 import Environment, PackageLoader
 from flask_debugtoolbar import DebugToolbarExtension
 
@@ -75,6 +75,7 @@ The cache will update if it has been more than n minutes since it has updated (s
 The stock prices will be returned in the same order as the arguments, delimited by newlines ("\n").
 """
 @app.route("/info", methods=['GET'])
+@login_required
 def get_stock_info():
     symbols = request.args.get('symbols')
     logger.info("Retrieving information for stock symbols " + str(symbols))
@@ -100,6 +101,7 @@ and whose values are the stock symbols' names and prices.
 TODO: retrieve the NASDAQ file daily (currently called stock_symbols.txt) and generate the json file daily (currently called parsed_symbols.json).
 """
 @app.route("/stockSymbolsMap", methods=['GET'])
+@login_required
 def get_stock_symbol_map():
     logger.info("Retrieving the stockSymbolsMap")
     seconds_left = cache.update(5)

@@ -191,18 +191,20 @@ TODO: Cookies
 @app.route("/login", methods=['POST'])
 def login():
     email = request.form['email']
+    password = request.form['password']
+
     user = users_db_access.get_user_by_email(email)
     logger.info("User: " + str(user) + " tried logging in")
-
-    password = request.form['password']
+    
     if not user:
         logger.info("User tried logging in with email " + str(email) + " but failed because no user exists for the email")
         template = env.get_template('index.html')
         return template.render(loginError='Email and password do not match up.')
 
     if user.check_password(password):
-        logger.info("Password matches, login successful.")
-        login_user(user)
+        remember_me = str(request.form.get('remember-me')) == "true"
+        logger.info("Password matches, login successful. Remember me: " + str(remember_me))
+        login_user(user, remember_me)
     else:
         logger.info("Login failed, password incorrect.")
         template = env.get_template('index.html')

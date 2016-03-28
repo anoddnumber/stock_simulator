@@ -1,63 +1,31 @@
-from decimal import Decimal
-from werkzeug.security import generate_password_hash, check_password_hash
-from flask_login import UserMixin
+from flask_mongoengine import Document
+from mongoengine import StringField, BooleanField, DateTimeField, DecimalField, DictField, ListField, ReferenceField
+from flask_security import UserMixin, RoleMixin
 
-# class User(UserMixin):
-#     def __init__(self, user_dict, load_from_db = False):
-#         self._username = user_dict.get('username')
-#         if load_from_db:
-#             self._pw_hash = user_dict.get('password')
-#             self._id = user_dict.get('_id')
-#         else:
-#             self._pw_hash = generate_password_hash(user_dict.get('password'))
-#         self._email = user_dict.get('email')
-#         self._cash = user_dict.get('cash')
-#         self._stocks = user_dict.get('stocks_owned')
-#
-#     def __str__(self):
-#         user_dictionary = self.get_dict()
-#         user_dictionary.pop("password", None)
-#         return str(user_dictionary)
-#
-#     @property
-#     def id(self):
-#         return self._id
-#
-#     @property
-#     def username(self):
-#         return self._username
-#
-#     @property
-#     def password_hash(self):
-#         return self._pw_hash
-#
-#     def check_password(self, password):
-#         return check_password_hash(self._pw_hash, password)
-#
-#     @property
-#     def email(self):
-#         return self._email
-#
-#     @property
-#     def cash(self):
-#         return self._cash
-#
-#     @property
-#     def stocks(self):
-#         return self._stocks
-#
-#     def get_rounded_cash(self):
-#         if self.cash is None:
-#             return None
-#         cash = Decimal(self.cash)
-#         cash = '{:.2f}'.format(round(cash, 2))
-#         return cash
-#
-#     def get_dict(self):
-#         return {
-#                 "username" : self.username,
-#                 "password" : self.password_hash,
-#                 "email" : self.email,
-#                 "cash" : self.cash,
-#                 "stocks_owned" : self.stocks
-#                 }
+class Role(Document, RoleMixin):
+    name = StringField(max_length=80, unique=True)
+    description = StringField(max_length=255)
+
+class User(Document, UserMixin):
+    username = StringField(max_length=255)
+    email = StringField(max_length=255)
+    password = StringField(max_length=255)
+    active = BooleanField(default=True)
+    confirmed_at = DateTimeField()
+    roles = ListField(ReferenceField(Role), default=[])
+    cash = DecimalField(max_length=255, default=50000, precision=2)
+    stocks_owned = DictField(default={})
+
+    def __str__(self):
+        # user_dictionary = self.get_dict()
+        # user_dictionary.pop("password", None)
+        user_dictionary = {
+            'username' : self.username,
+            'email' : self.email,
+            'cash' : self.cash,
+            'stocks_owned' : self.stocks_owned
+        }
+        return str(user_dictionary)
+
+    def check_password(self, password):
+        return password == self.password #TODO hash + salt password and check hashed password here

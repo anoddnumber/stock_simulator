@@ -1,13 +1,14 @@
 import json
 import cgi
 import time
+import datetime
 
 from flask import Flask, redirect, request, jsonify, url_for
 from jinja2 import Environment, PackageLoader
 from flask_debugtoolbar import DebugToolbarExtension
 
 from py.db_access import UsersDbAccess
-from py.user import User
+# from py.user import User
 from py.exceptions.invalid_usage import InvalidUsage
 from py.cache import Cache
 from py.exceptions.create_account_errors import *
@@ -17,22 +18,43 @@ import py.logging_setup
 import logging
 import urllib
 import urllib2
-from flask_login import LoginManager, login_required, login_user, logout_user, current_user
+from flask_login import LoginManager, login_user, logout_user, current_user
+from flask_mongoengine import MongoEngine, Document
+from py.db_info import DBInfo
+from flask_security import Security, MongoEngineUserDatastore, UserMixin, RoleMixin, login_required
+from bson.objectid import ObjectId
+from py.user2 import User2, Role
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='')
+app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
+
+# MongoDB Config
+app.config['MONGODB_DB'] = DBInfo.db_name
+app.config['MONGODB_HOST'] = 'localhost'
+app.config['MONGODB_PORT'] = DBInfo.db_port
 
 login_manager = LoginManager()
 login_manager.init_app(app)
 login_manager.login_view = '/'
 
-app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 config = {'defaultCash' : 50000}
+db = MongoEngine(app)
+# class Role(db.Document, RoleMixin):
+#     name = db.StringField(max_length=80, unique=True)
+#     description = db.StringField(max_length=255)
+# Setup Flask-Security
+user_datastore = MongoEngineUserDatastore(db, User2, Role)
+security = Security(app, user_datastore)
+
+# testuser = user_datastore.create_user(email='testemailasdfasdfasdf@nobien.net', password='password', confirmed_at = str(datetime.datetime.utcnow().isoformat()))
+# abc = user_datastore.get_user(ObjectId("56f8a2922bb4974e58603815"))
+# print "abc: " + str(abc.email)
+
 
 """
 The root page where the user logs into the application
 """
-
 @app.route("/", methods=['GET'])
 def root():
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
@@ -126,6 +148,7 @@ def create_account():
     retype_password = request.form['retypePassword']
     email = request.form['email'].strip()
 
+    # if statement for unit tests to bypass recaptcha
     if not config.get("DEBUG"):
         captcha = request.form['g-recaptcha-response']
 
@@ -168,7 +191,8 @@ def create_account():
                 'email' : email,
                 'cash' : config.get('defaultCash'),
                 'stocks_owned' : {} }
-    user = User(user_dict)
+    # user = User(user_dict)
+    user = User2(**user_dict)
 
     try:
         users_db_access.create_user(user)
@@ -180,8 +204,8 @@ def create_account():
         logger.info("User tried creating an account but failed because " + str(email) + " already exists")
         template = env.get_template('index.html')
         return template.render(createAccountError='Email already taken.')
-    user = users_db_access.get_user_by_email(email) #get the newly created user for the generated _id
-    login_user(user)
+    # user = users_db_access.get_user_by_email(email) #get the newly created user for the generated _id
+    # login_user(user)
     return redirect(url_for('root'))
 
 """
@@ -195,7 +219,7 @@ def login():
 
     user = users_db_access.get_user_by_email(email)
     logger.info("User: " + str(user) + " tried logging in")
-    
+
     if not user:
         logger.info("User tried logging in with email " + str(email) + " but failed because no user exists for the email")
         template = env.get_template('index.html')
@@ -341,7 +365,7 @@ def init_logger():
 
 def init_db():
     global users_db_access
-    users_db_access = UsersDbAccess()
+    users_db_access = UsersDbAccess(user_datastore)
 
 def init_cache(cache_path=None):
     global cache

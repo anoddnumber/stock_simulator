@@ -2,10 +2,10 @@ from pymongo import MongoClient
 from bson.objectid import ObjectId
 from py.exceptions.create_account_errors import DuplicateEmailError, DuplicateUsernameError
 
-from user import User
+# from user import User
 from db_info import DBInfo
 import logging
-
+import datetime
 
 class DbAccess:
     def __init__(self, dbname):
@@ -17,8 +17,9 @@ class UsersDbAccess:
 
     collection = DBInfo.get_collection()
 
-    def __init__(self):
+    def __init__(self, user_datastore):
         self.logger = logging.getLogger(__name__)
+        self.user_datastore = user_datastore
 
     def get_user_by_id(self, user_id):
         self.logger.info("get_user_by_id user_id: " + str(user_id))
@@ -31,16 +32,33 @@ class UsersDbAccess:
         return None
 
     def create_user(self, user):
-        self.logger.info("Creating user: " + str(user))
-        user_in_db = self.get_user_by_username(user.username)
-        if user_in_db is not None:
-            raise DuplicateUsernameError('Username already taken.')
-        elif self.get_user_by_email(user.email) is not None:
-            raise DuplicateEmailError('Account already exists for the given email.')
-        else:
-            self.logger.info("Successfully created the user")
-            self.collection.insert_one(user.get_dict())
-        return "Successful"
+        # self.logger.info("Creating user: " + str(user))
+        # user_in_db = self.get_user_by_username(user.username)
+        # if user_in_db is not None:
+        #     raise DuplicateUsernameError('Username already taken.')
+        # elif self.get_user_by_email(user.email) is not None:
+        #     raise DuplicateEmailError('Account already exists for the given email.')
+        # else:
+        #     self.logger.info("Successfully created the user")
+        #     self.collection.insert_one(user.get_dict())
+        # return "Successful"
+
+        # try:
+        #     id = user.get_id()
+        # except Exception:
+        #     id = None
+        #
+        # user_in_db = self.user_datastore.get_user(id)
+        # print "user_in_db: " + str(user_in_db)
+
+        # print "user.username: " + str(user.username)
+        # print "user.email: " + str(user.email)
+        # print "user.password: " + str(user.password_hash)
+        # print "user_datastore.model: " + str(self.user_datastore.user_model.active)
+
+        # self.user_datastore.create_user(email=user.email, username=user.username, password=user.password_hash)
+        # self.user_datastore.create_user()
+        self.user_datastore.create_user(email=user.email, username=user.username, password=user.password_hash)
 
     def get_user_by_username(self, username):
         self.logger.info("Retrieving user from database with username " + str(username))

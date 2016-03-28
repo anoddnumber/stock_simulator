@@ -52,8 +52,8 @@ class TestCreateAccount(BaseUnitTest):
         assert StockSimulatorTestClient.is_login_page(rv.data)
         assert rv.status_code == 200
 
-    def test_same_username(self):
-        print "test_same_username"
+    def test_duplicate_email(self):
+        print "test_duplicate_email"
         self.client.create_account()
 
         #same email, different username, different password
@@ -62,9 +62,9 @@ class TestCreateAccount(BaseUnitTest):
         assert "Email already taken." in rv.data
         assert StockSimulatorTestClient.is_login_page(rv.data)
         assert rv.status_code == 200
-
-    def test_same_email(self):
-        print "test_same_email"
+    #
+    def test_duplicate_username(self):
+        print "test_duplicate_username"
         self.client.create_account()
 
         #same username, different email, same password

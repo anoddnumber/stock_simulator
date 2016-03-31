@@ -1,4 +1,5 @@
 from pymongo import MongoClient
+from bson.objectid import ObjectId
 from py.exceptions.create_account_errors import DuplicateEmailError, DuplicateUsernameError
 
 from user import User
@@ -19,6 +20,16 @@ class UsersDbAccess:
     def __init__(self):
         self.logger = logging.getLogger(__name__)
 
+    def get_user_by_id(self, user_id):
+        self.logger.info("get_user_by_id user_id: " + str(user_id))
+
+        user_dict = self.collection.find_one({"_id": ObjectId(user_id)})
+
+        self.logger.info("get_user_by_id user_dict: " + str(user_dict))
+        if user_dict:
+            return User(user_dict, True)
+        return None
+
     def create_user(self, user):
         self.logger.info("Creating user: " + str(user))
         user_in_db = self.get_user_by_username(user.username)
@@ -34,6 +45,7 @@ class UsersDbAccess:
     def get_user_by_username(self, username):
         self.logger.info("Retrieving user from database with username " + str(username))
         user_dict = self.collection.find_one({"username": username})
+
         if user_dict is not None:
             self.logger.info("Successfully found user with username " + str(username))
             return User(user_dict, True)

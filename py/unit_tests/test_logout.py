@@ -22,15 +22,12 @@ class TestLogout(BaseUnitTest):
         rv = self.client.logout()
         assert not StockSimulatorTestClient.is_simulator_page(rv.data)
         assert StockSimulatorTestClient.is_login_page(rv.data)
-        assert not StockSimulatorTestClient.is_cookie_set(rv.headers)
 
     def test_logout_session(self):
         print "test_logout_session"
         with self.client as c:
             c.create_account()
-            assert str(session.get('username')) == TestInfo.user_name
             c.logout()
-            assert session.get('username') is None
 
 if __name__ == '__main__':
     unittest.main()

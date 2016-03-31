@@ -14,8 +14,11 @@
                 var stockPercentChange = stockInfo['daily_percent_change']
                 var stockPriceChange = stockInfo['daily_price_change']
                 var currentPrice = stockInfo['price'];
+                var day_open = stockInfo.day_open;
+                var day_high = stockInfo.day_high;
+                var day_low = stockInfo.day_low;
 
-                for(var key in userStockMap) {
+                for (var key in userStockMap) {
                     var value = userStockMap[key];
                     totalNumOfStock += value;
                 }
@@ -25,6 +28,9 @@
                 $(parent + ' .stockPriceChange').text(stockPriceChange);
                 $(parent + ' .stockInfoPageAmountOwned').text(totalNumOfStock);
                 $(parent + ' .stockInfoPageStockPrice').text(currentPrice);
+                $(parent + ' .stockInfoPageDayOpen').text(day_open);
+                $(parent + ' .stockInfoPageDayHigh').text(day_high);
+                $(parent + ' .stockInfoPageDayLow').text(day_low);
             },
 
             setupButtons : function(parent) {

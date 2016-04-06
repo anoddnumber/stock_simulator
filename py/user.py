@@ -1,11 +1,13 @@
 from decimal import Decimal
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_login import UserMixin
 
-class User:
+class User(UserMixin):
     def __init__(self, user_dict, load_from_db = False):
         self._username = user_dict.get('username')
         if load_from_db:
             self._pw_hash = user_dict.get('password')
+            self._id = user_dict.get('_id')
         else:
             self._pw_hash = generate_password_hash(user_dict.get('password'))
         self._email = user_dict.get('email')
@@ -16,6 +18,10 @@ class User:
         user_dictionary = self.get_dict()
         user_dictionary.pop("password", None)
         return str(user_dictionary)
+
+    @property
+    def id(self):
+        return self._id
 
     @property
     def username(self):

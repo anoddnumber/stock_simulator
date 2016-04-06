@@ -1,6 +1,7 @@
 import unittest
 from base_unit_test import BaseUnitTest
 import simulator
+from stock_simulator_test_client import StockSimulatorTestClient
 
 class TestSellStock(BaseUnitTest):
 
@@ -30,7 +31,8 @@ class TestSellStock(BaseUnitTest):
         price = self.client.get_stock_info(symbol).data
 
         rv = self.client.sell_stock(symbol, 1, price)
-        assert "Not logged in, cannot sell stock." in rv.data
+        # assert "Not logged in, cannot sell stock." in rv.data
+        assert StockSimulatorTestClient.is_login_page(rv.data)
 
     def test_sell_bad_quantity(self):
         print "test_sell_bad_quantity"

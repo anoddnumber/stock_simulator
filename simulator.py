@@ -2,7 +2,7 @@ import json
 import cgi
 import time
 
-from flask import Flask, session, redirect, request, jsonify, url_for
+from flask import Flask, redirect, request, jsonify, url_for
 from jinja2 import Environment, PackageLoader
 from flask_debugtoolbar import DebugToolbarExtension
 
@@ -17,51 +17,51 @@ import py.logging_setup
 import logging
 import urllib
 import urllib2
+from flask_login import LoginManager, login_required, login_user, logout_user, current_user
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='')
+
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = '/'
+
 app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 config = {'defaultCash' : 50000}
 
 """
 The root page where the user logs into the application
 """
+
 @app.route("/", methods=['GET'])
 def root():
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
-    username = session.get('username')
-    if username is None:
+
+    if current_user.is_authenticated:
+        logger.info("User with username " + str(current_user.username) + " is already authenticated.")
+        cash = str(current_user.get_rounded_cash())
+        username = cgi.escape(current_user.username)
+
+        template = env.get_template('simulator.html') #TODO change name
+        return template.render(username=username, cash=cash)
+    else:
         logger.info("User that is not logged in is at the login page.")
         template = env.get_template('index.html')
         return template.render()
-    else:
-        user = users_db_access.get_user_by_username(username)
-        if user is None:
-            logger.error("User with username " + str(username) +
-                         " has session cookie but is not found in the database." +
-                         " Displaying the login page.")
-            session.pop('username', None)
-            template = env.get_template('index.html')
-            return template.render()
-        cash = str(user.get_rounded_cash())
-        username = cgi.escape(username)
-        logger.info("User with username " + str(username) + " has been found in the database.")
-        template = env.get_template('simulator.html') #TODO change name
-        return template.render(username=username, cash=cash)
 
-"""
-Returns a page where the user can buy/sell stocks as well as information regarding the stock.
-"""
-@app.route("/stockInfo", methods=['GET'])
-def stock_info():
-    symbol = cgi.escape(request.args.get('symbol'))
-    price = get_stock_info_helper([symbol])
-
-    logger.info("Retrieving information for stock with symbol " + str(symbol) +
-                "and price " + str(price))
-
-    template = env.get_template('stock_info_page.html')
-    return template.render(symbol=symbol, price=price)
+# """
+# Returns a page where the user can buy/sell stocks as well as information regarding the stock.
+# """
+# @app.route("/stockInfo", methods=['GET'])
+# def stock_info():
+#     symbol = cgi.escape(request.args.get('symbol'))
+#     price = get_stock_info_helper([symbol])
+#
+#     logger.info("Retrieving information for stock with symbol " + str(symbol) +
+#                 "and price " + str(price))
+#
+#     template = env.get_template('stock_info_page.html')
+#     return template.render(symbol=symbol, price=price)
 
 """
 Gets the stock prices of the passed in symbols.
@@ -75,6 +75,7 @@ The cache will update if it has been more than n minutes since it has updated (s
 The stock prices will be returned in the same order as the arguments, delimited by newlines ("\n").
 """
 @app.route("/info", methods=['GET'])
+@login_required
 def get_stock_info():
     symbols = request.args.get('symbols')
     logger.info("Retrieving information for stock symbols " + str(symbols))
@@ -100,6 +101,7 @@ and whose values are the stock symbols' names and prices.
 TODO: retrieve the NASDAQ file daily (currently called stock_symbols.txt) and generate the json file daily (currently called parsed_symbols.json).
 """
 @app.route("/stockSymbolsMap", methods=['GET'])
+@login_required
 def get_stock_symbol_map():
     logger.info("Retrieving the stockSymbolsMap")
     seconds_left = cache.update(5)
@@ -178,7 +180,8 @@ def create_account():
         logger.info("User tried creating an account but failed because " + str(email) + " already exists")
         template = env.get_template('index.html')
         return template.render(createAccountError='Email already taken.')
-    session['username'] = user.username
+    user = users_db_access.get_user_by_email(email) #get the newly created user for the generated _id
+    login_user(user)
     return redirect(url_for('root'))
 
 """
@@ -188,24 +191,25 @@ TODO: Cookies
 @app.route("/login", methods=['POST'])
 def login():
     email = request.form['email']
+    password = request.form['password']
+
     user = users_db_access.get_user_by_email(email)
     logger.info("User: " + str(user) + " tried logging in")
-
-    password = request.form['password']
+    
     if not user:
         logger.info("User tried logging in with email " + str(email) + " but failed because no user exists for the email")
         template = env.get_template('index.html')
         return template.render(loginError='Email and password do not match up.')
 
     if user.check_password(password):
-        logger.info("Password matches, login successful.")
+        remember_me = str(request.form.get('remember-me')) == "true"
+        logger.info("Password matches, login successful. Remember me: " + str(remember_me))
+        login_user(user, remember_me)
     else:
         logger.info("Login failed, password incorrect.")
         template = env.get_template('index.html')
         return template.render(loginError='Email and password do not match up.')
 
-    #session.pop('username', None) #this probably isn't needed..
-    session['username'] = user.username
     return redirect(url_for('root'))
 
 """
@@ -213,23 +217,13 @@ Logs the user out.
 """
 @app.route("/logout", methods=['POST'])
 def logout():
-    username = session.get('username')
-    logger.info("User " + str(username) + " logging out")
-
-    session.pop('username', None)
+    logout_user()
     return redirect(url_for('root'))
 
 @app.route("/buyStock", methods=['POST'])
+@login_required
 def buy_stock():
-    username = session.get('username')
-    if username is None:
-        logger.warning("Non-logged in user tried buying stock")
-        return 'Not logged in, cannot buy stock.'
-    
-    user = users_db_access.get_user_by_username(username)
-    if user is None:
-        logger.warning("User trying to buy stock has session, but has no record in database with username " + str(username))
-        return 'User with username ' + username + ' not found in database.'
+    username = current_user.username
 
     try:
         symbol = request.form['symbol']
@@ -266,27 +260,20 @@ def buy_stock():
 
     total_cost = quantity * stock_price
     # check that the user has enough cash to buy the stocks requested
-    if total_cost >= user.cash:
+    if total_cost >= current_user.cash:
         logger.warning("User " + str(username) + " tried to buy more stocks than he/she can afford")
-        logger.warning("total_cost: " + str(total_cost) + ", user.cash: " + str(user.cash))
+        logger.warning("total_cost: " + str(total_cost) + ", user.cash: " + str(current_user.cash))
         return "Not enough cash"
 
     logger.info("User " + str(username) + " passed all validation for buying " + str(quantity) + " stocks with symbol " + str(symbol) +
                " at a stock price of " + str(stock_price) + ", totaling a cost of " + str(total_cost))
     # buy the stock
-    return users_db_access.add_stock_to_user(user.username, symbol, stock_price, quantity)
+    return users_db_access.add_stock_to_user(username, symbol, stock_price, quantity)
 
 @app.route("/sellStock", methods=['POST'])
+@login_required
 def sell_stock():
-    username = session.get('username')
-    if username is None:
-        logger.warning("Non-logged in user tried selling stock")
-        return 'Not logged in, cannot sell stock.'
-    
-    user = users_db_access.get_user_by_username(username)
-    if user is None:
-        logger.warning("User trying to sell stock has session, but has no record in database with username " + str(username))
-        return 'User with username ' + str(username) + ' not found in database.'
+    username = current_user.username
 
     try:
         symbol = request.form['symbol']
@@ -311,7 +298,7 @@ def sell_stock():
     server_stock_price = float(symbol_map.get("price"))
 
     if stock_price < 0 or quantity < 0:
-        logger.warning("User " + str(username) + " tried to sell a negative amount of stock or for a negative price")
+        logger.warning("User with username " + str(username) + " tried to sell a negative amount of stock or for a negative price")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
         return "Stock price or quantity less than 0"
 
@@ -319,25 +306,23 @@ def sell_stock():
         logger.warning("User tried to sell the stock at price " + str(stock_price) + " but the server stock price was " + str(server_stock_price))
         return "Stock price changed, please try again."
 
-    logger.info("User " + str(username) + " passed all validations for selling " + str(quantity) + " stocks with symbol " + str(symbol) +
+    logger.info("User with username " + str(username) + " passed all validations for selling " + str(quantity) + " stocks with symbol " + str(symbol) +
                " at a stock price of " + str(stock_price))
     # sell the stock
     return users_db_access.sell_stocks_from_user(username, symbol, quantity, cache)
 
 @app.route("/getUserInfo", methods=['GET'])
+@login_required
 def get_user_info():
-    username = session.get('username')
-    if username is None:
-        logger.warning("Non-logged in user tried getting user information")
-        return 'Not logged in, cannot retrieve information.'
-    user = users_db_access.get_user_by_username(username)
-    if user is None:
-        logger.warning("User trying to get user information, but has no record in database with username " + str(username))
-        return 'Could not find the current user in the database.'
-    user_dict = {'cash' : user.get_rounded_cash(), 'stocks_owned' : user.stocks}
-    logger.info("Returning user information for " + str(username))
+    user_dict = {'cash' : current_user.get_rounded_cash(), 'stocks_owned' : current_user.stocks}
+    logger.info("Returning user information for " + str(current_user.username))
     logger.info("user_dict: " + str(user_dict))
     return json.dumps(user_dict, sort_keys=True)
+
+@login_manager.user_loader
+def load_user(user_id):
+   logger.info("loading user with user_id: " + str(user_id))
+   return users_db_access.get_user_by_id(user_id)
 
 """
 This method is used to send error messages to the client.
@@ -368,5 +353,6 @@ if __name__ == "__main__":
     init_logger()
     init_cache()
     init_db()
+
     logger.info("Starting server")
-    run_simple('localhost', 5000, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))
+    run_simple('localhost', 5000, app, ssl_context=('./ssl_key.crt', './ssl_key.key')) #use HTTPS in devo

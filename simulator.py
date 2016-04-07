@@ -195,16 +195,11 @@ def create_account():
     user = User2(**user_dict)
 
     try:
-        users_db_access.create_user(user)
-        # print "type datastore: " + str(type(users_db_access.user_datastore))
-        # from mongoengine import ValidationError
-        # try:
-        #     a = User2
-        #     b = a.objects(id=ObjectId("5705d26c2bb4974bfc377dcb")).first()
-        # except ValidationError:
-        #     pass
-        # b = user_datastore.get_user(ObjectId("5705d26c2bb4974bfc377dcb"))
-        # print "get_user_by_id2: " + str(b)
+        # users_db_access.create_user(user)
+        # b = users_db_access.get_user_by_id2("5705d7382bb4974f5d8343f1")
+        # b = users_db_access.get_user_by_email2("test_email@gmail.com")
+        b = users_db_access.get_user_by_username2("test_user_name")
+        print "get_user_by_id2: " + str(b)
     except DuplicateUsernameError:
         logger.info("User tried creating an account but failed because username " + str(username) + " already exists")
         template = env.get_template('index.html')

@@ -73,6 +73,9 @@ class UsersDbAccess:
         self.logger.info("No user found with username " + str(username))
         return None
 
+    def get_user_by_username2(self, username):
+        return self.user_datastore.find_user(username=username)
+
     def get_user_by_email(self, email):
         self.logger.info("Retrieving user from database with email " + str(email))
         user_dict = UsersDbAccess.collection.find_one({"email": email})
@@ -81,6 +84,9 @@ class UsersDbAccess:
             return User(user_dict, True)
         print 'No user found with email ' + email
         return None
+
+    def get_user_by_email2(self, email):
+        return self.user_datastore.find_user(email=email)
 
     def add_stock_to_user(self, username, symbol, price_per_stock, quantity):
         self.logger.info("Adding stock to user with username " + str(username))

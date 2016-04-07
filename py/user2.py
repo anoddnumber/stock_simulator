@@ -18,66 +18,72 @@ class User2(Document, UserMixin):
     cash = DecimalField(max_length=255, default=50000, precision=2)
     stocks_owned = DictField(default={})
 
-    def __init__(self, load_from_db = False, **kwargs):
-        super(User2, self).__init__()
-
-        if load_from_db:
-            self._pw_hash = kwargs.get('password')
-            self._id = kwargs.get('_id')
-        else:
-            self._pw_hash = generate_password_hash(kwargs.get('password'))
-
-        self.username = kwargs.get('username')
-        self.email = kwargs.get('email')
-        self.password = self._pw_hash
-        self.confirmed_at = kwargs.get('confirmed_at')
-        self.cash = kwargs.get('cash')
-        self.stocks_owned = kwargs.get('stocks_owned')
-
-    def __str__(self):
-        user_dictionary = self.get_dict()
-        user_dictionary.pop("password", None)
-        return str(user_dictionary)
-
-    # @property
-    # def id(self):
-    #     return self._id
+    # def __init__(self, load_from_db = False, **kwargs):
+    #     super(User2, self).__init__()
     #
+    #     if load_from_db:
+    #         self._pw_hash = kwargs.get('password')
+    #         self._id = kwargs.get('_id')
+    #     else:
+    #         self._pw_hash = generate_password_hash(kwargs.get('password'))
+    #
+    #     self._username = kwargs.get('username')
+    #     self.email = kwargs.get('email')
+    #     self.password = self._pw_hash
+    #     self.confirmed_at = kwargs.get('confirmed_at')
+    #     self.cash = kwargs.get('cash')
+    #     self.stocks_owned = kwargs.get('stocks_owned')
+    #
+    def __str__(self):
+        # user_dictionary = self.get_dict()
+        # user_dictionary.pop("password", None)
+        user_dictionary = {
+            'username' : self.username,
+            'email' : self.email,
+            'cash' : self.cash,
+            'stocks_owned' : self.stocks_owned
+        }
+        return str(user_dictionary)
+    #
+    # # @property
+    # # def id(self):
+    # #     return self._id
+    # #
     # @property
     # def username(self):
-    #     return self.username
-    #
-    @property
-    def password_hash(self):
-        return self._pw_hash
-    #
-    # def check_password(self, password):
-    #     return check_password_hash(self._pw_hash, password)
+    #     return self._username
     #
     # @property
-    # def email(self):
-    #     return self.email
+    # def password_hash(self):
+    #     return self._pw_hash
+    # #
+    # # def check_password(self, password):
+    # #     return check_password_hash(self._pw_hash, password)
+    # #
+    # # @property
+    # # def email(self):
+    # #     return self.email
+    # #
+    # # @property
+    # # def cash(self):
+    # #     return self.cash
+    # #
+    # # @property
+    # # def stocks(self):
+    # #     return self.stocks
     #
-    # @property
-    # def cash(self):
-    #     return self.cash
+    # def get_rounded_cash(self):
+    #     if self.cash is None:
+    #         return None
+    #     cash = Decimal(self.cash)
+    #     cash = '{:.2f}'.format(round(cash, 2))
+    #     return cash
     #
-    # @property
-    # def stocks(self):
-    #     return self.stocks
-
-    def get_rounded_cash(self):
-        if self.cash is None:
-            return None
-        cash = Decimal(self.cash)
-        cash = '{:.2f}'.format(round(cash, 2))
-        return cash
-
-    def get_dict(self):
-        return {
-                "username" : self.username,
-                "password" : self.password_hash,
-                "email" : self.email,
-                "cash" : self.cash,
-                "stocks_owned" : self.stocks
-                }
+    # def get_dict(self):
+    #     return {
+    #             "username" : self.username,
+    #             "password" : self.password_hash,
+    #             "email" : self.email,
+    #             "cash" : self.cash,
+    #             "stocks_owned" : self.stocks
+    #             }

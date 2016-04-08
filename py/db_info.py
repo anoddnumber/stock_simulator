@@ -2,7 +2,8 @@ from pymongo import MongoClient
 
 class DBInfo:
     db_name = "stock_market_simulator_db"
-    collection_name = "users"
+    # collection_name = "users"
+    collection_name = "user2"
     db_port = 27017
 
     @staticmethod

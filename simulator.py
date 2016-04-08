@@ -18,10 +18,11 @@ import py.logging_setup
 import logging
 import urllib
 import urllib2
-from flask_login import LoginManager, login_user, logout_user, current_user
+from flask_login import logout_user
 from flask_mongoengine import MongoEngine, Document
 from py.db_info import DBInfo
-from flask_security import Security, MongoEngineUserDatastore, UserMixin, RoleMixin, login_required
+from flask_security import Security, MongoEngineUserDatastore, UserMixin, RoleMixin, login_required, login_user, \
+    current_user, user_confirmed
 from bson.objectid import ObjectId
 from py.user2 import User2, Role
 
@@ -34,9 +35,9 @@ app.config['MONGODB_DB'] = DBInfo.db_name
 app.config['MONGODB_HOST'] = 'localhost'
 app.config['MONGODB_PORT'] = DBInfo.db_port
 
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = '/'
+# login_manager = LoginManager()
+# login_manager.init_app(app)
+# login_manager.login_view = '/'
 
 config = {'defaultCash' : 50000}
 db = MongoEngine(app)
@@ -58,10 +59,12 @@ The root page where the user logs into the application
 @app.route("/", methods=['GET'])
 def root():
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
+    print "current_user2: " + str(current_user)
+    print "current_user.is_authenticated2: " + str(current_user.is_authenticated)
 
     if current_user.is_authenticated:
         logger.info("User with username " + str(current_user.username) + " is already authenticated.")
-        cash = str(current_user.get_rounded_cash())
+        cash = str(current_user.cash)
         username = cgi.escape(current_user.username)
 
         template = env.get_template('simulator.html') #TODO change name
@@ -148,25 +151,25 @@ def create_account():
     retype_password = request.form['retypePassword']
     email = request.form['email'].strip()
 
-    # if statement for unit tests to bypass recaptcha
-    if not config.get("DEBUG"):
-        captcha = request.form['g-recaptcha-response']
-
-        logger.info("captcha: " + str(captcha))
-        data = urllib.urlencode({'secret' : '6Lf7ZBoTAAAAAHIKbm4AnecJxycyM5PIjmWt3eO_',
-                             'response'  : captcha})
-        u = urllib2.urlopen('https://www.google.com/recaptcha/api/siteverify', data)
-        google_response = u.read()
-        logger.info("Google responded to captcha with " + str(google_response))
-
-        google_json = json.loads(google_response)
-        logger.info('google_json.get("success"): ' + str(google_json.get("success")))
-
-        if not google_json.get("success"):
-            logger.warning("User tried creating an account but failed because reCaptcha failed")
-            template = env.get_template('index.html')
-            return template.render(createAccountError='Failed to create an account, please try again.')
-
+    # # if statement for unit tests to bypass recaptcha
+    # if not config.get("DEBUG"):
+    #     captcha = request.form['g-recaptcha-response']
+    #
+    #     logger.info("captcha: " + str(captcha))
+    #     data = urllib.urlencode({'secret' : '6Lf7ZBoTAAAAAHIKbm4AnecJxycyM5PIjmWt3eO_',
+    #                          'response'  : captcha})
+    #     u = urllib2.urlopen('https://www.google.com/recaptcha/api/siteverify', data)
+    #     google_response = u.read()
+    #     logger.info("Google responded to captcha with " + str(google_response))
+    #
+    #     google_json = json.loads(google_response)
+    #     logger.info('google_json.get("success"): ' + str(google_json.get("success")))
+    #
+    #     if not google_json.get("success"):
+    #         logger.warning("User tried creating an account but failed because reCaptcha failed")
+    #         template = env.get_template('index.html')
+    #         return template.render(createAccountError='Failed to create an account, please try again.')
+    #
     if username == "" or password == "" or email == "":
         logger.warning("User tried to create account with either a blank username, password, or email")
         template = env.get_template('index.html')
@@ -191,30 +194,50 @@ def create_account():
                 'email' : email,
                 'cash' : config.get('defaultCash'),
                 'stocks_owned' : {} }
-    # user = User(user_dict)
+    # # user = User(user_dict)
     user = User2(**user_dict)
-
-    try:
-        # users_db_access.create_user(user)
-        # b = users_db_access.get_user_by_id2("5705d7382bb4974f5d8343f1")
-        # b = users_db_access.get_user_by_email2("test_email@gmail.com")
-        b = users_db_access.get_user_by_username2("test_user_name")
-        print "get_user_by_id2: " + str(b)
-    except DuplicateUsernameError:
+    #
+    b = users_db_access.get_user_by_username2(username)
+    c = users_db_access.get_user_by_email2(email)
+    if b:
         logger.info("User tried creating an account but failed because username " + str(username) + " already exists")
         template = env.get_template('index.html')
         return template.render(createAccountError='Username already taken.')
-    except DuplicateEmailError:
+    elif c:
         logger.info("User tried creating an account but failed because " + str(email) + " already exists")
         template = env.get_template('index.html')
         return template.render(createAccountError='Email already taken.')
+    else:
+        user = users_db_access.create_user(user)
+        # user = user_datastore.create_user(email=email, username=username, password=password)
+    #     # b = users_db_access.get_user_by_id2("5705d7382bb4974f5d8343f1")
+    #     # b = users_db_access.get_user_by_email2("test_email@gmail.com")
+    #     b = users_db_access.get_user_by_username2("test_user_name")
+    #     print "get_user_by_id2: " + str(b)
+    #     template = env.get_template('index.html')
+    #     return template.render(createAccountError='Username already taken.')
+    # except DuplicateEmailError:
+    #     logger.info("User tried creating an account but failed because " + str(email) + " already exists")
+    #     template = env.get_template('index.html')
+    #     return template.render(createAccountError='Email already taken.')
     # user = users_db_access.get_user_by_email(email) #get the newly created user for the generated _id
-    # login_user(user)
+    # user = user_datastore.get_user("570742a22bb4970b711f2f07")
+    print "user: " + str(user)
+    c = login_user(user)
+    print "c: " + str(c)
+    print "current_user: " + str(current_user)
+    print "current_user.is_authenticated: " + str(current_user.is_authenticated)
 
     # print "user.get_id(): " + str(user.get_id())
     # print "users_db_access.get_user(userid): " + str(users_db_access.get_user_by_id2(user.get_id()))
 
     return redirect(url_for('root'))
+    # return "abc"
+
+@app.route("/test", methods=['GET'])
+def testing():
+    print "current_user23: " + str(current_user)
+    return "blah"
 
 """
 Logs the user in. Verifies that the given username and password match the ones in the database.
@@ -346,15 +369,17 @@ def sell_stock():
 @app.route("/getUserInfo", methods=['GET'])
 @login_required
 def get_user_info():
-    user_dict = {'cash' : current_user.get_rounded_cash(), 'stocks_owned' : current_user.stocks}
+    user_dict = {'cash' : str(current_user.cash), 'stocks_owned' : current_user.stocks_owned}
     logger.info("Returning user information for " + str(current_user.username))
     logger.info("user_dict: " + str(user_dict))
     return json.dumps(user_dict, sort_keys=True)
 
-@login_manager.user_loader
-def load_user(user_id):
-   logger.info("loading user with user_id: " + str(user_id))
-   return users_db_access.get_user_by_id(user_id)
+# @login_manager.user_loader
+# def load_user(user_id):
+#     logger.info("loading user with user_id: " + str(user_id))
+#     print "IT'S CALLING LOAD USER?!?!?!??!?!?!?!??!?!?!?!?!?!??!"
+#     # return users_db_access.get_user_by_id2(user_id)
+#     return users_db_access.get_user_by_id2("570729832bb4977ab8b4b3fd")
 
 """
 This method is used to send error messages to the client.

@@ -61,7 +61,7 @@ class UsersDbAccess:
 
         # self.user_datastore.create_user(email=user.email, username=user.username, password=user.password_hash)
         # self.user_datastore.create_user()
-        self.user_datastore.create_user(email=user.email, username=user.username, password=user.password)
+        return self.user_datastore.create_user(email=user.email, username=user.username, password=user.password)
 
     def get_user_by_username(self, username):
         self.logger.info("Retrieving user from database with username " + str(username))

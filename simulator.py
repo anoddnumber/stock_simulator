@@ -20,7 +20,8 @@ import urllib
 import urllib2
 from flask_mongoengine import MongoEngine, Document
 from py.db_info import DBInfo
-from flask_security import Security, MongoEngineUserDatastore, UserMixin, RoleMixin, login_required, login_user, \
+from flask_login import LoginManager, login_required, set_login_view
+from flask_security import Security, MongoEngineUserDatastore, UserMixin, RoleMixin, login_user, \
     current_user, user_confirmed, logout_user
 from bson.objectid import ObjectId
 from py.user2 import User2, Role
@@ -33,10 +34,12 @@ app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 app.config['MONGODB_DB'] = DBInfo.db_name
 app.config['MONGODB_HOST'] = 'localhost'
 app.config['MONGODB_PORT'] = DBInfo.db_port
+# app.config['login_view'] = 'login'
 
-# login_manager = LoginManager()
-# login_manager.init_app(app)
-# login_manager.login_view = '/'
+
+
+
+# login_manager.unauthorized_handler(root)
 
 config = {'defaultCash' : 50000}
 db = MongoEngine(app)
@@ -47,10 +50,22 @@ db = MongoEngine(app)
 user_datastore = MongoEngineUserDatastore(db, User2, Role)
 security = Security(app, user_datastore, register_blueprint=False)
 
-# testuser = user_datastore.create_user(email='testemailasdfasdfasdf@nobien.net', password='password', confirmed_at = str(datetime.datetime.utcnow().isoformat()))
-# abc = user_datastore.get_user(ObjectId("56f8a2922bb4974e58603815"))
-# print "abc: " + str(abc.email)
+security.app.login_manager.login_view = 'root' #this will give a ?next= in the URL. Using the unauthorized handler will give more control,
+                                               #we can add the next parameter later
 
+@security.app.login_manager.unauthorized_handler
+def unauthorized_callback():
+    return redirect(url_for('root'))
+
+# # Make sure the login_manager is initialized after security or else it gets overridden
+# login_manager = LoginManager()
+# login_manager.init_app(app)
+# # login_manager.login_view = 'root' #this will give a ?next= in the URL. Using the unauthorized handler will give more control,
+#                                     #we can add the next parameter later
+#
+# @login_manager.unauthorized_handler
+# def unauthorized_callback():
+#     return redirect(url_for('root'))
 
 """
 The root page where the user logs into the application
@@ -249,12 +264,17 @@ def logout():
 @app.route("/buyStock", methods=['POST'])
 @login_required
 def buy_stock():
+    print "buy stock"
     username = current_user.username
 
     try:
+        print "symbol: " + str(request.form['symbol'])
+        print "quantity: " + str(request.form['quantity'])
+        print "stock_price: " + str(request.form['stockPrice'])
         symbol = request.form['symbol']
         quantity = int(request.form['quantity'])
         stock_price = float(request.form['stockPrice'])
+
     except ValueError:
         logger.warning("User trying to buy stock but there was an error trying to read the arguments")
         return "Error reading arguments"

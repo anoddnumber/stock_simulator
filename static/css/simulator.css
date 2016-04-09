@@ -32,8 +32,10 @@ a:visited{
 }
 
 .dataTables_wrapper .dataTables_filter label input {
-    width: 45%;
+    width: 65%;
+    height: 30px;
     margin-left: 0;
+    margin-bottom: 0.4%;
 }
 
 /* Navigation bar CSS */

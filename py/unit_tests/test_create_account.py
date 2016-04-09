@@ -8,9 +8,6 @@ class TestCreateAccount(BaseUnitTest):
         print "test_create_account_success"
         rv = self.client.create_account()
 
-
-        print "rv.data: " + str(rv.data)
-
         assert StockSimulatorTestClient.is_simulator_page(rv.data)
         assert rv.status_code == 200
 

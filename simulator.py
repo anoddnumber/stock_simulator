@@ -1,29 +1,25 @@
 import json
 import cgi
 import time
-import datetime
 
 from flask import Flask, redirect, request, jsonify, url_for
 from jinja2 import Environment, PackageLoader
 from flask_debugtoolbar import DebugToolbarExtension
 
 from py.db_access import UsersDbAccess
-# from py.user import User
 from py.exceptions.invalid_usage import InvalidUsage
 from py.cache import Cache
-from py.exceptions.create_account_errors import *
 from werkzeug.serving import run_simple
 
 import py.logging_setup
 import logging
 import urllib
 import urllib2
-from flask_mongoengine import MongoEngine, Document
+from flask_mongoengine import MongoEngine
 from py.db_info import DBInfo
-from flask_login import LoginManager, login_required, set_login_view
-from flask_security import Security, MongoEngineUserDatastore, UserMixin, RoleMixin, login_user, \
-    current_user, user_confirmed, logout_user
-from bson.objectid import ObjectId
+from flask_login import login_required
+from flask_security import Security, MongoEngineUserDatastore, login_user, \
+    current_user, logout_user
 from py.user2 import User2, Role
 
 env = Environment(loader=PackageLoader('py', 'templates'))
@@ -34,38 +30,18 @@ app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 app.config['MONGODB_DB'] = DBInfo.db_name
 app.config['MONGODB_HOST'] = 'localhost'
 app.config['MONGODB_PORT'] = DBInfo.db_port
-# app.config['login_view'] = 'login'
-
-
-
-
-# login_manager.unauthorized_handler(root)
 
 config = {'defaultCash' : 50000}
 db = MongoEngine(app)
-# class Role(db.Document, RoleMixin):
-#     name = db.StringField(max_length=80, unique=True)
-#     description = db.StringField(max_length=255)
-# Setup Flask-Security
 user_datastore = MongoEngineUserDatastore(db, User2, Role)
 security = Security(app, user_datastore, register_blueprint=False)
 
-security.app.login_manager.login_view = 'root' #this will give a ?next= in the URL. Using the unauthorized handler will give more control,
+# security.app.login_manager.login_view = 'root' #this will give a ?next= in the URL. Using the unauthorized handler will give more control,
                                                #we can add the next parameter later
 
 @security.app.login_manager.unauthorized_handler
 def unauthorized_callback():
     return redirect(url_for('root'))
-
-# # Make sure the login_manager is initialized after security or else it gets overridden
-# login_manager = LoginManager()
-# login_manager.init_app(app)
-# # login_manager.login_view = 'root' #this will give a ?next= in the URL. Using the unauthorized handler will give more control,
-#                                     #we can add the next parameter later
-#
-# @login_manager.unauthorized_handler
-# def unauthorized_callback():
-#     return redirect(url_for('root'))
 
 """
 The root page where the user logs into the application

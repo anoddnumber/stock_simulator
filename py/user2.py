@@ -44,6 +44,9 @@ class User2(Document, UserMixin):
             'stocks_owned' : self.stocks_owned
         }
         return str(user_dictionary)
+
+    def check_password(self, password):
+        return password == self.password #TODO hash + salt password and check hashed password here
     #
     # # @property
     # # def id(self):

@@ -6,7 +6,7 @@
         </div>
         <div class="col-xs-6 availableCash">
             Available Cash: <span class="stockInfoPageTotalCash"></span><br>
-        </div><br>
+        </div>
     </div>
     <div class="row">
         <div class="col-xs-6 column1">
@@ -45,16 +45,19 @@
             Amount Owned: <span class="stockInfoPageAmountOwned"></span><br>
 <!--          <button class="stockInfoPageStocksBuyButton buySell" type="button">Buy</button>
           <button class="stockInfoPageStocksSellButton buySell" type="button">Sell</button><br> -->
-            <form action="action_page.php">
+            <form action="action_page.php" class="buySell">
                 <input type="radio" name="market" value="buy" checked> Buy
+                &nbsp;&nbsp;&nbsp;
                 <input type="radio" name="market" value="sell"> Sell
 <!--            <input type="submit"> -->
             </form>
-            <form class="slider"> Quantity:<br><br>
-                <input type="range" name="foo" min="0" max="100" style="width: 250px;">
-                <output for="foo" onforminput="value = foo.valueAsNumber;"></output>
-                <input class="stockInfoPageStockQuantity" autocomplete="off" type="text" name="quantitybar" size="10">
+            Quantity:<br>
+            <form class="quantity">
+                <input class="slider" type="range" name="amountRange" min="0" max="100" value="0" oninput="this.form.amountInput.value=this.value" />
+                &nbsp;&nbsp;
+                <input class="stockInfoPageStockQuantity" type="number" name="amountInput" min="0" max="100" value="0" oninput="this.form.amountRange.value=this.value" />
             </form>
+
             Commission: <br>
             Total Price: <span class="stockInfoPageStockTotalPrice">0.00</span><br>
             <button class="stockInfoPageStocksConfirmButton" type="button">Confirm</button>

@@ -20,6 +20,7 @@ from py.db_info import DBInfo
 from flask_login import login_required
 from flask_security import Security, MongoEngineUserDatastore, login_user, \
     current_user, logout_user
+from flask_security.utils import encrypt_password
 from py.user import User, Role
 
 env = Environment(loader=PackageLoader('py', 'templates'))
@@ -30,6 +31,8 @@ app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 app.config['MONGODB_DB'] = DBInfo.db_name
 app.config['MONGODB_HOST'] = 'localhost'
 app.config['MONGODB_PORT'] = DBInfo.db_port
+app.config['SECURITY_PASSWORD_SALT'] = 'Zafaw9rtnisO9QCIi7ekdGNFu4cbIjtedzhWmMwebLE='
+app.config['SECURITY_PASSWORD_HASH'] = 'sha512_crypt'
 
 config = {'defaultCash' : 50000}
 db = MongoEngine(app)
@@ -177,18 +180,23 @@ def create_account():
         template = env.get_template('index.html')
         return template.render(createAccountError='Passwords do not match.')
 
-    user_dict = {'username' : username,
-                'password' : password,
-                'email' : email,
-                'cash' : config.get('defaultCash'),
-                'stocks_owned' : {} }
+    encrypted_password = encrypt_password(password)
+    print "encrypted_password: " + str(encrypted_password)
+
+    user_dict = {
+                'username': username,
+                'password': encrypted_password,
+                'email': email,
+                'cash': config.get('defaultCash'),
+                'stocks_owned': {}
+                 }
     user = User(**user_dict)
 
     if users_db_access.get_user_by_username(username):
         logger.info("User tried creating an account but failed because username " + str(username) + " already exists")
         template = env.get_template('index.html')
         return template.render(createAccountError='Username already taken.')
-    elif users_db_access.get_user_by_email2(email):
+    elif users_db_access.get_user_by_email(email):
         logger.info("User tried creating an account but failed because " + str(email) + " already exists")
         template = env.get_template('index.html')
         return template.render(createAccountError='Email already taken.')
@@ -208,7 +216,7 @@ def login():
     email = request.form['email']
     password = request.form['password']
 
-    user = users_db_access.get_user_by_email2(email)
+    user = users_db_access.get_user_by_email(email)
     logger.info("User: " + str(user) + " tried logging in")
 
     if not user:

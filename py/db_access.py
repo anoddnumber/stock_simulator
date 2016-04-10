@@ -5,14 +5,15 @@ from bson.objectid import ObjectId
 from db_info import DBInfo
 import logging
 
+
 class DbAccess:
     def __init__(self, dbname):
         self.dbname = dbname
         self.client = MongoClient()
         self.db = self.client[dbname]
 
-class UsersDbAccess:
 
+class UsersDbAccess:
     collection = DBInfo.get_collection()
 
     def __init__(self, user_datastore):
@@ -28,7 +29,7 @@ class UsersDbAccess:
     def get_user_by_username(self, username):
         return self.user_datastore.find_user(username=username)
 
-    def get_user_by_email2(self, email):
+    def get_user_by_email(self, email):
         return self.user_datastore.find_user(email=email)
 
     def add_stock_to_user(self, username, symbol, price_per_stock, quantity):

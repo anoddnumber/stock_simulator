@@ -1,6 +1,7 @@
 from flask_mongoengine import Document
 from mongoengine import StringField, BooleanField, DateTimeField, DecimalField, DictField, ListField, ReferenceField
 from flask_security import UserMixin, RoleMixin
+from flask_security.utils import verify_password
 
 class Role(Document, RoleMixin):
     name = StringField(max_length=80, unique=True)
@@ -20,12 +21,12 @@ class User(Document, UserMixin):
         # user_dictionary = self.get_dict()
         # user_dictionary.pop("password", None)
         user_dictionary = {
-            'username' : self.username,
-            'email' : self.email,
-            'cash' : self.cash,
-            'stocks_owned' : self.stocks_owned
+            'username': self.username,
+            'email': self.email,
+            'cash': self.cash,
+            'stocks_owned': self.stocks_owned
         }
         return str(user_dictionary)
 
     def check_password(self, password):
-        return password == self.password #TODO hash + salt password and check hashed password here
+        return verify_password(password, self.password)

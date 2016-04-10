@@ -1,14 +1,17 @@
 import simulator
 from test_info import TestInfo
 
+
 class StockSimulatorTestClient:
 
     def __init__(self):
-        simulator.config['TESTING'] = True
-        simulator.config['DEBUG'] = True
+        # simulator.config['TESTING'] = True
+        simulator.config['DEBUG'] = True  # Set to bypass reCaptcha
+        simulator.app.config['TESTING'] = True  # Set so that no emails are send during testing
         simulator.init_logger()
         simulator.init_cache('./static/cache.json')
         simulator.init_db()
+
         self.client = simulator.app.test_client()
 
     def __enter__(self):
@@ -70,7 +73,7 @@ class StockSimulatorTestClient:
     def is_simulator_page(data):
         return '<div id="stock_simulator">' in data
 
-    #only useful if follow_redirects is false
+    # only useful if follow_redirects is false
     @staticmethod
     def is_redirect(data, redirect_route=None):
         result = 'You should be redirected automatically to target URL:' in data

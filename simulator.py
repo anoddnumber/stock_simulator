@@ -20,6 +20,7 @@ from py.db_info import DBInfo
 from flask_login import login_required
 from flask_security import Security, MongoEngineUserDatastore, login_user, \
     current_user, logout_user
+from flask_mail import Mail, Message
 from flask_security.utils import encrypt_password
 from py.user import User, Role
 
@@ -33,8 +34,13 @@ app.config['MONGODB_HOST'] = 'localhost'
 app.config['MONGODB_PORT'] = DBInfo.db_port
 app.config['SECURITY_PASSWORD_SALT'] = 'Zafaw9rtnisO9QCIi7ekdGNFu4cbIjtedzhWmMwebLE='
 app.config['SECURITY_PASSWORD_HASH'] = 'sha512_crypt'
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = 'theofficialstockmeister'
+app.config['MAIL_PASSWORD'] = 'testaccount'
 
-config = {'defaultCash' : 50000}
+config = {'defaultCash': 50000}
 db = MongoEngine(app)
 user_datastore = MongoEngineUserDatastore(db, User, Role)
 security = Security(app, user_datastore, register_blueprint=False)
@@ -58,7 +64,7 @@ def root():
         cash = str(current_user.cash)
         username = cgi.escape(current_user.username)
 
-        template = env.get_template('simulator.html') #TODO change name
+        template = env.get_template('simulator.html')
         return template.render(username=username, cash=cash)
     else:
         logger.info("User that is not logged in is at the login page.")
@@ -205,6 +211,14 @@ def create_account():
 
     login_user(user)
 
+    mail = Mail(app)
+    message = Message("Welcome to Stock Meister", sender="Stock Meister <this_email_is_ignored@gmail.com>",
+                      recipients=[email])
+    logger.info("Sending email to user " + str(username) + " with email address " + str(email) + " because he/she created an account.")
+    logger.info("message: " + str(message))
+
+    mail.send(message)
+
     return redirect(url_for('root'))
 
 """
@@ -335,10 +349,11 @@ def sell_stock():
     # sell the stock
     return users_db_access.sell_stocks_from_user(username, symbol, quantity, cache)
 
+
 @app.route("/getUserInfo", methods=['GET'])
 @login_required
 def get_user_info():
-    user_dict = {'cash' : str(current_user.cash), 'stocks_owned' : current_user.stocks_owned}
+    user_dict = {'cash': str(current_user.cash), 'stocks_owned': current_user.stocks_owned}
     logger.info("Returning user information for " + str(current_user.username))
     logger.info("user_dict: " + str(user_dict))
     return json.dumps(user_dict, sort_keys=True)

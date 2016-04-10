@@ -2,6 +2,7 @@ import unittest
 from stock_simulator_test_client import StockSimulatorTestClient
 from base_unit_test import BaseUnitTest
 
+
 class TestCreateAccount(BaseUnitTest):
 
     def test_create_account_success(self):
@@ -34,7 +35,7 @@ class TestCreateAccount(BaseUnitTest):
         print "test_create_account_with_empty_password"
         self.client.create_account()
 
-        #same email, different username, different password
+        # same email, different username, different password
         rv = self.client.create_account(username="  ")
 
         assert "Invalid username, password, or email." in rv.data
@@ -45,7 +46,7 @@ class TestCreateAccount(BaseUnitTest):
         print "test_create_account_with_space_in_username"
         self.client.create_account()
 
-        #same email, different username, different password
+        # same email, different username, different password
         rv = self.client.create_account(username="test test")
 
         assert "Username cannot contain spaces." in rv.data
@@ -56,7 +57,7 @@ class TestCreateAccount(BaseUnitTest):
         print "test_duplicate_email"
         self.client.create_account()
 
-        #same email, different username, different password
+        # same email, different username, different password
         rv = self.client.create_account(username="different_username", password="different_pass", retype_password="different_pass")
 
         assert "Email already taken." in rv.data
@@ -67,7 +68,7 @@ class TestCreateAccount(BaseUnitTest):
         print "test_duplicate_username"
         self.client.create_account()
 
-        #same username, different email, same password
+        # same username, different email, same password
         rv = self.client.create_account(email="different_email@email.com")
 
         assert "Username already taken." in rv.data

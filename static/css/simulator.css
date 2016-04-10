@@ -1,5 +1,5 @@
 body {
-  margin : 0px;
+  margin-top : 70px;
   background-color: #eee;
 }
 
@@ -21,7 +21,7 @@ a:visited{
 
 .dataTables_wrapper .dataTables_filter {
     float: none;
-    text-align: none;
+    text-align: left;
     margin-left: auto;
     margin-right: auto;
     width: 98%;
@@ -32,14 +32,19 @@ a:visited{
 }
 
 .dataTables_wrapper .dataTables_filter label input {
-    width: 100%;
+    width: 45%;
     margin-left: 0;
 }
 
 /* Navigation bar CSS */
+
 .navbar-default {
   background-color: #000000;
   border-color: #eeeeee;
+  position: fixed;
+  width: 100%;
+  z-index:1;
+  margin-top: -70px;
 }
 .navbar-default .navbar-brand {
   color: #ffffff;
@@ -97,8 +102,11 @@ a:visited{
   }
 }
 
-
 /* Stock Info Page */
+.back {
+    text-align: left;
+}
+
 .availableCash {
     text-align: right;
     font-size: 20px;
@@ -128,8 +136,13 @@ a:visited{
 }
 
 .graph {
-    width: 650px;
-    height: 400px;
+    max-width: 100%;
+    height: auto;
+    width: auto;
+}
+
+.column3 {
+    padding: 0px;
 }
 
 /* .buySell {

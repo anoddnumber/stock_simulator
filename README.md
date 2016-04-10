@@ -4,7 +4,7 @@ Uses Python 2.7, Flask, HTML5, Javascript, CSS, MongoDB, and Bootstrap (uses Gru
 
 
 #Developer Information
-Install Python 2.7 (not Python 3, although it may still work), PyMongo (3.0.3+), MongoDB (3.0.6+), Flask (0.10.1+).
+Install Python 2.7 (not Python 3, although it may still work), PyMongo (3.0.3+), MongoDB (3.0.6+), Flask (0.10.1+), Flask-Login (0.3.2+).
 
 Note that Bootstrap (3.3.6+), Grunt (0.1.13+), and NodeJS (v4.2.2) do not need to be installed since the source files are in the repository. 
 

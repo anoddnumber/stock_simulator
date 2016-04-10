@@ -40,7 +40,13 @@ class UsersDbAccess:
 
         user_dict = UsersDbAccess.collection.find_one({"username": username})
         total_cost = price_per_stock * quantity
+
+        # format the price_per_stock to always have exactly 2 digits after the decimal
+        price_per_stock = '{0:.2f}'.format(price_per_stock)
+
+        # mongodb does not allow periods/has problems with them. Replace them with underscores
         price_per_stock = str(price_per_stock).replace('.', '_')
+
         try:
             num_stocks_owned = user_dict['stocks_owned'][symbol][price_per_stock]
         except KeyError, e:
@@ -56,7 +62,7 @@ class UsersDbAccess:
         self.logger.info("Updating the database for a buy transaction for username " + username)
         self.logger.info("update: " + str(update))
 
-        UsersDbAccess.collection.update({"username": username}, {"$set" : update})
+        UsersDbAccess.collection.update({"username": username}, {"$set": update})
 
         self.logger.info("Stock(s) bought successfully")
         return "Success"

@@ -20,7 +20,7 @@ from py.db_info import DBInfo
 from flask_login import login_required
 from flask_security import Security, MongoEngineUserDatastore, login_user, \
     current_user, logout_user
-from py.user2 import User2, Role
+from py.user import User, Role
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='')
@@ -33,7 +33,7 @@ app.config['MONGODB_PORT'] = DBInfo.db_port
 
 config = {'defaultCash' : 50000}
 db = MongoEngine(app)
-user_datastore = MongoEngineUserDatastore(db, User2, Role)
+user_datastore = MongoEngineUserDatastore(db, User, Role)
 security = Security(app, user_datastore, register_blueprint=False)
 
 # security.app.login_manager.login_view = 'root' #this will give a ?next= in the URL. Using the unauthorized handler will give more control,
@@ -49,8 +49,6 @@ The root page where the user logs into the application
 @app.route("/", methods=['GET'])
 def root():
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
-    print "current_user2: " + str(current_user)
-    print "current_user.is_authenticated2: " + str(current_user.is_authenticated)
 
     if current_user.is_authenticated:
         logger.info("User with username " + str(current_user.username) + " is already authenticated.")
@@ -184,9 +182,9 @@ def create_account():
                 'email' : email,
                 'cash' : config.get('defaultCash'),
                 'stocks_owned' : {} }
-    user = User2(**user_dict)
+    user = User(**user_dict)
 
-    if users_db_access.get_user_by_username2(username):
+    if users_db_access.get_user_by_username(username):
         logger.info("User tried creating an account but failed because username " + str(username) + " already exists")
         template = env.get_template('index.html')
         return template.render(createAccountError='Username already taken.')
@@ -240,13 +238,9 @@ def logout():
 @app.route("/buyStock", methods=['POST'])
 @login_required
 def buy_stock():
-    print "buy stock"
     username = current_user.username
 
     try:
-        print "symbol: " + str(request.form['symbol'])
-        print "quantity: " + str(request.form['quantity'])
-        print "stock_price: " + str(request.form['stockPrice'])
         symbol = request.form['symbol']
         quantity = int(request.form['quantity'])
         stock_price = float(request.form['stockPrice'])

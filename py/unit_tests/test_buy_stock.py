@@ -21,7 +21,7 @@ class TestBuyStock(BaseUnitTest):
         rv = self.client.buy_stock(symbol, quantity, price)
 
         assert "Success" in rv.data
-        self.assert_user_info({"AMZN" : {price.replace(".", "_") : quantity} },
+        self.assert_user_info({"AMZN": {price.replace(".", "_"): quantity}},
                               starting_cash - quantity * float(price))
 
     def test_buy_as_much_as_possible(self):

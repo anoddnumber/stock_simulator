@@ -1,8 +1,7 @@
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-from py.exceptions.create_account_errors import DuplicateEmailError, DuplicateUsernameError
 
-from user import User
+# from user import User
 from db_info import DBInfo
 import logging
 
@@ -13,53 +12,25 @@ class DbAccess:
         self.client = MongoClient()
         self.db = self.client[dbname]
 
-class UsersDbAccess:
 
+class UsersDbAccess:
     collection = DBInfo.get_collection()
 
-    def __init__(self):
+    def __init__(self, user_datastore):
         self.logger = logging.getLogger(__name__)
+        self.user_datastore = user_datastore
 
     def get_user_by_id(self, user_id):
-        self.logger.info("get_user_by_id user_id: " + str(user_id))
-
-        user_dict = self.collection.find_one({"_id": ObjectId(user_id)})
-
-        self.logger.info("get_user_by_id user_dict: " + str(user_dict))
-        if user_dict:
-            return User(user_dict, True)
-        return None
+        return self.user_datastore.get_user(ObjectId(user_id))
 
     def create_user(self, user):
-        self.logger.info("Creating user: " + str(user))
-        user_in_db = self.get_user_by_username(user.username)
-        if user_in_db is not None:
-            raise DuplicateUsernameError('Username already taken.')
-        elif self.get_user_by_email(user.email) is not None:
-            raise DuplicateEmailError('Account already exists for the given email.')
-        else:
-            self.logger.info("Successfully created the user")
-            self.collection.insert_one(user.get_dict())
-        return "Successful"
+        return self.user_datastore.create_user(email=user.email, username=user.username, password=user.password)
 
     def get_user_by_username(self, username):
-        self.logger.info("Retrieving user from database with username " + str(username))
-        user_dict = self.collection.find_one({"username": username})
-
-        if user_dict is not None:
-            self.logger.info("Successfully found user with username " + str(username))
-            return User(user_dict, True)
-        self.logger.info("No user found with username " + str(username))
-        return None
+        return self.user_datastore.find_user(username=username)
 
     def get_user_by_email(self, email):
-        self.logger.info("Retrieving user from database with email " + str(email))
-        user_dict = UsersDbAccess.collection.find_one({"email": email})
-        if user_dict is not None:
-            self.logger.info("Successfully found user with email " + str(email))
-            return User(user_dict, True)
-        print 'No user found with email ' + email
-        return None
+        return self.user_datastore.find_user(email=email)
 
     def add_stock_to_user(self, username, symbol, price_per_stock, quantity):
         self.logger.info("Adding stock to user with username " + str(username))
@@ -69,7 +40,13 @@ class UsersDbAccess:
 
         user_dict = UsersDbAccess.collection.find_one({"username": username})
         total_cost = price_per_stock * quantity
+
+        # format the price_per_stock to always have exactly 2 digits after the decimal
+        price_per_stock = '{0:.2f}'.format(price_per_stock)
+
+        # mongodb does not allow periods/has problems with them. Replace them with underscores
         price_per_stock = str(price_per_stock).replace('.', '_')
+
         try:
             num_stocks_owned = user_dict['stocks_owned'][symbol][price_per_stock]
         except KeyError, e:
@@ -85,7 +62,7 @@ class UsersDbAccess:
         self.logger.info("Updating the database for a buy transaction for username " + username)
         self.logger.info("update: " + str(update))
 
-        UsersDbAccess.collection.update({"username": username}, {"$set" : update})
+        UsersDbAccess.collection.update({"username": username}, {"$set": update})
 
         self.logger.info("Stock(s) bought successfully")
         return "Success"

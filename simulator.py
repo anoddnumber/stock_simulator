@@ -7,42 +7,71 @@ from jinja2 import Environment, PackageLoader
 from flask_debugtoolbar import DebugToolbarExtension
 
 from py.db_access import UsersDbAccess
-from py.user import User
 from py.exceptions.invalid_usage import InvalidUsage
 from py.cache import Cache
-from py.exceptions.create_account_errors import *
 from werkzeug.serving import run_simple
 
 import py.logging_setup
 import logging
 import urllib
 import urllib2
-from flask_login import LoginManager, login_required, login_user, logout_user, current_user
+from flask_mongoengine import MongoEngine
+from py.db_info import DBInfo
+from flask_security import Security, MongoEngineUserDatastore, login_user, \
+    current_user, logout_user, login_required
+from flask_mail import Mail, Message
+from flask_security.utils import encrypt_password
+from flask_security.confirmable import send_confirmation_instructions
+from py.user import User, Role
 
 env = Environment(loader=PackageLoader('py', 'templates'))
-app = Flask(__name__, static_url_path='')
-
-login_manager = LoginManager()
-login_manager.init_app(app)
-login_manager.login_view = '/'
-
+app = Flask(__name__, static_url_path='', template_folder='py/templates')
 app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
-config = {'defaultCash' : 50000}
+
+# MongoDB Config
+app.config['MONGODB_DB'] = DBInfo.db_name
+app.config['MONGODB_HOST'] = 'localhost'
+app.config['MONGODB_PORT'] = DBInfo.db_port
+app.config['SECURITY_PASSWORD_SALT'] = 'Zafaw9rtnisO9QCIi7ekdGNFu4cbIjtedzhWmMwebLE='
+app.config['SECURITY_PASSWORD_HASH'] = 'sha512_crypt'
+# Mail config
+app.config['MAIL_SERVER'] = 'smtp.gmail.com'
+app.config['MAIL_PORT'] = 465
+app.config['MAIL_USE_SSL'] = True
+app.config['MAIL_USERNAME'] = 'theofficialstockmeister'
+app.config['MAIL_PASSWORD'] = 'testaccount'
+# Flask-Security config
+app.config['SECURITY_CONFIRMABLE'] = True
+app.config['SECURITY_EMAIL_SENDER'] = 'Stock Meister <this_email_is_ignored@gmail.com>'
+app.config['SECURITY_LOGIN_URL'] = '/security_login'
+
+config = {'defaultCash': 50000}
+db = MongoEngine(app)
+user_datastore = MongoEngineUserDatastore(db, User, Role)
+# security = Security(app, user_datastore, register_blueprint=False)
+security = Security(app, user_datastore)
+mail = Mail(app)
+
+# security.app.login_manager.login_view = 'root' #this will give a ?next= in the URL. Using the unauthorized handler will give more control,
+                                               #we can add the next parameter later
+
+@security.app.login_manager.unauthorized_handler
+def unauthorized_callback():
+    return redirect(url_for('root'))
 
 """
 The root page where the user logs into the application
 """
-
 @app.route("/", methods=['GET'])
 def root():
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
 
     if current_user.is_authenticated:
         logger.info("User with username " + str(current_user.username) + " is already authenticated.")
-        cash = str(current_user.get_rounded_cash())
+        cash = str(current_user.cash)
         username = cgi.escape(current_user.username)
 
-        template = env.get_template('simulator.html') #TODO change name
+        template = env.get_template('simulator.html')
         return template.render(username=username, cash=cash)
     else:
         logger.info("User that is not logged in is at the login page.")
@@ -126,6 +155,7 @@ def create_account():
     retype_password = request.form['retypePassword']
     email = request.form['email'].strip()
 
+    # if statement for unit tests to bypass recaptcha
     if not config.get("DEBUG"):
         captcha = request.form['g-recaptcha-response']
 
@@ -163,25 +193,36 @@ def create_account():
         template = env.get_template('index.html')
         return template.render(createAccountError='Passwords do not match.')
 
-    user_dict = {'username' : username,
-                'password' : password,
-                'email' : email,
-                'cash' : config.get('defaultCash'),
-                'stocks_owned' : {} }
-    user = User(user_dict)
+    encrypted_password = encrypt_password(password)
+    print "encrypted_password: " + str(encrypted_password)
 
-    try:
-        users_db_access.create_user(user)
-    except DuplicateUsernameError:
+    user_dict = {
+                'username': username,
+                'password': encrypted_password,
+                'email': email,
+                'cash': config.get('defaultCash'),
+                'stocks_owned': {}
+                 }
+    user = User(**user_dict)
+
+    if users_db_access.get_user_by_username(username):
         logger.info("User tried creating an account but failed because username " + str(username) + " already exists")
         template = env.get_template('index.html')
         return template.render(createAccountError='Username already taken.')
-    except DuplicateEmailError:
+    elif users_db_access.get_user_by_email(email):
         logger.info("User tried creating an account but failed because " + str(email) + " already exists")
         template = env.get_template('index.html')
         return template.render(createAccountError='Email already taken.')
-    user = users_db_access.get_user_by_email(email) #get the newly created user for the generated _id
+    else:
+        user = users_db_access.create_user(user)
+
     login_user(user)
+
+    logger.info("Sending email to user " + str(username) + " with email address " + str(email) +
+                " because he/she created an account.")
+
+    send_confirmation_instructions(user)
+
     return redirect(url_for('root'))
 
 """
@@ -195,7 +236,7 @@ def login():
 
     user = users_db_access.get_user_by_email(email)
     logger.info("User: " + str(user) + " tried logging in")
-    
+
     if not user:
         logger.info("User tried logging in with email " + str(email) + " but failed because no user exists for the email")
         template = env.get_template('index.html')
@@ -229,6 +270,7 @@ def buy_stock():
         symbol = request.form['symbol']
         quantity = int(request.form['quantity'])
         stock_price = float(request.form['stockPrice'])
+
     except ValueError:
         logger.warning("User trying to buy stock but there was an error trying to read the arguments")
         return "Error reading arguments"
@@ -311,18 +353,14 @@ def sell_stock():
     # sell the stock
     return users_db_access.sell_stocks_from_user(username, symbol, quantity, cache)
 
+
 @app.route("/getUserInfo", methods=['GET'])
 @login_required
 def get_user_info():
-    user_dict = {'cash' : current_user.get_rounded_cash(), 'stocks_owned' : current_user.stocks}
+    user_dict = {'cash': str(current_user.cash), 'stocks_owned': current_user.stocks_owned}
     logger.info("Returning user information for " + str(current_user.username))
     logger.info("user_dict: " + str(user_dict))
     return json.dumps(user_dict, sort_keys=True)
-
-@login_manager.user_loader
-def load_user(user_id):
-   logger.info("loading user with user_id: " + str(user_id))
-   return users_db_access.get_user_by_id(user_id)
 
 """
 This method is used to send error messages to the client.
@@ -341,7 +379,7 @@ def init_logger():
 
 def init_db():
     global users_db_access
-    users_db_access = UsersDbAccess()
+    users_db_access = UsersDbAccess(user_datastore)
 
 def init_cache(cache_path=None):
     global cache

@@ -6,4 +6,3 @@ static/cache.json
 .pydevproject
 *.idea*
 
-*.log*

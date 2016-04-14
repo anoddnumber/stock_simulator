@@ -17,15 +17,15 @@ import urllib
 import urllib2
 from flask_mongoengine import MongoEngine
 from py.db_info import DBInfo
-from flask_login import login_required
 from flask_security import Security, MongoEngineUserDatastore, login_user, \
-    current_user, logout_user
+    current_user, logout_user, login_required
 from flask_mail import Mail, Message
 from flask_security.utils import encrypt_password
+from flask_security.confirmable import send_confirmation_instructions
 from py.user import User, Role
 
 env = Environment(loader=PackageLoader('py', 'templates'))
-app = Flask(__name__, static_url_path='')
+app = Flask(__name__, static_url_path='', template_folder='py/templates')
 app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 
 # MongoDB Config
@@ -34,16 +34,23 @@ app.config['MONGODB_HOST'] = 'localhost'
 app.config['MONGODB_PORT'] = DBInfo.db_port
 app.config['SECURITY_PASSWORD_SALT'] = 'Zafaw9rtnisO9QCIi7ekdGNFu4cbIjtedzhWmMwebLE='
 app.config['SECURITY_PASSWORD_HASH'] = 'sha512_crypt'
+# Mail config
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USERNAME'] = 'theofficialstockmeister'
 app.config['MAIL_PASSWORD'] = 'testaccount'
+# Flask-Security config
+app.config['SECURITY_CONFIRMABLE'] = True
+app.config['SECURITY_EMAIL_SENDER'] = 'Stock Meister <this_email_is_ignored@gmail.com>'
+app.config['SECURITY_LOGIN_URL'] = '/security_login'
 
 config = {'defaultCash': 50000}
 db = MongoEngine(app)
 user_datastore = MongoEngineUserDatastore(db, User, Role)
-security = Security(app, user_datastore, register_blueprint=False)
+# security = Security(app, user_datastore, register_blueprint=False)
+security = Security(app, user_datastore)
+mail = Mail(app)
 
 # security.app.login_manager.login_view = 'root' #this will give a ?next= in the URL. Using the unauthorized handler will give more control,
                                                #we can add the next parameter later
@@ -211,13 +218,10 @@ def create_account():
 
     login_user(user)
 
-    mail = Mail(app)
-    message = Message("Welcome to Stock Meister", sender="Stock Meister <this_email_is_ignored@gmail.com>",
-                      recipients=[email])
-    logger.info("Sending email to user " + str(username) + " with email address " + str(email) + " because he/she created an account.")
-    logger.info("message: " + str(message))
+    logger.info("Sending email to user " + str(username) + " with email address " + str(email) +
+                " because he/she created an account.")
 
-    mail.send(message)
+    send_confirmation_instructions(user)
 
     return redirect(url_for('root'))
 

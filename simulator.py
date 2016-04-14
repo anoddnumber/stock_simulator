@@ -140,7 +140,7 @@ def get_stock_symbol_map():
 
     info_dict = {'stockSymbolsMap' : cache.json, 'delay' : delay * 1000}
 
-    time.sleep(5)
+    # time.sleep(5)
     return jsonify(info_dict)
 
 """

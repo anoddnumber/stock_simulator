@@ -113,12 +113,15 @@ $( document ).ready(function() {
         'selectors' : ['#stockTableContainer', '#stocks .stockInfoPage']
     });
 
+    // https://datatables.net/reference/option/dom
+    // https://datatables.net/examples/advanced_init/dom_toolbar.html
     $('#stocks_table').DataTable({
         "lengthChange" : false,
         language: {
             search: "_INPUT_", //Don't display any label left of the search box
             searchPlaceholder: "Search"
-        }
+        },
+        "dom": 'f<"stockInfoPageTotalCash availableCash">tip' //TODO change the stockInfoPageTotalCash class..
     });
 
     ApiClient.updateCache(function() {

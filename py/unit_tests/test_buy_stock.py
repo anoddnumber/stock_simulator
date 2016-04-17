@@ -10,6 +10,8 @@ class TestBuyStock(BaseUnitTest):
     def test_basic_buy(self):
         print "test_basic_buy"
         self.client.create_account()
+        self.client.confirm_test_account()
+        self.client.login()
 
         symbol = "AMZN"
         starting_cash = simulator.config.get("defaultCash")
@@ -27,6 +29,8 @@ class TestBuyStock(BaseUnitTest):
     def test_buy_as_much_as_possible(self):
         print "test_buy_as_much_as_possible"
         self.client.create_account()
+        self.client.confirm_test_account()
+        self.client.login()
 
         symbol = "AMZN"
         starting_cash = simulator.config.get("defaultCash")
@@ -56,6 +60,8 @@ class TestBuyStock(BaseUnitTest):
     def test_buy_bad_quantity(self):
         print "test_buy_bad_quantity"
         self.client.create_account()
+        self.client.confirm_test_account()
+        self.client.login()
 
         symbol = "AMZN"
         starting_cash = simulator.config.get("defaultCash")
@@ -79,6 +85,8 @@ class TestBuyStock(BaseUnitTest):
     def test_buy_bad_symbol(self):
         print "test_buy_bad_symbol"
         self.client.create_account()
+        self.client.confirm_test_account()
+        self.client.login()
 
         symbol = "bad_symbol"
 
@@ -88,6 +96,8 @@ class TestBuyStock(BaseUnitTest):
     def test_buy_bad_stock_price(self):
         print "test_buy_bad_stock_price"
         self.client.create_account()
+        self.client.confirm_test_account()
+        self.client.login()
 
         symbol = "AMZN"
         quantity = 1
@@ -112,6 +122,8 @@ class TestBuyStock(BaseUnitTest):
     def test_buy_missing_argument(self):
         print "test_buy_missing_argument"
         self.client.create_account()
+        self.client.confirm_test_account()
+        self.client.login()
 
         symbol = "AMZN"
         quantity = 1

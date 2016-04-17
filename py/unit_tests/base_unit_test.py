@@ -1,10 +1,11 @@
 import unittest
 from stock_simulator_test_client import StockSimulatorTestClient
-from db_info import DBInfo
+from py.db_info import DBInfo
 from test_info import TestInfo
 import ast
 
 collection = DBInfo.get_collection()
+
 
 class BaseUnitTest(unittest.TestCase):
     def setUp(self):

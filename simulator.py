@@ -2,7 +2,7 @@ import json
 import cgi
 import time
 
-from flask import Flask, redirect, request, jsonify, url_for
+from flask import Flask, redirect, request, jsonify, url_for, g, current_app
 from jinja2 import Environment, PackageLoader
 from flask_debugtoolbar import DebugToolbarExtension
 
@@ -13,20 +13,19 @@ from werkzeug.serving import run_simple
 
 import py.logging_setup
 import logging
-import urllib
-import urllib2
 from flask_mongoengine import MongoEngine
 from py.db_info import DBInfo
 from flask_security import Security, MongoEngineUserDatastore, login_user, \
-    current_user, logout_user, login_required
-from flask_mail import Mail, Message
+    current_user, login_required
+from flask_mail import Mail
 from flask_security.utils import encrypt_password
 from flask_security.confirmable import send_confirmation_instructions
 from py.user import User, Role
+from py.extended_register_form import ExtendedRegisterForm
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='', template_folder='py/templates')
-app.secret_key='i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
+app.secret_key = 'i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 
 # MongoDB Config
 app.config['MONGODB_DB'] = DBInfo.db_name
@@ -34,49 +33,102 @@ app.config['MONGODB_HOST'] = 'localhost'
 app.config['MONGODB_PORT'] = DBInfo.db_port
 app.config['SECURITY_PASSWORD_SALT'] = 'Zafaw9rtnisO9QCIi7ekdGNFu4cbIjtedzhWmMwebLE='
 app.config['SECURITY_PASSWORD_HASH'] = 'sha512_crypt'
+
 # Mail config
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_USERNAME'] = 'theofficialstockmeister'
 app.config['MAIL_PASSWORD'] = 'testaccount'
-# Flask-Security config
-app.config['SECURITY_CONFIRMABLE'] = True
+
+# Flask-Security general config
+app.config['SECURITY_CONFIRMABLE'] = True  # the user must confirm their account through email
 app.config['SECURITY_EMAIL_SENDER'] = 'Stock Meister <this_email_is_ignored@gmail.com>'
-app.config['SECURITY_LOGIN_URL'] = '/security_login'
+app.config['WTF_CSRF_ENABLED'] = False  # use for debugging to be able to send requests over rest client
+
+# Flask-Security URL configs
+app.config['SECURITY_LOGIN_URL'] = '/login'
+app.config['SECURITY_POST_LOGIN_VIEW'] = '/'
+app.config['SECURITY_POST_REGISTER_VIEW'] = '/post_register'
+
+# Flask-Security register configs
+app.config['SECURITY_REGISTERABLE'] = True
+
+# Flask-Security login error messages
+app.config['SECURITY_MSG_CONFIRMATION_REQUIRED'] = ('Please confirm your account through your email.', 'error')
+app.config['SECURITY_MSG_EMAIL_NOT_PROVIDED'] = ('Email or password is incorrect.', 'error')
+app.config['SECURITY_MSG_PASSWORD_NOT_PROVIDED'] = ('Email or password is incorrect.', 'error')
+app.config['SECURITY_MSG_USER_DOES_NOT_EXIST'] = ('Email or password is incorrect.', 'error')
+app.config['SECURITY_MSG_PASSWORD_NOT_SET'] = ('Unexpected error.', 'error')
+app.config['SECURITY_MSG_INVALID_PASSWORD'] = ('Email or password is incorrect.', 'error')
+app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = ('This account is disabled.', 'error')
 
 config = {'defaultCash': 50000}
 db = MongoEngine(app)
 user_datastore = MongoEngineUserDatastore(db, User, Role)
 # security = Security(app, user_datastore, register_blueprint=False)
-security = Security(app, user_datastore)
+security = Security(app, user_datastore, confirm_register_form=ExtendedRegisterForm)
 mail = Mail(app)
 
-# security.app.login_manager.login_view = 'root' #this will give a ?next= in the URL. Using the unauthorized handler will give more control,
-                                               #we can add the next parameter later
+# security.app.login_manager.login_view = 'root' # this will give a ?next= in the URL.
+# Using the unauthorized handler will give more control, we can add the next parameter later
+
 
 @security.app.login_manager.unauthorized_handler
 def unauthorized_callback():
-    return redirect(url_for('root'))
+    list_routes()
+    return redirect(url_for('security.login'))
 
-"""
-The root page where the user logs into the application
-"""
+
 @app.route("/", methods=['GET'])
+@login_required
 def root():
+    """
+    The actual application
+    """
+    list_routes()  # for debugging
+
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
+    template = env.get_template('simulator.html')
+    return template.render()
 
-    if current_user.is_authenticated:
-        logger.info("User with username " + str(current_user.username) + " is already authenticated.")
-        cash = str(current_user.cash)
-        username = cgi.escape(current_user.username)
 
-        template = env.get_template('simulator.html')
-        return template.render(username=username, cash=cash)
-    else:
-        logger.info("User that is not logged in is at the login page.")
-        template = env.get_template('index.html')
-        return template.render()
+@security.context_processor
+def security_global_context_processor():
+    def get_form_error(form):
+        for field in form:
+            try:
+                if len(field.errors) > 0:
+                    return field.errors[0]
+            except AttributeError:
+                continue
+        return None
+    return dict(get_form_error=get_form_error)
+
+
+@app.route("/site-map")
+def site_map():
+    return str(list_routes())
+
+
+def list_routes():
+    import urllib
+    output = []
+    for rule in app.url_map.iter_rules():
+
+        options = {}
+        for arg in rule.arguments:
+            options[arg] = "[{0}]".format(arg)
+
+        methods = ','.join(rule.methods)
+        url = url_for(rule.endpoint, **options)
+        line = urllib.unquote("{:50s} {:20s} {}".format(rule.endpoint, methods, url))
+        output.append(line)
+
+    for line in sorted(output):
+        print line
+
+    return output
 
 # """
 # Returns a page where the user can buy/sell stocks as well as information regarding the stock.
@@ -143,123 +195,143 @@ def get_stock_symbol_map():
     # time.sleep(5)
     return jsonify(info_dict)
 
-"""
-This service creates an account for the user.
-It takes in a username, password and email, does verifications, and saves the information to the database
-or raises an error if there is an issue.
-"""
-@app.route("/createAccount", methods=['POST'])
-def create_account():
-    username = request.form['username'].strip()
-    password = request.form['password']
-    retype_password = request.form['retypePassword']
-    email = request.form['email'].strip()
 
-    # if statement for unit tests to bypass recaptcha
-    if not config.get("DEBUG"):
-        captcha = request.form['g-recaptcha-response']
+# """
+# This service creates an account for the user.
+# It takes in a username, password and email, does verifications, and saves the information to the database
+# or raises an error if there is an issue.
+# """
+# @app.route("/createAccount", methods=['POST'])
+# def create_account():
+#     username = request.form['username'].strip()
+#     password = request.form['password']
+#     retype_password = request.form['retypePassword']
+#     email = request.form['email'].strip()
+#
+#     # if statement for unit tests to bypass recaptcha
+#     # if not config.get("DEBUG"):
+#     #     captcha = request.form['g-recaptcha-response']
+#     #
+#     #     logger.info("captcha: " + str(captcha))
+#     #     data = urllib.urlencode({'secret' : '6Lf7ZBoTAAAAAHIKbm4AnecJxycyM5PIjmWt3eO_',
+#     #                          'response'  : captcha})
+#     #     u = urllib2.urlopen('https://www.google.com/recaptcha/api/siteverify', data)
+#     #     google_response = u.read()
+#     #     logger.info("Google responded to captcha with " + str(google_response))
+#     #
+#     #     google_json = json.loads(google_response)
+#     #     logger.info('google_json.get("success"): ' + str(google_json.get("success")))
+#     #
+#     #     if not google_json.get("success"):
+#     #         logger.warning("User tried creating an account but failed because reCaptcha failed")
+#     #         template = env.get_template('index.html')
+#     #         return template.render(createAccountError='Failed to create an account, please try again.')
+#
+#     if username == "" or password == "" or email == "":
+#         logger.warning("User tried to create account with either a blank username, password, or email")
+#         template = env.get_template('index.html')
+#         return template.render(createAccountError='Invalid username, password, or email.')
+#
+#     if " " in username:
+#         logger.warning("User tried to create an account with a space in it.")
+#         template = env.get_template('index.html')
+#         return template.render(createAccountError='Username cannot contain spaces.')
+#
+#     logger.info("User trying to create an account with username " + str(username) +
+#                  " and email " + str(email))
+#
+#     # Use != instead of "is not" since we are comparing unicode, not strings
+#     if password != retype_password:
+#         logger.info("User tried creating an account but failed because passwords didn't match")
+#         template = env.get_template('index.html')
+#         return template.render(createAccountError='Passwords do not match.')
+#
+#     encrypted_password = encrypt_password(password)
+#     print "encrypted_password: " + str(encrypted_password)
+#
+#     user_dict = {
+#                 'username': username,
+#                 'password': encrypted_password,
+#                 'email': email,
+#                 'cash': config.get('defaultCash'),
+#                 'stocks_owned': {}
+#                  }
+#     user = User(**user_dict)
+#
+#     if users_db_access.get_user_by_username(username):
+#         logger.info("User tried creating an account but failed because username " + str(username) + " already exists")
+#         template = env.get_template('index.html')
+#         return template.render(createAccountError='Username already taken.')
+#     elif users_db_access.get_user_by_email(email):
+#         logger.info("User tried creating an account but failed because " + str(email) + " already exists")
+#         template = env.get_template('index.html')
+#         return template.render(createAccountError='Email already taken.')
+#     else:
+#         user = users_db_access.create_user(user)
+#
+#     # login_user(user)
+#
+#     logger.info("Sending email to user " + str(username) + " with email address " + str(email) +
+#                 " because he/she created an account.")
+#
+#     send_confirmation_instructions(user)
+#
+#     # return redirect(url_for('root'))
+#     return "created account"
 
-        logger.info("captcha: " + str(captcha))
-        data = urllib.urlencode({'secret' : '6Lf7ZBoTAAAAAHIKbm4AnecJxycyM5PIjmWt3eO_',
-                             'response'  : captcha})
-        u = urllib2.urlopen('https://www.google.com/recaptcha/api/siteverify', data)
-        google_response = u.read()
-        logger.info("Google responded to captcha with " + str(google_response))
+# """
+# Logs the user in. Verifies that the given username and password match the ones in the database.
+# TODO: Cookies
+# """
+# @app.route("/login", methods=['POST'])
+# def login():
+#     email = request.form['email']
+#     password = request.form['password']
+#
+#     user = users_db_access.get_user_by_email(email)
+#     logger.info("User: " + str(user) + " tried logging in")
+#
+#     if not user:
+#         logger.info("User tried logging in with email " + str(email) + " but failed because no user exists for the email")
+#         template = env.get_template('index.html')
+#         return template.render(loginError='Email and password do not match up.')
+#
+#     if user.check_password(password):
+#         remember_me = str(request.form.get('remember-me')) == "true"
+#         logger.info("Password matches, login successful. Remember me: " + str(remember_me))
+#         login_user(user, remember_me)
+#     else:
+#         logger.info("Login failed, password incorrect.")
+#         template = env.get_template('index.html')
+#         return template.render(loginError='Email and password do not match up.')
+#
+#     return redirect(url_for('root'))
 
-        google_json = json.loads(google_response)
-        logger.info('google_json.get("success"): ' + str(google_json.get("success")))
 
-        if not google_json.get("success"):
-            logger.warning("User tried creating an account but failed because reCaptcha failed")
-            template = env.get_template('index.html')
-            return template.render(createAccountError='Failed to create an account, please try again.')
+@app.route("/post_register", methods=['GET'])
+def post_register():
+    """
+    The view that is shown to the user after they create a new account. The user will still have to
+    confirm their email address
+    """
+    # logout_user()
+    # return redirect(url_for('root'))
+    template = env.get_template('post_register.html')
+    return template.render()
 
-    if username == "" or password == "" or email == "":
-        logger.warning("User tried to create account with either a blank username, password, or email")
-        template = env.get_template('index.html')
-        return template.render(createAccountError='Invalid username, password, or email.')
 
-    if " " in username:
-        logger.warning("User tried to create an account with a space in it.")
-        template = env.get_template('index.html')
-        return template.render(createAccountError='Username cannot contain spaces.')
+# """
+# Logs the user out.
+# """
+# @app.route("/logout", methods=['POST'])
+# def logout():
+#     print "blah"
+#     print str(request.form.get('abc'))
+#     print "request.json: " + str(request.json)
+#     # logout_user()
+#     # return redirect(url_for('root'))
+#     return "hi"
 
-    logger.info("User trying to create an account with username " + str(username) +
-                 " and email " + str(email))
-
-    # Use != instead of "is not" since we are comparing unicode, not strings
-    if password != retype_password:
-        logger.info("User tried creating an account but failed because passwords didn't match")
-        template = env.get_template('index.html')
-        return template.render(createAccountError='Passwords do not match.')
-
-    encrypted_password = encrypt_password(password)
-    print "encrypted_password: " + str(encrypted_password)
-
-    user_dict = {
-                'username': username,
-                'password': encrypted_password,
-                'email': email,
-                'cash': config.get('defaultCash'),
-                'stocks_owned': {}
-                 }
-    user = User(**user_dict)
-
-    if users_db_access.get_user_by_username(username):
-        logger.info("User tried creating an account but failed because username " + str(username) + " already exists")
-        template = env.get_template('index.html')
-        return template.render(createAccountError='Username already taken.')
-    elif users_db_access.get_user_by_email(email):
-        logger.info("User tried creating an account but failed because " + str(email) + " already exists")
-        template = env.get_template('index.html')
-        return template.render(createAccountError='Email already taken.')
-    else:
-        user = users_db_access.create_user(user)
-
-    login_user(user)
-
-    logger.info("Sending email to user " + str(username) + " with email address " + str(email) +
-                " because he/she created an account.")
-
-    send_confirmation_instructions(user)
-
-    return redirect(url_for('root'))
-
-"""
-Logs the user in. Verifies that the given username and password match the ones in the database.
-TODO: Cookies
-"""
-@app.route("/login", methods=['POST'])
-def login():
-    email = request.form['email']
-    password = request.form['password']
-
-    user = users_db_access.get_user_by_email(email)
-    logger.info("User: " + str(user) + " tried logging in")
-
-    if not user:
-        logger.info("User tried logging in with email " + str(email) + " but failed because no user exists for the email")
-        template = env.get_template('index.html')
-        return template.render(loginError='Email and password do not match up.')
-
-    if user.check_password(password):
-        remember_me = str(request.form.get('remember-me')) == "true"
-        logger.info("Password matches, login successful. Remember me: " + str(remember_me))
-        login_user(user, remember_me)
-    else:
-        logger.info("Login failed, password incorrect.")
-        template = env.get_template('index.html')
-        return template.render(loginError='Email and password do not match up.')
-
-    return redirect(url_for('root'))
-
-"""
-Logs the user out.
-"""
-@app.route("/logout", methods=['POST'])
-def logout():
-    logout_user()
-    return redirect(url_for('root'))
 
 @app.route("/buyStock", methods=['POST'])
 @login_required
@@ -377,9 +449,11 @@ def init_logger():
     py.logging_setup.setup()
     logger = logging.getLogger(__name__)
 
+
 def init_db():
     global users_db_access
     users_db_access = UsersDbAccess(user_datastore)
+
 
 def init_cache(cache_path=None):
     global cache

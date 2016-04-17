@@ -3,9 +3,11 @@ from mongoengine import StringField, BooleanField, DateTimeField, DecimalField, 
 from flask_security import UserMixin, RoleMixin
 from flask_security.utils import verify_password
 
+
 class Role(Document, RoleMixin):
     name = StringField(max_length=80, unique=True)
     description = StringField(max_length=255)
+
 
 class User(Document, UserMixin):
     username = StringField(max_length=255)

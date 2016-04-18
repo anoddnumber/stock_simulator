@@ -43,24 +43,24 @@
         </div>
         <div class="col-xs-6 column2">
             Amount Owned: <span class="stockInfoPageAmountOwned"></span><br>
-<!--          <button class="stockInfoPageStocksBuyButton buySell" type="button">Buy</button>
-          <button class="stockInfoPageStocksSellButton buySell" type="button">Sell</button><br> -->
-            <form action="action_page.php" class="buySell">
-                <input type="radio" name="market" value="buy" checked> Buy
-                &nbsp;&nbsp;&nbsp;
-                <input type="radio" name="market" value="sell"> Sell
-<!--            <input type="submit"> -->
-            </form>
-            Quantity:<br>
-            <form class="quantity">
-                <input class="slider" type="range" name="amountRange" min="0" max="100" value="0" oninput="this.form.amountInput.value=this.value" />
-                &nbsp;&nbsp;
-                <input class="stockInfoPageStockQuantity" type="number" name="amountInput" min="0" max="100" value="0" oninput="this.form.amountRange.value=this.value" />
-            </form>
+            <form>
+                <div class="buySellRadioInput">
+                    <input type="radio" name="market" value="buy" checked> Buy
+                    &nbsp;&nbsp;&nbsp;
+                    <input type="radio" name="market" value="sell"> Sell
+                </div>
 
-            Commission: <br>
-            Total Price: <span class="stockInfoPageStockTotalPrice">0.00</span><br>
-            <button class="stockInfoPageStocksConfirmButton" type="button">Confirm</button>
+                Quantity:<br>
+                <div class="quantityBar">
+                    <input class="slider" type="range" name="amountRange" min="0" max="100" value="0" oninput="this.form.amountInput.value=this.value" />
+                    &nbsp;&nbsp;
+                    <input class="stockInfoPageStockQuantity" type="number" name="amountInput" min="0" max="100" value="0" oninput="this.form.amountRange.value=this.value=this.value.replace(/[^0-9]/g,'0');" />
+                </div>
+                Commission: <span class="stockInfoPageCommission">0.00</span><br>
+                Total Price: <span class="stockInfoPageStockTotalPrice">0.00</span><br>
+                <button class="stockInfoPageStocksConfirmButton" type="button">Confirm</button>
+            <!--                <input type="submit"> -->
+            </form>
         </div>
     </div>
 

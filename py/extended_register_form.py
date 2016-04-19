@@ -19,8 +19,7 @@ class ExtendedRegisterForm(RegisterForm):
         self.recaptcha_secret_key = '6Lf7ZBoTAAAAAHIKbm4AnecJxycyM5PIjmWt3eO_'
 
     def validate(self):
-        from simulator import config
-        from simulator import user_datastore
+        from simulator import config, user_datastore
 
         # Use standard validator
         validation = Form.validate(self)

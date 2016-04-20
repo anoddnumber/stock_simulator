@@ -34,25 +34,18 @@
             },
 
             setupButtons : function(parent) {
-                $(parent + ' .stockInfoPageStocksBuyButton').click(function() {
+                $(parent + ' .stockInfoPageStocksConfirmButton').click(function() {
                     var value = $(parent + ' .stockInfoPage input[name=quantitybar]').val().trim();
                     var price = $(parent + ' .stockInfoPageStockPrice').text().trim();
                     quantity = Utility.isPositiveInteger(value);
+                    console.log("quantity: " + quantity);
                     if (quantity) {
                         var symbol = $(parent + " .stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
-                        ApiClient.buyStock(symbol, quantity, price);
-                    } else {
-                        //TODO show error
-                    }
-                });
-
-                $(parent + ' .stockInfoPageStocksSellButton').click(function() {
-                    var value = $(parent + ' .stockInfoPage input[name=quantitybar]').val().trim();
-                    var price = $(parent + ' .stockInfoPageStockPrice').text().trim();
-                    quantity = Utility.isPositiveInteger(value);
-                    if (quantity) {
-                        var symbol = $(parent + " .stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
-                        ApiClient.sellStock(symbol, quantity, price);
+                        if ($(parent + ' .buyStockRadioButton').is(':checked')) {
+                            ApiClient.buyStock(symbol, quantity, price);
+                        } else if ($(parent + ' .sellStockRadioButton').is(':checked')) {
+                            ApiClient.sellStock(symbol, quantity, price);
+                        }
                     } else {
                         //TODO show error
                     }

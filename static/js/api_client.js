@@ -135,7 +135,7 @@ var config = {
                             console.log("getting user info error: " + err);
                         }
 
-                        $('.stockInfoPageTotalCash').text(userInfo.cash);
+                        $('.stockInfoPageTotalCash').text("Available Cash: $" + userInfo.cash);
                         $('#cashBox').text('Cash: $' + userInfo.cash);
                         $('#previewBuyStockCash').text('$' + userInfo.cash);
                         console.log("userInfo: " + JSON.stringify(userInfo));

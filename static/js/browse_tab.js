@@ -117,7 +117,7 @@ $( document ).ready(function() {
         "lengthChange" : false,
         language: {
             search: "_INPUT_", //Don't display any label left of the search box
-            searchPlaceholder: "Search"
+            searchPlaceholder: "  Search"
         }
     });
 

@@ -1,6 +1,6 @@
 body {
   margin-top : 70px;
-  background-color: #eee;
+  background-color: #E8E8E8;
 }
 
 tr {
@@ -33,16 +33,18 @@ a:visited{
 
 .dataTables_wrapper .dataTables_filter label input {
     width: 65%;
-    height: 30px;
+    height: 40px;
     margin-left: 0;
     margin-bottom: 0.4%;
+    border-style: solid;
+    border-color: #585858;
 }
 
 /* Navigation bar CSS */
 
 .navbar-default {
   background-color: #000000;
-  border-color: #eeeeee;
+  border-color: #E8E8E8;
   position: fixed;
   width: 100%;
   z-index:1;
@@ -64,18 +66,18 @@ a:visited{
   color: #7a7a7a;
 }
 .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
-  color: #7a7a7a;
-  background-color: #eeeeee;
+  color: #000000;
+  background-color: #E8E8E8;
 }
 .navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:hover, .navbar-default .navbar-nav > .open > a:focus {
-  color: #7a7a7a;
-  background-color: #eeeeee;
+  color: #000000;
+  background-color: #E8E8E8;
 }
 .navbar-default .navbar-toggle {
-  border-color: #eeeeee;
+  border-color: #E8E8E8;
 }
 .navbar-default .navbar-toggle:hover, .navbar-default .navbar-toggle:focus {
-  background-color: #eeeeee;
+  background-color: #E8E8E8;
 }
 .navbar-default .navbar-toggle .icon-bar {
   background-color: #ffffff;
@@ -147,12 +149,12 @@ a:visited{
     padding: 0px;
 }
 
-.buySell {
+.buySellRadioInput {
     margin-top: 3px;
     margin-bottom: 3px;
 }
 
-.quantity {
+.quantityBar {
     position: relative;
     margin-top: 10px;
     margin-bottom: 5px;

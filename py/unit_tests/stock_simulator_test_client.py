@@ -1,14 +1,20 @@
 import simulator
 from test_info import TestInfo
+from py.db_access import UsersDbAccess
+from datetime import datetime
+
 
 class StockSimulatorTestClient:
 
     def __init__(self):
-        simulator.config['TESTING'] = True
-        simulator.config['DEBUG'] = True
+        # simulator.config['TESTING'] = True
+        simulator.config['DEBUG'] = True  # Set to bypass reCaptcha
+        simulator.app.config['TESTING'] = True  # Set so that no emails are sent during testing
         simulator.init_logger()
         simulator.init_cache('./static/cache.json')
         simulator.init_db()
+
+        self.db_access = UsersDbAccess(simulator.user_datastore)
         self.client = simulator.app.test_client()
 
     def __enter__(self):
@@ -32,15 +38,15 @@ class StockSimulatorTestClient:
         ), follow_redirects=True)
 
     def create_account(self, email=TestInfo.email, username=TestInfo.user_name, password=TestInfo.password, retype_password=TestInfo.password):
-        return self.client.post('/createAccount', data=dict(
+        return self.client.post('/register', data=dict(
             email=email,
             username=username,
             password=password,
-            retypePassword=retype_password,
+            password_confirm=retype_password,
         ), follow_redirects=True)
 
     def logout(self):
-        return self.client.post('/logout', data=dict(), follow_redirects=True)
+        return self.client.get('/logout', data=dict(), follow_redirects=True)
 
     def buy_stock(self, symbol, quantity, stock_price):
         return self.client.post('/buyStock', data=dict(
@@ -62,6 +68,13 @@ class StockSimulatorTestClient:
     def get(self, path, follow_redirects=True):
         return self.client.get(path, follow_redirects=follow_redirects)
 
+    def confirm_test_account(self):
+        """Update the db directly just for test purposes"""
+
+        user = self.db_access.get_user_by_username(TestInfo.user_name)
+        user.confirmed_at = datetime.utcnow()
+        self.db_access.user_datastore.put(user)
+
     @staticmethod
     def is_login_page(data):
         return 'forgotPasswordLink' in data and 'loginDiv' in data and '<div id="stock_simulator">' not in data
@@ -70,7 +83,11 @@ class StockSimulatorTestClient:
     def is_simulator_page(data):
         return '<div id="stock_simulator">' in data
 
-    #only useful if follow_redirects is false
+    @staticmethod
+    def is_post_create_account_page(data):
+        return 'Please confirm your account through your email address' in data
+
+    # only useful if follow_redirects is false
     @staticmethod
     def is_redirect(data, redirect_route=None):
         result = 'You should be redirected automatically to target URL:' in data

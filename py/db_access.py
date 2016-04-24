@@ -1,7 +1,7 @@
 from pymongo import MongoClient
-from py.exceptions.create_account_errors import DuplicateEmailError, DuplicateUsernameError
+from bson.objectid import ObjectId
 
-from user import User
+# from user import User
 from db_info import DBInfo
 import logging
 
@@ -12,42 +12,25 @@ class DbAccess:
         self.client = MongoClient()
         self.db = self.client[dbname]
 
-class UsersDbAccess:
 
+class UsersDbAccess:
     collection = DBInfo.get_collection()
 
-    def __init__(self):
+    def __init__(self, user_datastore):
         self.logger = logging.getLogger(__name__)
+        self.user_datastore = user_datastore
+
+    def get_user_by_id(self, user_id):
+        return self.user_datastore.get_user(ObjectId(user_id))
 
     def create_user(self, user):
-        self.logger.info("Creating user: " + str(user))
-        user_in_db = self.get_user_by_username(user.username)
-        if user_in_db is not None:
-            raise DuplicateUsernameError('Username already taken.')
-        elif self.get_user_by_email(user.email) is not None:
-            raise DuplicateEmailError('Account already exists for the given email.')
-        else:
-            self.logger.info("Successfully created the user")
-            self.collection.insert_one(user.get_dict())
-        return "Successful"
+        return self.user_datastore.create_user(email=user.email, username=user.username, password=user.password)
 
     def get_user_by_username(self, username):
-        self.logger.info("Retrieving user from database with username " + str(username))
-        user_dict = self.collection.find_one({"username": username})
-        if user_dict is not None:
-            self.logger.info("Successfully found user with username " + str(username))
-            return User(user_dict, True)
-        self.logger.info("No user found with username " + str(username))
-        return None
+        return self.user_datastore.find_user(username=username)
 
     def get_user_by_email(self, email):
-        self.logger.info("Retrieving user from database with email " + str(email))
-        user_dict = UsersDbAccess.collection.find_one({"email": email})
-        if user_dict is not None:
-            self.logger.info("Successfully found user with email " + str(email))
-            return User(user_dict, True)
-        print 'No user found with email ' + email
-        return None
+        return self.user_datastore.find_user(email=email)
 
     def add_stock_to_user(self, username, symbol, price_per_stock, quantity):
         self.logger.info("Adding stock to user with username " + str(username))
@@ -57,32 +40,46 @@ class UsersDbAccess:
 
         user_dict = UsersDbAccess.collection.find_one({"username": username})
         total_cost = price_per_stock * quantity
+
+        # format the price_per_stock to always have exactly 2 digits after the decimal
+        price_per_stock = '{0:.2f}'.format(price_per_stock)
+
+        # mongodb does not allow periods/has problems with them. Replace them with underscores
         price_per_stock = str(price_per_stock).replace('.', '_')
+
         try:
-            num_stocks_owned = user_dict['stocks_owned'][symbol][price_per_stock]
+            num_stocks_owned_at_price = user_dict['stocks_owned'][symbol][price_per_stock]
         except KeyError, e:
-            num_stocks_owned = 0
-        self.logger.info(str(username) + " already owns " + str(num_stocks_owned) + " of " + str(symbol) +
+            num_stocks_owned_at_price = 0
+
+        try:
+            total_num_stocks_owned = user_dict['stocks_owned'][symbol]['total']
+        except KeyError, e:
+            total_num_stocks_owned = 0
+
+        self.logger.info(str(username) + " already owns " + str(num_stocks_owned_at_price) + " of " + str(symbol) +
                          " at price " + str(price_per_stock))
         key = "stocks_owned." + str(symbol) + "." + price_per_stock
+        total_stocks_key = "stocks_owned." + str(symbol) + ".total"
 
         update = {}
-        update[key] = int(num_stocks_owned) + quantity
+        update[key] = int(num_stocks_owned_at_price) + quantity
         update["cash"] = round(float(user_dict['cash']) - total_cost, 2)
+        update[total_stocks_key] = total_num_stocks_owned + quantity
 
         self.logger.info("Updating the database for a buy transaction for username " + username)
         self.logger.info("update: " + str(update))
 
-        UsersDbAccess.collection.update({"username": username}, {"$set" : update})
+        UsersDbAccess.collection.update({"username": username}, {"$set": update})
 
         self.logger.info("Stock(s) bought successfully")
         return "Success"
 
-    '''
-    Sells stocks for a user, starting from the lowest price bought.
-    If the user does not have enough stocks, none are sold and an error is returned.
-    '''
     def sell_stocks_from_user(self, username, symbol, quantity, cache):
+        """"
+        Sells stocks for a user, starting from the lowest price bought.
+        If the user does not have enough stocks, none are sold and an error is returned.
+        """
         user_dict = UsersDbAccess.collection.find_one({"username": username})
         self.logger.info("Selling stocks from user with username " + str(username))
         self.logger.info("Symbol: " + str(symbol) + "\n" +
@@ -95,17 +92,20 @@ class UsersDbAccess:
             self.logger.exception("User " + str(username) + " does not own stock with symbol " + str(symbol))
             return "User does not own stock"
 
+        user_stock_symbol_info.pop('total', None)  # remove the total and add it back at the end
+        # TODO: use the total quantity field
         num_stocks_owned = 0
         for key in user_stock_symbol_info:
             num_stocks_owned += int(user_stock_symbol_info[key])
 
         if num_stocks_owned < quantity:
-            self.logger.warning("User " + str(username) + " does not own enough of " + str(symbol) + "." \
-                   + " Trying to sell " + str(quantity) + " but only owns " + str(num_stocks_owned) + ".")
-            return "User down not enough stock"
+            self.logger.warning("User " + str(username) + " does not own enough of " + str(symbol) + "." +
+                                " Trying to sell " + str(quantity) + " but only owns " + str(num_stocks_owned) + ".")
+            return "User does not own enough stock"
 
         quantity_left = quantity
         keys_to_remove = []
+
         # we now know for sure that the user owns enough stock.
         for key in user_stock_symbol_info:
             num_stocks_of_price = int(user_stock_symbol_info[key])
@@ -122,6 +122,9 @@ class UsersDbAccess:
         # remove the stock entry from the stocks_owned if the user has sold all stocks of that symbol
         if not user_stock_symbol_info:
             user_dict['stocks_owned'].pop(symbol, None)
+        else:
+            # otherwise update the total field
+            user_dict['stocks_owned'][symbol]['total'] = num_stocks_owned - quantity
 
         key = "stocks_owned"
         update = {}
@@ -132,7 +135,7 @@ class UsersDbAccess:
         self.logger.info("Updating the database for a sell transaction for username " + username)
         self.logger.info("update: " + str(update))
 
-        UsersDbAccess.collection.update({"username": username}, {"$set" : update})
+        UsersDbAccess.collection.update({"username": username}, {"$set": update})
 
         self.logger.info("Stock(s) sold successfully")
         return "Success"

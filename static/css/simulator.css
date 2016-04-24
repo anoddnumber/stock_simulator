@@ -1,6 +1,10 @@
 body {
-  margin : 0px;
-  background-color: #eee;
+  margin-top : 70px;
+  background-color: #E8E8E8;
+}
+
+tr {
+    cursor : pointer;
 }
 
 .tab-pane {
@@ -16,11 +20,11 @@ a:visited{
 }
 
 .dataTables_wrapper .dataTables_filter {
-    float: none;
-    text-align: none;
+    float: left;
+    text-align: left;
     margin-left: auto;
     margin-right: auto;
-    width: 98%;
+    width: 80%;
 }
 
 .dataTables_wrapper .dataTables_filter label {
@@ -28,14 +32,27 @@ a:visited{
 }
 
 .dataTables_wrapper .dataTables_filter label input {
-    width: 100%;
+    width: 65%;
+    height: 40px;
     margin-left: 0;
+    margin-bottom: 0.4%;
+    border-style: solid;
+    border-color: #585858;
+}
+
+.profileDataTablesCash {
+    display: inline;
 }
 
 /* Navigation bar CSS */
+
 .navbar-default {
   background-color: #000000;
-  border-color: #eeeeee;
+  border-color: #E8E8E8;
+  position: fixed;
+  width: 100%;
+  z-index:1;
+  margin-top: -70px;
 }
 .navbar-default .navbar-brand {
   color: #ffffff;
@@ -53,18 +70,18 @@ a:visited{
   color: #7a7a7a;
 }
 .navbar-default .navbar-nav > .active > a, .navbar-default .navbar-nav > .active > a:hover, .navbar-default .navbar-nav > .active > a:focus {
-  color: #7a7a7a;
-  background-color: #eeeeee;
+  color: #000000;
+  background-color: #E8E8E8;
 }
 .navbar-default .navbar-nav > .open > a, .navbar-default .navbar-nav > .open > a:hover, .navbar-default .navbar-nav > .open > a:focus {
-  color: #7a7a7a;
-  background-color: #eeeeee;
+  color: #000000;
+  background-color: #E8E8E8;
 }
 .navbar-default .navbar-toggle {
-  border-color: #eeeeee;
+  border-color: #E8E8E8;
 }
 .navbar-default .navbar-toggle:hover, .navbar-default .navbar-toggle:focus {
-  background-color: #eeeeee;
+  background-color: #E8E8E8;
 }
 .navbar-default .navbar-toggle .icon-bar {
   background-color: #ffffff;
@@ -93,8 +110,11 @@ a:visited{
   }
 }
 
-
 /* Stock Info Page */
+.back {
+    text-align: left;
+}
+
 .availableCash {
     text-align: right;
     font-size: 20px;
@@ -115,19 +135,49 @@ a:visited{
     font-size: 35px;
 }
 
+.stockInfoPageStockSymbolName {
+    font-size: 35px;
+}
+
 .stockPrice {
     font-size: 25px;
 }
 
-.buySell {
+.graph {
+    max-width: 100%;
+    height: auto;
+    width: auto;
+}
+
+.column3 {
+    padding: 0px;
+}
+
+.buySellRadioInput {
+    margin-top: 3px;
+    margin-bottom: 3px;
+}
+
+.quantityBar {
+    position: relative;
     margin-top: 10px;
-    margin-bottom: 10px;
+    margin-bottom: 5px;
+}
+
+input[type=range] {
+    display: inline;
+    width: 40%;
+}
+
+.stockInfoPageStockQuantity {
+    width: 70px;
+    height: 30px;
 }
 
 .stockInfoPageStocksConfirmButton {
     font-size: 18px;
     margin-top: 10px;
-    margin-left: 130px;
+    margin-left: 42%;
 }
 
 

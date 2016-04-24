@@ -53,6 +53,7 @@
                     for (var j = 0; j < pricesBought.length; j++) {
                         var price = pricesBought[j];
                         var quantity = Number(symbolData[price]);
+                        if (price === "total") continue;
                         price = price.replace("_", ".");
                         price = Number(price);
 
@@ -111,12 +112,15 @@ $( document ).ready(function() {
         'selectors' : ['#profileTableContainer', '#profile .stockInfoPage']
     });
 
+    // https://datatables.net/reference/option/dom
+    // https://datatables.net/examples/advanced_init/dom_toolbar.html
     $('#profile_table').DataTable({
         "lengthChange" : false,
         language: {
             search: "_INPUT_", //Don't display any label left of the search box
             searchPlaceholder: "Search"
-        }
+        },
+        "dom": 'f<"stockInfoPageTotalCash availableCash">tip' //TODO change the stockInfoPageTotalCash class..
     });
 
     $('#profile_table tbody').on('click', 'tr', function(event) {

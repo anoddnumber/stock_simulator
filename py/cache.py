@@ -144,7 +144,7 @@ class Cache:
     names - an array of names (strings) of the stocks that we are retrieving that will be inserted into the JSON object
     """
     def __add_results_to_new_cache(self, new_json, keys, names):
-        api = YahooStockAPI(keys, 'l1c1p2')
+        api = YahooStockAPI(keys, 'l1c1p2ohg')
 
         try:
             results = api.submit_request()
@@ -156,21 +156,29 @@ class Cache:
                 self.logger.error("len(keys): " + str(len(keys)))
                 self.logger.error("len(results: " + str(len(results)))
                 raise InvalidUsage('Server Cache Error, keys and results do not match', status_code=500)
+
             for i, key in enumerate(keys):
                 try:
                     name = names[i]
                     line = results[i]
-                    (decimal, daily_price_change, daily_percent_change) = tuple(line.split(','))
+                    (decimal, daily_price_change, daily_percent_change, day_open, day_high, day_low) = tuple(line.split(','))
                     decimal = Decimal(float(decimal))
                     daily_percent_change = daily_percent_change.replace('"','')
                     price = str('{:.2f}'.format(round(decimal, 2)))
-                    new_json[key] = {"name": str(name), "price" : price, "daily_price_change" : daily_price_change,
-                                    "daily_percent_change" : daily_percent_change}
+
+                    if float(price) > 0:
+                        new_json[key] = {"name": str(name), "price" : price, "daily_price_change" : daily_price_change,
+                                            "daily_percent_change" : daily_percent_change,
+                                            "day_open" : day_open,
+                                            "day_high" : day_high,
+                                            "day_low" : day_low
+                                         }
                 except ValueError as e:
                     self.logger.exception("Error while adding a stock to the new cache.\n" +
                                           "key: " + str(key) + "\n" +
                                           "name: " + str(name) + "\n" +
                                           "line: " + str(line))
+                    #TODO remove that stock from parsed_symbols.json
                     continue
         except Exception:
             self.logger.exception("Error calling YahooStockAPI, loading stock data from a backup source")

@@ -1,7 +1,7 @@
 import unittest
-import ast
 from base_unit_test import BaseUnitTest
 import simulator
+from stock_simulator_test_client import StockSimulatorTestClient
 
 #TODO: Test buying a stock at different prices (somewhat difficult to test this..)
 class TestBuyStock(BaseUnitTest):
@@ -9,6 +9,8 @@ class TestBuyStock(BaseUnitTest):
     def test_basic_buy(self):
         print "test_basic_buy"
         self.client.create_account()
+        self.client.confirm_test_account()
+        self.client.login()
 
         symbol = "AMZN"
         starting_cash = simulator.config.get("defaultCash")
@@ -20,12 +22,14 @@ class TestBuyStock(BaseUnitTest):
         rv = self.client.buy_stock(symbol, quantity, price)
 
         assert "Success" in rv.data
-        self.assert_user_info({"AMZN" : {price.replace(".", "_") : quantity} },
+        self.assert_user_info({"AMZN": {price.replace(".", "_"): quantity, "total": quantity}},
                               starting_cash - quantity * float(price))
 
     def test_buy_as_much_as_possible(self):
         print "test_buy_as_much_as_possible"
         self.client.create_account()
+        self.client.confirm_test_account()
+        self.client.login()
 
         symbol = "AMZN"
         starting_cash = simulator.config.get("defaultCash")
@@ -39,7 +43,9 @@ class TestBuyStock(BaseUnitTest):
         rv = self.client.buy_stock(symbol, max_quantity_possible, price)
 
         assert "Success" in rv.data
-        self.assert_user_info({"AMZN" : {price.replace(".", "_") : max_quantity_possible} },
+        self.assert_user_info({"AMZN": {price.replace(".", "_"): max_quantity_possible,
+                                        "total": max_quantity_possible
+                                        }},
                               starting_cash - max_quantity_possible * float(price))
 
     def test_buy_without_account(self):
@@ -50,11 +56,13 @@ class TestBuyStock(BaseUnitTest):
         price = rv.data
 
         rv = self.client.buy_stock(symbol, 1, price)
-        assert "Not logged in, cannot buy stock." in rv.data
+        assert StockSimulatorTestClient.is_login_page(rv.data)
 
     def test_buy_bad_quantity(self):
         print "test_buy_bad_quantity"
         self.client.create_account()
+        self.client.confirm_test_account()
+        self.client.login()
 
         symbol = "AMZN"
         starting_cash = simulator.config.get("defaultCash")
@@ -78,6 +86,8 @@ class TestBuyStock(BaseUnitTest):
     def test_buy_bad_symbol(self):
         print "test_buy_bad_symbol"
         self.client.create_account()
+        self.client.confirm_test_account()
+        self.client.login()
 
         symbol = "bad_symbol"
 
@@ -87,6 +97,8 @@ class TestBuyStock(BaseUnitTest):
     def test_buy_bad_stock_price(self):
         print "test_buy_bad_stock_price"
         self.client.create_account()
+        self.client.confirm_test_account()
+        self.client.login()
 
         symbol = "AMZN"
         quantity = 1
@@ -111,6 +123,8 @@ class TestBuyStock(BaseUnitTest):
     def test_buy_missing_argument(self):
         print "test_buy_missing_argument"
         self.client.create_account()
+        self.client.confirm_test_account()
+        self.client.login()
 
         symbol = "AMZN"
         quantity = 1
@@ -134,7 +148,6 @@ class TestBuyStock(BaseUnitTest):
         # missing symbol
         rv = self.client.buy_stock("", quantity, price)
 
-        print "rv.data: " + rv.data
         assert "Invalid symbol" in rv.data
         self.assert_user_info({}, starting_cash)
 

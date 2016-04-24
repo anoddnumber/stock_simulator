@@ -32,11 +32,17 @@
             <p>Buy, Sell, Dominate.</p>
         </div>
 
+        <!-- login_user_form is the name of the form that Flask-Security uses - look in flask_security/views.py -->
+        {% set loginError = get_form_error(login_user_form) %}
+
+        <!-- register_user_form is the name of the form that Flask-Security uses - look in flask_security/views.py -->
+        {% set createAccountError = get_form_error(register_user_form) %}
+
         <!-- Note: each input should have a label associated with it for screen readers (to assist the handicapped).
            The labels will not show up on the screen.
         -->
-        <div class="container" id="loginDiv" {% if createAccountError is defined %} hidden {% endif %}>
-            <div class="alert alert-danger error" role="alert" {% if loginError is not defined %} hidden {% endif %}>
+        <div class="container" id="loginDiv" {% if createAccountError %} hidden {% endif %}>
+            <div class="alert alert-danger error" role="alert" {% if not loginError %} hidden {% endif %}>
                {{loginError}}
             </div>
             <form class="form-signin" action="login" method="post">
@@ -59,22 +65,25 @@
             </a>
         </div> <!-- /container -->
 
-        <div class="container" id="createAccountDiv" {% if createAccountError is not defined %} hidden {% endif %}>
-            <div class="alert alert-danger error" role="alert" {% if createAccountError is not defined %} hidden {% endif %}>
+        <div class="container" id="createAccountDiv" {% if not createAccountError %} hidden {% endif %}>
+            <div class="alert alert-danger error" role="alert" {% if not createAccountError %} hidden {% endif %}>
               {{createAccountError}}
             </div>
-            <form class="form-signin" action="createAccount" method="post">
+            <form class="form-signin" action="register" method="post">
+                <!-- The name of the below input must be email because Flask-Security looks for that name -->
                 <label for="createAccountInputEmail" class="sr-only">Email address</label>
                 <input name="email" type="email" id="createAccountInputEmail" class="form-control" placeholder="Email address" required autofocus>
 
                 <label for="inputUsername" class="sr-only">Username</label>
                 <input name="username" id="inputUsername" class="form-control" placeholder="Username" required>
 
+                <!-- The name of the below input must be password because Flask-Security looks for that name -->
                 <label for="createAccountInputPassword" class="sr-only">Password</label>
                 <input name="password" type="password" id="createAccountInputPassword" class="form-control" placeholder="Password" required>
 
-                <label for="retypePassword" class="sr-only">Retype Password</label>
-                <input name="retypePassword" type="password" id="retypePassword" class="form-control" placeholder="Retype Password" required>
+                <label for="retype_password" class="sr-only">Retype Password</label>
+                <!-- The name of the below input must be password_confirm because Flask-Security looks for that name -->
+                <input name="password_confirm" type="password" id="retype_password" class="form-control" placeholder="Retype Password" required>
                 <br>
 
                 <div class="g-recaptcha" data-sitekey="6Lf7ZBoTAAAAAEG8hc7yYPmlbJC6YI75Trt8QUTg"></div>

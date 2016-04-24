@@ -45,9 +45,11 @@
             Amount Owned: <span class="stockInfoPageAmountOwned"></span><br>
             <form>
                 <div class="buySellRadioInput">
-                    <input type="radio" name="market" value="buy" class="buyStockRadioButton" checked> Buy
+                    <input id="buyRadioButton" type="radio" name="market" value="buy" class="buyStockRadioButton" checked>
+                    <label for="buyRadioButton">Buy</label>
                     &nbsp;&nbsp;&nbsp;
-                    <input type="radio" name="market" value="sell" class="sellStockRadioButton"> Sell
+                    <input id="sellRadioButton" type="radio" name="market" value="sell" class="sellStockRadioButton">
+                    <label for="sellRadioButton">Sell</label>
                 </div>
 
                 Quantity:<br>

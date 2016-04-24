@@ -158,10 +158,6 @@ a:visited{
     margin-bottom: 3px;
 }
 
-.buySellRadioInput label {
-    font-weight : normal;
-}
-
 .quantityBar {
     position: relative;
     margin-top: 10px;

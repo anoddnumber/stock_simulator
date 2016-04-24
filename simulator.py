@@ -348,4 +348,5 @@ if __name__ == "__main__":
     init_db()
 
     logger.info("Starting server")
-    run_simple('localhost', 5000, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))  # use HTTPS in devo
+    # run_simple('localhost', 5000, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))  # use HTTPS in devo
+    app.run()

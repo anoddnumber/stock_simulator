@@ -1,4 +1,5 @@
 import json
+import os
 
 from flask import Flask, redirect, request, jsonify, url_for, g, current_app
 from jinja2 import Environment, PackageLoader
@@ -347,6 +348,10 @@ if __name__ == "__main__":
     init_cache()
     init_db()
 
+    # Bind to PORT if defined, otherwise default to 5000.
+    # Heroku will define the PORT environment variable, so use it if it is defined
+    port = int(os.environ.get('PORT', 5000))
+
     logger.info("Starting server")
-    # run_simple('localhost', 5000, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))  # use HTTPS in devo
-    app.run()
+    run_simple('localhost', port, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))  # use HTTPS in devo
+    # app.run()

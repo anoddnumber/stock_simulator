@@ -31,14 +31,51 @@
                 $(parent + ' .stockInfoPageDayOpen').text(day_open);
                 $(parent + ' .stockInfoPageDayHigh').text(day_high);
                 $(parent + ' .stockInfoPageDayLow').text(day_low);
+
+                // by default, the buy radio button is selected
+                // TODO refactor to make a "set slider bar max/min" function
+                $(parent + ' .stockInfoPage input').attr({
+                    "min" : 0,
+                    "max" : Math.floor(userInfo.cash / currentPrice),
+                });
+
+                //make sure we don't stack up actions on the click event..
+                $(parent + " input[name=market]").unbind("click");
+
+                $(parent + " input[name=market]").click(function(){
+                    var defaultValue = 0;
+                    $(parent + ' .stockInfoPage input[name=amountRange]')[0].value = defaultValue;
+                    $(parent + ' .stockInfoPage input[name=amountInput]')[0].value = defaultValue;
+
+                    if ($(parent + ' .buyStockRadioButton').is(':checked')) {
+                        // clicked the buy radio button
+
+                        $(parent + ' .stockInfoPage input[name=amountRange]').attr({
+                            "min" : 0,
+                            "max" : Math.floor(userInfo.cash / currentPrice),
+                        });
+                    } else if ($(parent + ' .sellStockRadioButton').is(':checked')) {
+                        // clicked the sell radio button
+
+                        var maxAvailableToSell = 0;
+                        if (userInfo.stocks_owned[symbol]) {
+                            maxAvailableToSell = userInfo.stocks_owned[symbol].total
+                        }
+
+                        $(parent + ' .stockInfoPage input[name=amountRange]').attr({
+                            "min" : 0,
+                            "max" : maxAvailableToSell,
+                        });
+
+                    }
+                });
             },
 
             setupButtons : function(parent) {
                 $(parent + ' .stockInfoPageStocksConfirmButton').click(function() {
-                    var value = $(parent + ' .stockInfoPage input[name=quantitybar]').val().trim();
+                    var value = $(parent + ' .stockInfoPage input[name=amountInput]').val().trim();
                     var price = $(parent + ' .stockInfoPageStockPrice').text().trim();
                     quantity = Utility.isPositiveInteger(value);
-                    console.log("quantity: " + quantity);
                     if (quantity) {
                         var symbol = $(parent + " .stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
                         if ($(parent + ' .buyStockRadioButton').is(':checked')) {

@@ -21,7 +21,8 @@ class TestSellStock(BaseUnitTest):
         a = float(starting_cash) - int(quantity) * float(price)
         print "a: " + str(a)
 
-        self.assert_user_info({symbol: {price.replace(".", "_"): quantity}},
+        self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
+                                        "total": quantity}},
                               float(starting_cash) - int(quantity) * float(price))
 
         rv = self.client.sell_stock(symbol, quantity, price)
@@ -66,14 +67,17 @@ class TestSellStock(BaseUnitTest):
         quantity_bought = 1
         self.client.buy_stock(symbol, quantity_bought, price)
 
-        self.assert_user_info({symbol: {price.replace(".", "_") : quantity_bought}},
+        self.assert_user_info({symbol: {price.replace(".", "_"): quantity_bought,
+                                        "total": quantity_bought}},
                               starting_cash - quantity_bought * float(price))
 
         rv = self.client.sell_stock(symbol, 2, price)
 
-        assert "User down not enough stock" in rv.data
+        print "rv.data: " + str(rv.data)
+        assert "User does not own enough stock" in rv.data
         # make sure nothing changed in the db
-        self.assert_user_info({symbol: {price.replace(".", "_"): quantity_bought}},
+        self.assert_user_info({symbol: {price.replace(".", "_"): quantity_bought,
+                                        "total": quantity_bought}},
                               starting_cash - quantity_bought * float(price))
 
     def test_sell_bad_symbol(self):
@@ -101,23 +105,26 @@ class TestSellStock(BaseUnitTest):
 
         self.assert_user_info({}, starting_cash)
 
-        self.client.buy_stock(symbol, 1, price)
+        self.client.buy_stock(symbol, quantity, price)
 
-        self.assert_user_info({symbol : {price.replace(".", "_"): quantity}},
+        self.assert_user_info({symbol : {price.replace(".", "_"): quantity,
+                                         "total": quantity}},
                               starting_cash - quantity * float(price))
 
         # price does not equal server's price
         rv = self.client.sell_stock(symbol, 1, bad_price)
 
         assert "Stock price changed, please try again." in rv.data
-        self.assert_user_info({symbol : {price.replace(".", "_"): quantity}},
+        self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
+                               "total": quantity}},
                               starting_cash - quantity * float(price))
 
         # pass in negative price
         rv = self.client.sell_stock(symbol, 1, -1)
 
         assert "Stock price or quantity less than 0" in rv.data
-        self.assert_user_info({symbol : {price.replace(".", "_"): quantity}},
+        self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
+                               "total": quantity}},
                               starting_cash - quantity * float(price))
 
     def test_sell_missing_argument(self):
@@ -135,21 +142,24 @@ class TestSellStock(BaseUnitTest):
 
         self.client.buy_stock(symbol, quantity, price)
 
-        self.assert_user_info({symbol: {price.replace(".", "_"): quantity}},
+        self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
+                                        "total": quantity}},
                               starting_cash - quantity * float(price))
 
         # missing price
         rv = self.client.sell_stock(symbol, quantity, "")
 
         assert "Error reading arguments" in rv.data
-        self.assert_user_info({symbol: {price.replace(".", "_"): quantity}},
+        self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
+                                        "total": quantity}},
                               starting_cash - quantity * float(price))
 
         # missing quantity
         rv = self.client.sell_stock(symbol, "", price)
 
         assert "Error reading arguments" in rv.data
-        self.assert_user_info({symbol: {price.replace(".", "_"): quantity}},
+        self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
+                                        "total": quantity}},
                               starting_cash - quantity * float(price))
 
         # missing symbol
@@ -157,7 +167,8 @@ class TestSellStock(BaseUnitTest):
 
         print "rv.data: " + rv.data
         assert "Invalid symbol" in rv.data
-        self.assert_user_info({symbol: {price.replace(".", "_"): quantity}},
+        self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
+                                        "total": quantity}},
                               starting_cash - quantity * float(price))
 
 if __name__ == '__main__':

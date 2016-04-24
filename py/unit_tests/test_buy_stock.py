@@ -1,5 +1,4 @@
 import unittest
-import ast
 from base_unit_test import BaseUnitTest
 import simulator
 from stock_simulator_test_client import StockSimulatorTestClient
@@ -23,7 +22,7 @@ class TestBuyStock(BaseUnitTest):
         rv = self.client.buy_stock(symbol, quantity, price)
 
         assert "Success" in rv.data
-        self.assert_user_info({"AMZN": {price.replace(".", "_"): quantity}},
+        self.assert_user_info({"AMZN": {price.replace(".", "_"): quantity, "total": quantity}},
                               starting_cash - quantity * float(price))
 
     def test_buy_as_much_as_possible(self):
@@ -44,7 +43,9 @@ class TestBuyStock(BaseUnitTest):
         rv = self.client.buy_stock(symbol, max_quantity_possible, price)
 
         assert "Success" in rv.data
-        self.assert_user_info({"AMZN" : {price.replace(".", "_") : max_quantity_possible} },
+        self.assert_user_info({"AMZN": {price.replace(".", "_"): max_quantity_possible,
+                                        "total": max_quantity_possible
+                                        }},
                               starting_cash - max_quantity_possible * float(price))
 
     def test_buy_without_account(self):

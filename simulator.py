@@ -353,5 +353,6 @@ if __name__ == "__main__":
     port = int(os.environ.get('PORT', 5000))
 
     logger.info("Starting server")
-    run_simple('localhost', port, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))  # use HTTPS in devo
+    # run_simple('localhost', port, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))  # use HTTPS in devo
+    app.run(host='0.0.0.0', port=port)
     # app.run()

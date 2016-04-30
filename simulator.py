@@ -45,9 +45,12 @@ def set_db_config():
         app.config['MONGODB_HOST'] = host
         app.config['MONGODB_PORT'] = int(db_port)
         logger.info("setting db configs")
-        logger.info("db_name: " + str(db_name))
+        logger.info("mongo_db: " + str(mongo_db))
+        logger.info("db_user: " + db_user)
+        logger.info("db_password: " + db_password)
         logger.info("host: " + str(host))
-        logger.info("port: " + str(host))
+        logger.info("port: " + str(port))
+        logger.info("db_name: " + str(db_name))
     else:
         app.config['MONGODB_DB'] = DBInfo.db_name
         app.config['MONGODB_HOST'] = 'localhost'

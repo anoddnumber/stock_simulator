@@ -106,7 +106,7 @@ mail = Mail(app)
 
 
 def get_collection():
-    host = app.config['MONGODB_HOST']
+    host = os.environ.get('MONGODB_URI')
     port = app.config['MONGODB_PORT']
 
     client = MongoClient(host=host,port=port)

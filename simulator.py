@@ -25,6 +25,12 @@ env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='', template_folder='py/templates')
 app.secret_key = 'i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 
+def init_logger():
+    global logger
+    py.logging_setup.setup()
+    logger = logging.getLogger(__name__)
+init_logger()
+
 # MongoDB Config
 def set_db_config():
     # split on multiple strings
@@ -38,6 +44,10 @@ def set_db_config():
         app.config['MONGODB_DB'] = db_name
         app.config['MONGODB_HOST'] = host
         app.config['MONGODB_PORT'] = int(db_port)
+        logger.info("setting db configs")
+        logger.info("db_name: " + str(db_name))
+        logger.info("host: " + str(host))
+        logger.info("port: " + str(host))
     else:
         app.config['MONGODB_DB'] = DBInfo.db_name
         app.config['MONGODB_HOST'] = 'localhost'
@@ -343,13 +353,6 @@ def handle_invalid_usage(error):
     response.status_code = error.status_code
     return response
 
-
-def init_logger():
-    global logger
-    py.logging_setup.setup()
-    logger = logging.getLogger(__name__)
-
-
 def init_db():
     global users_db_access
     users_db_access = UsersDbAccess(user_datastore)
@@ -362,7 +365,7 @@ def init_cache(cache_path=None):
 if __name__ == "__main__":
     app.debug = False
     toolbar = DebugToolbarExtension(app)
-    init_logger()
+
     init_cache()
     init_db()
 

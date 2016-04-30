@@ -49,7 +49,7 @@ def set_db_config():
         logger.info("db_user: " + db_user)
         logger.info("db_password: " + db_password)
         logger.info("host: " + str(host))
-        logger.info("port: " + str(port))
+        logger.info("port: " + str(db_port))
         logger.info("db_name: " + str(db_name))
     else:
         app.config['MONGODB_DB'] = DBInfo.db_name

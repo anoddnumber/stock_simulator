@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 from flask import Flask, redirect, request, jsonify, url_for, g, current_app
 from jinja2 import Environment, PackageLoader
@@ -18,15 +19,32 @@ from flask_security import Security, MongoEngineUserDatastore, current_user, log
 from flask_mail import Mail
 from py.user import User, Role
 from py.extended_register_form import ExtendedRegisterForm
+from string import Formatter
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='', template_folder='py/templates')
 app.secret_key = 'i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 
 # MongoDB Config
-app.config['MONGODB_DB'] = DBInfo.db_name
-app.config['MONGODB_HOST'] = 'localhost'
-app.config['MONGODB_PORT'] = DBInfo.db_port
+def set_db_config():
+    # split on multiple strings
+    mongodb_uri = os.environ.get('MONGODB_URI')
+    # mongodb_uri = 'mongodb://heroku_jnccm4lq:81b5jm0qkg0frk5j1o8bd63t84@ds021751.mlab.com:21751/heroku_jnccm4lq'
+    # PROD_MONGODB=mongodb://dbuser:dbpass@host1:port1,host2:port2/dbname
+
+    a = Formatter()
+    if mongodb_uri:
+        (mongo_db, db_user, db_password, host, db_port, db_name) = re.split('://|:|@|,|/', mongodb_uri)
+        app.config['MONGODB_DB'] = db_name
+        app.config['MONGODB_HOST'] = host
+        app.config['MONGODB_PORT'] = int(db_port)
+    else:
+        app.config['MONGODB_DB'] = DBInfo.db_name
+        app.config['MONGODB_HOST'] = 'localhost'
+        app.config['MONGODB_PORT'] = DBInfo.db_port
+
+set_db_config()
+
 app.config['SECURITY_PASSWORD_SALT'] = 'Zafaw9rtnisO9QCIi7ekdGNFu4cbIjtedzhWmMwebLE='
 app.config['SECURITY_PASSWORD_HASH'] = 'sha512_crypt'
 
@@ -82,7 +100,7 @@ def root():
     """
     The actual application
     """
-    list_routes()  # for debugging
+    # list_routes()  # for debugging
 
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
     template = env.get_template('simulator.html')

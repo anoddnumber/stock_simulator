@@ -6,11 +6,9 @@ from flask import Flask, redirect, request, jsonify, url_for
 from jinja2 import Environment, PackageLoader
 from flask_debugtoolbar import DebugToolbarExtension
 
-from py.db_access import UsersDbAccess
 from py.exceptions.invalid_usage import InvalidUsage
 from py.cache import Cache
 # from werkzeug.serving import run_simple
-from pymongo import MongoClient
 
 import py.logging_setup
 import logging
@@ -106,15 +104,15 @@ mail = Mail(app)
 # Using the unauthorized handler will give more control, we can add the next parameter later
 
 
-def get_collection():
-    host = os.environ.get('MONGODB_URI')
-    port = app.config['MONGODB_PORT']
-
-    client = MongoClient(host=host,port=port)
-    db_name = app.config['MONGODB_DB']
-    the_db = client[db_name]
-    collection = the_db[DBInfo.collection_name]
-    return collection
+# def get_collection():
+#     host = os.environ.get('MONGODB_URI')
+#     port = app.config['MONGODB_PORT']
+#
+#     client = MongoClient(host=host,port=port)
+#     db_name = app.config['MONGODB_DB']
+#     the_db = client[db_name]
+#     collection = the_db[DBInfo.collection_name]
+#     return collection
 
 @security.app.login_manager.unauthorized_handler
 def unauthorized_callback():
@@ -371,10 +369,6 @@ def handle_invalid_usage(error):
     response.status_code = error.status_code
     return response
 
-def init_db():
-    global users_db_access
-    users_db_access = UsersDbAccess(user_datastore, get_collection())
-
 
 def init_cache(cache_path=None):
     global cache
@@ -385,7 +379,6 @@ if __name__ == "__main__":
     toolbar = DebugToolbarExtension(app)
 
     init_cache()
-    init_db()
 
     # Bind to PORT if defined, otherwise default to 5000.
     # Heroku will define the PORT environment variable, so use it if it is defined

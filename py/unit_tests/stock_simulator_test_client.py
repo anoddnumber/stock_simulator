@@ -1,6 +1,5 @@
 import simulator
 from test_info import TestInfo
-from py.db_access import UsersDbAccess
 from datetime import datetime
 
 
@@ -12,9 +11,7 @@ class StockSimulatorTestClient:
         simulator.app.config['TESTING'] = True  # Set so that no emails are sent during testing
         simulator.init_logger()
         simulator.init_cache('./static/cache.json')
-        simulator.init_db()
 
-        self.db_access = UsersDbAccess(simulator.user_datastore, simulator.get_collection())
         self.client = simulator.app.test_client()
 
     def __enter__(self):
@@ -71,9 +68,9 @@ class StockSimulatorTestClient:
     def confirm_test_account(self):
         """Update the db directly just for test purposes"""
 
-        user = self.db_access.get_user_by_username(TestInfo.user_name)
+        user = simulator.stock_user_datastore.find_user(username=TestInfo.user_name)
         user.confirmed_at = datetime.utcnow()
-        self.db_access.user_datastore.put(user)
+        user.save()
 
     @staticmethod
     def is_login_page(data):

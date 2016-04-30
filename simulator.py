@@ -349,7 +349,7 @@ def sell_stock():
     logger.info("User with username " + str(username) + " passed all validations for selling " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price))
     # sell the stock
-    return users_db_access.sell_stocks_from_user(username, symbol, quantity, cache)
+    return stock_user_datastore.sell_stocks_from_user(username, symbol, quantity, cache)
 
 
 @app.route("/getUserInfo", methods=['GET'])

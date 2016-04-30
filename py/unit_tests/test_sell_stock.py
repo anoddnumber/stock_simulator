@@ -13,19 +13,23 @@ class TestSellStock(BaseUnitTest):
         self.client.login()
 
         symbol = "AMZN"
-        quantity = 1
+        quantity = 2
         price = self.client.get_stock_info(symbol).data
         starting_cash = simulator.config.get("defaultCash")
 
         self.client.buy_stock(symbol, quantity, price)
-        a = float(starting_cash) - int(quantity) * float(price)
-        print "a: " + str(a)
 
         self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
                                         "total": quantity}},
                               float(starting_cash) - int(quantity) * float(price))
 
-        rv = self.client.sell_stock(symbol, quantity, price)
+        rv = self.client.sell_stock(symbol, 1, price)
+
+        self.assert_user_info({symbol: {price.replace(".", "_"): quantity - 1,
+                                "total": quantity - 1}},
+                      float(starting_cash) - (int(quantity) - 1) * float(price))
+
+        rv = self.client.sell_stock(symbol, 1, price)
 
         self.assert_user_info({}, starting_cash)
         assert "Success" in rv.data

@@ -48,3 +48,66 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
 
         user.save()
         return "Success"
+
+    def sell_stocks_from_user(self, username, symbol, quantity, cache):
+        """"
+        Sells stocks for a user, starting from the lowest price bought.
+        If the user does not have enough stocks, none are sold and an error is returned.
+        """
+        # user_dict = self.collection.find_one({"username": username})
+        user = self.find_user(username=username)
+        print "user: " + str(user)
+        self.logger.info("Selling stocks from user with username " + str(username))
+        self.logger.info("Symbol: " + str(symbol) + "\n" +
+                         "Quantity: " + str(quantity))
+
+        try:
+            # the information regarding the symbol
+            user_stock_symbol_info = user['stocks_owned'][symbol]
+        except KeyError, e:
+            self.logger.exception("User " + str(username) + " does not own stock with symbol " + str(symbol))
+            return "User does not own stock"
+
+        user_stock_symbol_info.pop('total', None)  # remove the total and add it back at the end
+        # TODO: use the total quantity field
+        num_stocks_owned = 0
+        for key in user_stock_symbol_info:
+            num_stocks_owned += int(user_stock_symbol_info[key])
+
+        if num_stocks_owned < quantity:
+            self.logger.warning("User " + str(username) + " does not own enough of " + str(symbol) + "." +
+                                " Trying to sell " + str(quantity) + " but only owns " + str(num_stocks_owned) + ".")
+            return "User does not own enough stock"
+
+        quantity_left = quantity
+        keys_to_remove = []
+
+        # we now know for sure that the user owns enough stock.
+        for key in user_stock_symbol_info:
+            num_stocks_of_price = int(user_stock_symbol_info[key])
+            if num_stocks_of_price > quantity_left:
+                user_stock_symbol_info[key] = num_stocks_of_price - quantity_left
+                break
+            else:
+                quantity_left -= num_stocks_of_price
+                keys_to_remove.append(key)
+
+        for key in keys_to_remove:
+            user_stock_symbol_info.pop(key, None)
+
+        # remove the stock entry from the stocks_owned if the user has sold all stocks of that symbol
+        if not user_stock_symbol_info:
+            print "pop"
+            user.stocks_owned.pop(symbol, None)
+            print "user pop: " + str(user)
+        else:
+            # otherwise update the total field
+            user['stocks_owned'][symbol]['total'] = num_stocks_owned - quantity
+
+        user.cash = round(float(user['cash']) + quantity * float(cache.get_stock_price(symbol)), 2)
+        user.save()
+
+        self.logger.info("Updating the database for a sell transaction for username " + username)
+        self.logger.info("Stock(s) sold successfully")
+
+        return "Success"

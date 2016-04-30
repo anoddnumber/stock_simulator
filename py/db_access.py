@@ -1,8 +1,5 @@
 from pymongo import MongoClient
 from bson.objectid import ObjectId
-
-# from user import User
-from db_info import DBInfo
 import logging
 
 
@@ -12,13 +9,12 @@ class DbAccess:
         self.client = MongoClient()
         self.db = self.client[dbname]
 
-
 class UsersDbAccess:
-    collection = DBInfo.get_collection()
 
-    def __init__(self, user_datastore):
+    def __init__(self, user_datastore, collection):
         self.logger = logging.getLogger(__name__)
         self.user_datastore = user_datastore
+        self.collection = collection
 
     def get_user_by_id(self, user_id):
         return self.user_datastore.get_user(ObjectId(user_id))
@@ -38,7 +34,7 @@ class UsersDbAccess:
                          "Price per stock: " + str(price_per_stock) + "\n" +
                          "Quantity: " + str(quantity))
 
-        user_dict = UsersDbAccess.collection.find_one({"username": username})
+        user_dict = self.collection.find_one({"username": username})
         total_cost = price_per_stock * quantity
 
         # format the price_per_stock to always have exactly 2 digits after the decimal
@@ -70,7 +66,7 @@ class UsersDbAccess:
         self.logger.info("Updating the database for a buy transaction for username " + username)
         self.logger.info("update: " + str(update))
 
-        UsersDbAccess.collection.update({"username": username}, {"$set": update})
+        self.collection.update({"username": username}, {"$set": update})
 
         self.logger.info("Stock(s) bought successfully")
         return "Success"
@@ -80,7 +76,7 @@ class UsersDbAccess:
         Sells stocks for a user, starting from the lowest price bought.
         If the user does not have enough stocks, none are sold and an error is returned.
         """
-        user_dict = UsersDbAccess.collection.find_one({"username": username})
+        user_dict = self.collection.find_one({"username": username})
         self.logger.info("Selling stocks from user with username " + str(username))
         self.logger.info("Symbol: " + str(symbol) + "\n" +
                          "Quantity: " + str(quantity))
@@ -135,7 +131,7 @@ class UsersDbAccess:
         self.logger.info("Updating the database for a sell transaction for username " + username)
         self.logger.info("update: " + str(update))
 
-        UsersDbAccess.collection.update({"username": username}, {"$set": update})
+        self.collection.update({"username": username}, {"$set": update})
 
         self.logger.info("Stock(s) sold successfully")
         return "Success"

@@ -1,13 +1,16 @@
 import json
+import os
+import re
 
-from flask import Flask, redirect, request, jsonify, url_for, g, current_app
+from flask import Flask, redirect, request, jsonify, url_for
 from jinja2 import Environment, PackageLoader
 from flask_debugtoolbar import DebugToolbarExtension
 
 from py.db_access import UsersDbAccess
 from py.exceptions.invalid_usage import InvalidUsage
 from py.cache import Cache
-from werkzeug.serving import run_simple
+# from werkzeug.serving import run_simple
+from pymongo import MongoClient
 
 import py.logging_setup
 import logging
@@ -17,15 +20,48 @@ from flask_security import Security, MongoEngineUserDatastore, current_user, log
 from flask_mail import Mail
 from py.user import User, Role
 from py.extended_register_form import ExtendedRegisterForm
+from string import Formatter
+from stock_user_datastore import MongoEngineStockUserDatastore
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='', template_folder='py/templates')
 app.secret_key = 'i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 
+def init_logger():
+    global logger
+    py.logging_setup.setup()
+    logger = logging.getLogger(__name__)
+init_logger()
+
 # MongoDB Config
-app.config['MONGODB_DB'] = DBInfo.db_name
-app.config['MONGODB_HOST'] = 'localhost'
-app.config['MONGODB_PORT'] = DBInfo.db_port
+def set_db_config():
+    # split on multiple strings
+    mongodb_uri = os.environ.get('MONGODB_URI')
+    # mongodb_uri = 'mongodb://heroku_jnccm4lq:81b5jm0qkg0frk5j1o8bd63t84@ds021751.mlab.com:21751/heroku_jnccm4lq'
+
+    a = Formatter()
+    if mongodb_uri:
+        (mongo_db, db_user, db_password, host, db_port, db_name) = re.split('://|:|@|,|/', mongodb_uri)
+        app.config['MONGODB_USERNAME'] = db_user
+        app.config['MONGODB_PASSWORD'] = db_password
+        app.config['MONGODB_HOST'] = host
+        app.config['MONGODB_PORT'] = int(db_port)
+        app.config['MONGODB_DB'] = db_name
+
+        logger.info("setting db configs")
+        logger.info("mongo_db: " + str(mongo_db))
+        logger.info("db_user: " + db_user)
+        logger.info("db_password: " + db_password)
+        logger.info("host: " + str(host))
+        logger.info("port: " + str(db_port))
+        logger.info("db_name: " + str(db_name))
+    else:
+        app.config['MONGODB_DB'] = DBInfo.db_name
+        app.config['MONGODB_HOST'] = 'localhost'
+        app.config['MONGODB_PORT'] = DBInfo.db_port
+
+set_db_config()
+
 app.config['SECURITY_PASSWORD_SALT'] = 'Zafaw9rtnisO9QCIi7ekdGNFu4cbIjtedzhWmMwebLE='
 app.config['SECURITY_PASSWORD_HASH'] = 'sha512_crypt'
 
@@ -61,6 +97,7 @@ app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = ('This account is disabled.', 'err
 config = {'defaultCash': 50000}
 db = MongoEngine(app)
 user_datastore = MongoEngineUserDatastore(db, User, Role)
+stock_user_datastore = MongoEngineStockUserDatastore(db, User, Role)
 # security = Security(app, user_datastore, register_blueprint=False)
 security = Security(app, user_datastore, confirm_register_form=ExtendedRegisterForm)
 mail = Mail(app)
@@ -69,9 +106,19 @@ mail = Mail(app)
 # Using the unauthorized handler will give more control, we can add the next parameter later
 
 
+def get_collection():
+    host = os.environ.get('MONGODB_URI')
+    port = app.config['MONGODB_PORT']
+
+    client = MongoClient(host=host,port=port)
+    db_name = app.config['MONGODB_DB']
+    the_db = client[db_name]
+    collection = the_db[DBInfo.collection_name]
+    return collection
+
 @security.app.login_manager.unauthorized_handler
 def unauthorized_callback():
-    list_routes()
+    # list_routes()
     return redirect(url_for('security.login'))
 
 
@@ -81,7 +128,7 @@ def root():
     """
     The actual application
     """
-    list_routes()  # for debugging
+    # list_routes()  # for debugging
 
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
     template = env.get_template('simulator.html')
@@ -258,8 +305,8 @@ def buy_stock():
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price) +
                 ", totaling a cost of " + str(total_cost))
     # buy the stock
-    return users_db_access.add_stock_to_user(username, symbol, stock_price, quantity)
-
+    # return users_db_access.add_stock_to_user(username, symbol, stock_price, quantity)
+    return stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)
 
 @app.route("/sellStock", methods=['POST'])
 @login_required
@@ -324,16 +371,9 @@ def handle_invalid_usage(error):
     response.status_code = error.status_code
     return response
 
-
-def init_logger():
-    global logger
-    py.logging_setup.setup()
-    logger = logging.getLogger(__name__)
-
-
 def init_db():
     global users_db_access
-    users_db_access = UsersDbAccess(user_datastore)
+    users_db_access = UsersDbAccess(user_datastore, get_collection())
 
 
 def init_cache(cache_path=None):
@@ -343,9 +383,15 @@ def init_cache(cache_path=None):
 if __name__ == "__main__":
     app.debug = False
     toolbar = DebugToolbarExtension(app)
-    init_logger()
+
     init_cache()
     init_db()
 
+    # Bind to PORT if defined, otherwise default to 5000.
+    # Heroku will define the PORT environment variable, so use it if it is defined
+    port = int(os.environ.get('PORT', 5000))
+
     logger.info("Starting server")
-    run_simple('localhost', 5000, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))  # use HTTPS in devo
+    # run_simple('localhost', port, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))  # use HTTPS in devo
+    app.run(host='0.0.0.0', port=port)
+    # app.run()

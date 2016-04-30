@@ -14,7 +14,7 @@ class StockSimulatorTestClient:
         simulator.init_cache('./static/cache.json')
         simulator.init_db()
 
-        self.db_access = UsersDbAccess(simulator.user_datastore)
+        self.db_access = UsersDbAccess(simulator.user_datastore, simulator.get_collection())
         self.client = simulator.app.test_client()
 
     def __enter__(self):

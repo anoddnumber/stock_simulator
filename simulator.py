@@ -9,7 +9,8 @@ from flask_debugtoolbar import DebugToolbarExtension
 from py.db_access import UsersDbAccess
 from py.exceptions.invalid_usage import InvalidUsage
 from py.cache import Cache
-from werkzeug.serving import run_simple
+# from werkzeug.serving import run_simple
+from pymongo import MongoClient
 
 import py.logging_setup
 import logging
@@ -103,6 +104,13 @@ mail = Mail(app)
 # security.app.login_manager.login_view = 'root' # this will give a ?next= in the URL.
 # Using the unauthorized handler will give more control, we can add the next parameter later
 
+
+def get_collection():
+    client = MongoClient()
+    db_name = app.config['MONGODB_DB']
+    the_db = client[db_name]
+    collection = the_db[DBInfo.collection_name]
+    return collection
 
 @security.app.login_manager.unauthorized_handler
 def unauthorized_callback():
@@ -361,7 +369,7 @@ def handle_invalid_usage(error):
 
 def init_db():
     global users_db_access
-    users_db_access = UsersDbAccess(user_datastore)
+    users_db_access = UsersDbAccess(user_datastore, get_collection())
 
 
 def init_cache(cache_path=None):

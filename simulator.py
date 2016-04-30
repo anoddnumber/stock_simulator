@@ -41,9 +41,12 @@ def set_db_config():
     a = Formatter()
     if mongodb_uri:
         (mongo_db, db_user, db_password, host, db_port, db_name) = re.split('://|:|@|,|/', mongodb_uri)
-        app.config['MONGODB_DB'] = db_name
+        app.config['MONGODB_USERNAME'] = db_user
+        app.config['MONGODB_PASSWORD'] = db_password
         app.config['MONGODB_HOST'] = host
         app.config['MONGODB_PORT'] = int(db_port)
+        app.config['MONGODB_DB'] = db_name
+
         logger.info("setting db configs")
         logger.info("mongo_db: " + str(mongo_db))
         logger.info("db_user: " + db_user)

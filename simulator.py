@@ -121,32 +121,46 @@ def root():
 
 
 @app.route("/stock/<symbol>", methods=['GET'])
-# @login_required
+@login_required
 def stock_info_page(symbol):
-    print "stock info page"
-    print "the symbol: " + str(type(symbol))
     template = env.get_template('new_stock_info_page.html')
-    print "current user: " + str(current_user)
-    print "THE user info: " + str(get_user_info())
-    # print "THE stock info: " + str(get_stock_info_helper([str(symbol)]))
 
-    print "more stock info: " + str(cache.json.get(symbol))
-    info = cache.json.get(symbol)
+    user_dict = get_user_dict()
 
-    logger.info("Retrieving information for symbol " + str(symbol) + ": " + str(info))
+    stocks_owned = user_dict.get("stocks_owned")
+    cash = user_dict.get("cash")
 
-    name = info.get("name")  # Company name
-    price = info.get("price")
-    day_low = info.get("day_low")
-    daily_percent_change = info.get("daily_percent_change")
-    daily_price_change = info.get("daily_price_change")
-    day_open = info.get("day_open")
-    day_high = info.get("day_high")
+    num_owned = 0
+    if stocks_owned:
+        stock_owned_info = stocks_owned.get(symbol)
+        if stock_owned_info:
+            num_owned = stock_owned_info.get("total")
+            if not num_owned:
+                num_owned = 0
+                logger.exception("User " + str(current_user) + "'s stock data is corrupted. " +
+                                 "Symbol " + str(symbol) + " exists in stocks_owned but does not contain " +
+                                 "a total field")
+    else:
+        logger.exception("Corrupted data. User " + str(current_user) + " does not have a stocks_owned field."
+                         " stocks_owned: " + str(stocks_owned))
 
-    if price:
+    stock_info = cache.json.get(symbol)
+
+    if stock_info:
+        name = stock_info.get("name")  # Company name
+        price = stock_info.get("price")
+        daily_percent_change = stock_info.get("daily_percent_change")
+        daily_price_change = stock_info.get("daily_price_change")
+        day_open = stock_info.get("day_open")
+        day_high = stock_info.get("day_high")
+        day_low = stock_info.get("day_low")
+
+    if stock_info and user_dict and cash and name and price and daily_percent_change and daily_price_change and \
+            day_open and day_high and day_low:
+
         return template.render(name=name, symbol=symbol, price=price, day_low=day_low,
                                daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
-                               day_open=day_open, day_high=day_high)
+                               day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash)
     else:
         return "Requested stock does not exist in our database"
 
@@ -372,10 +386,14 @@ def sell_stock():
 @app.route("/getUserInfo", methods=['GET'])
 @login_required
 def get_user_info():
-    user_dict = {'cash': str(current_user.cash), 'stocks_owned': current_user.stocks_owned}
+    user_dict = get_user_dict()
     logger.info("Returning user information for " + str(current_user.username))
     logger.info("user_dict: " + str(user_dict))
     return json.dumps(user_dict, sort_keys=True)
+
+
+def get_user_dict():
+    return {'cash': str(current_user.cash), 'stocks_owned': current_user.stocks_owned}
 
 
 @app.errorhandler(InvalidUsage)

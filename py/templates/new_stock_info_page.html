@@ -7,7 +7,7 @@
             <button class="stockInfoPageBackButton" type="button">Back</button>
         </div>
         <div class="col-xs-6 availableCash">
-            <span class="stockInfoPageTotalCash"></span><br>
+            <span class="stockInfoPageTotalCash">Available Cash: ${{cash|e}}</span><br>
         </div>
     </div>
     <div class="row">
@@ -44,7 +44,7 @@
             </div>
         </div>
         <div class="col-xs-6 column2">
-            Amount Owned: <span class="stockInfoPageAmountOwned"></span><br>
+            Amount Owned: <span class="stockInfoPageAmountOwned">{{num_owned|e}}</span><br>
             <form>
                 <div class="buySellRadioInput">
                     <input type="radio" name="market" value="buy" class="buyStockRadioButton" checked> Buy

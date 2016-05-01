@@ -7,6 +7,12 @@ class TestStockInfo(BaseUnitTest):
 
     def test_basic_stock_info(self):
         print "test_basic_stock_info"
+
+        self.client.create_account()
+
+        self.client.confirm_test_account()
+        self.client.login()
+
         self.client.stock_info_page("AMZN")
 
 

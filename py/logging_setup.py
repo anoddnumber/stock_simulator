@@ -2,6 +2,7 @@ import os
 import json
 import logging.config
 
+
 def setup(path='./config/logging.json', level=logging.INFO, env_key='LOG_CFG',
           log_dir='./logs'):
     """
@@ -25,4 +26,4 @@ def setup(path='./config/logging.json', level=logging.INFO, env_key='LOG_CFG',
         logging.config.dictConfig(config)
     else:
         print "path does not exist"
-        logging.basicConfig(level=level) #prints to standard out
+        logging.basicConfig(level=level)  # prints to standard out

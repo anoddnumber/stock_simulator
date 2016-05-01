@@ -6,13 +6,14 @@ import logging
 class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
 
     def __init__(self, db, user_model, role_model):
+        super(MongoEngineStockUserDatastore, self).__init__(db, user_model, role_model)
         self.logger = logging.getLogger(__name__)
-        MongoEngineUserDatastore.__init__(self, db, user_model, role_model)
 
     def get_user_by_id(self, user_id):
         return self.get_user(ObjectId(user_id))
 
-    def create_user(self, user):
+    # don't call this create_user since it is a parent method
+    def create_user_from_user_obj(self, user):
         return self.create_user(email=user.email, username=user.username, password=user.password)
 
     def get_user_by_username(self, username):

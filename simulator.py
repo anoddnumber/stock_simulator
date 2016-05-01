@@ -13,12 +13,11 @@ from py.cache import Cache
 import py.logging_setup
 import logging
 from flask_mongoengine import MongoEngine
-from py.db_info import DBInfo
-from flask_security import Security, MongoEngineUserDatastore, current_user, login_required
+from py.db_info import DevoDBInfo
+from flask_security import Security, current_user, login_required
 from flask_mail import Mail
 from py.user import User, Role
 from py.extended_register_form import ExtendedRegisterForm
-from string import Formatter
 from stock_user_datastore import MongoEngineStockUserDatastore
 
 env = Environment(loader=PackageLoader('py', 'templates'))
@@ -37,7 +36,6 @@ def set_db_config():
     mongodb_uri = os.environ.get('MONGODB_URI')
     # mongodb_uri = 'mongodb://heroku_jnccm4lq:81b5jm0qkg0frk5j1o8bd63t84@ds021751.mlab.com:21751/heroku_jnccm4lq'
 
-    a = Formatter()
     if mongodb_uri:
         (mongo_db, db_user, db_password, host, db_port, db_name) = re.split('://|:|@|,|/', mongodb_uri)
         app.config['MONGODB_USERNAME'] = db_user
@@ -54,10 +52,9 @@ def set_db_config():
         logger.info("port: " + str(db_port))
         logger.info("db_name: " + str(db_name))
     else:
-        app.config['MONGODB_DB'] = DBInfo.db_name
-        app.config['MONGODB_HOST'] = 'localhost'
-        app.config['MONGODB_PORT'] = DBInfo.db_port
-
+        app.config['MONGODB_DB'] = DevoDBInfo.db_name
+        app.config['MONGODB_HOST'] = DevoDBInfo.host
+        app.config['MONGODB_PORT'] = DevoDBInfo.db_port
 set_db_config()
 
 app.config['SECURITY_PASSWORD_SALT'] = 'Zafaw9rtnisO9QCIi7ekdGNFu4cbIjtedzhWmMwebLE='
@@ -94,25 +91,12 @@ app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = ('This account is disabled.', 'err
 
 config = {'defaultCash': 50000}
 db = MongoEngine(app)
-user_datastore = MongoEngineUserDatastore(db, User, Role)
 stock_user_datastore = MongoEngineStockUserDatastore(db, User, Role)
-# security = Security(app, user_datastore, register_blueprint=False)
-security = Security(app, user_datastore, confirm_register_form=ExtendedRegisterForm)
+security = Security(app, stock_user_datastore, confirm_register_form=ExtendedRegisterForm)
 mail = Mail(app)
 
 # security.app.login_manager.login_view = 'root' # this will give a ?next= in the URL.
 # Using the unauthorized handler will give more control, we can add the next parameter later
-
-
-# def get_collection():
-#     host = os.environ.get('MONGODB_URI')
-#     port = app.config['MONGODB_PORT']
-#
-#     client = MongoClient(host=host,port=port)
-#     db_name = app.config['MONGODB_DB']
-#     the_db = client[db_name]
-#     collection = the_db[DBInfo.collection_name]
-#     return collection
 
 @security.app.login_manager.unauthorized_handler
 def unauthorized_callback():
@@ -380,11 +364,12 @@ if __name__ == "__main__":
 
     init_cache()
 
-    # Bind to PORT if defined, otherwise default to 5000.
-    # Heroku will define the PORT environment variable, so use it if it is defined
+    # Heroku will define the PORT environment variable, so use it if it is defined, otherwise default to 5000.
     port = int(os.environ.get('PORT', 5000))
 
     logger.info("Starting server")
     # run_simple('localhost', port, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))  # use HTTPS in devo
+
+    # host='0.0.0.0' tells your operating system to listen on all public IPs.
     app.run(host='0.0.0.0', port=port)
     # app.run()

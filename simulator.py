@@ -121,9 +121,10 @@ def root():
 # @login_required
 def stock_info_page(symbol):
     print "stock info page"
-    print "symbol: " + str(symbol)
+    print "the symbol: " + str(symbol)
     template = env.get_template('new_stock_info_page.html')
-    return template.render()
+    print "THE user info: " + str(get_user_info())
+    return template.render(symbol=symbol)
 
 
 @security.context_processor
@@ -368,7 +369,7 @@ def init_cache(cache_path=None):
     cache = Cache(cache_path)
             
 if __name__ == "__main__":
-    app.debug = False
+    app.debug = True
     toolbar = DebugToolbarExtension(app)
 
     init_cache()

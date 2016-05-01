@@ -16,8 +16,12 @@
             <span class="stockInfoPageStockSymbolName">({{symbol|e}})</span><br>
             <div class ="stockPrice">
                 <span class="stockInfoPageStockPrice">{{price|e}}</span><font size="2">&nbsp;USD</font>&nbsp;
-                <span class="glyphicon glyphicon-arrow-up" style="color:#4CC417"></span>
+                {% if change == "increase" %}
+                    <span class="glyphicon glyphicon-arrow-up" style="color:#4CC417"></span>
+                {% endif %}
+                {% if change == "decrease" %}
                 <span class="glyphicon glyphicon-arrow-down" style="color:#E42217"></span>
+                {% endif %}
                 <span class="stockPriceChange">{{daily_price_change|e}}</span>
                 <span class="stockPercentChange">({{daily_percent_change|e}})</span><br>
             </div>

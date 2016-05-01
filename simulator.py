@@ -131,7 +131,7 @@ def stock_info_page(symbol):
     cash = user_dict.get("cash")
 
     num_owned = 0
-    if stocks_owned:
+    if stocks_owned is not None:
         stock_owned_info = stocks_owned.get(symbol)
         if stock_owned_info:
             num_owned = stock_owned_info.get("total")
@@ -141,8 +141,8 @@ def stock_info_page(symbol):
                                  "Symbol " + str(symbol) + " exists in stocks_owned but does not contain " +
                                  "a total field")
     else:
-        logger.exception("Corrupted data. User " + str(current_user) + " does not have a stocks_owned field."
-                         " stocks_owned: " + str(stocks_owned))
+        logger.exception("Corrupted data. User " + str(current_user) + " does not have a stocks_owned field." +
+                         " user_dict:" + str(user_dict) + " stocks_owned: " + str(stocks_owned))
 
     stock_info = cache.json.get(symbol)
 
@@ -154,13 +154,21 @@ def stock_info_page(symbol):
         day_open = stock_info.get("day_open")
         day_high = stock_info.get("day_high")
         day_low = stock_info.get("day_low")
+        if daily_price_change is not None:
+            price_change = float(daily_price_change)
+            if price_change > 0:
+                change = 'increase'
+            elif price_change < 0:
+                change = 'decrease'
+            else:
+                change = 'same'
 
     if stock_info and user_dict and cash and name and price and daily_percent_change and daily_price_change and \
             day_open and day_high and day_low:
 
         return template.render(name=name, symbol=symbol, price=price, day_low=day_low,
                                daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
-                               day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash)
+                               day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change)
     else:
         return "Requested stock does not exist in our database"
 

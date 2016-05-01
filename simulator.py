@@ -168,7 +168,8 @@ def stock_info_page(symbol):
 
         return template.render(name=name, symbol=symbol, price=price, day_low=day_low,
                                daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
-                               day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change)
+                               day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change,
+                               activeTab='stocks')
     else:
         return "Requested stock does not exist in our database"
 

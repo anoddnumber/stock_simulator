@@ -13,16 +13,17 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul id="navbarTabs" class="nav navbar-nav" role="tablist">
-            <li class="active">
+
+            <li {% if activeTab is not defined or activeTab=="profile" %} class="active" {% endif %}>
                 <a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a>
             </li>
-            <li>
+            <li {% if activeTab=="stocks" %} class="active" {% endif %}>
                 <a href="#stocks" aria-controls="stocks" role="tab" data-toggle="tab">Stocks</a>
             </li>
-            <li>
+            <li {% if activeTab=="watching" %} class="active" {% endif %}>
                 <a href="#watching" aria-controls="watching" role="tab" data-toggle="tab">Watching</a>
             </li>
-            <li>
+            <li {% if activeTab=="leaderboard" %} class="active" {% endif %}>
                 <a href="#leaderboard" aria-controls="leaderboard" role="tab" data-toggle="tab">Leaderboard</a>
             </li>
         </ul>

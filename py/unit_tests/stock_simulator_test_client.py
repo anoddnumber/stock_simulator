@@ -58,6 +58,9 @@ class StockSimulatorTestClient:
             stockPrice=stock_price,
         ), follow_redirects=True)
 
+    def stock_info_page(self, symbol):
+        return self.client.get('/stock/' + str(symbol), follow_redirects=True)
+
     def get_stock_info(self, symbols):
         return self.client.get('/info?symbols=' + str(symbols))
 

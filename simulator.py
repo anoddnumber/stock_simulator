@@ -117,6 +117,15 @@ def root():
     return template.render()
 
 
+@app.route("/stock/<symbol>", methods=['GET'])
+# @login_required
+def stock_info_page(symbol):
+    print "stock info page"
+    print "symbol: " + str(symbol)
+    template = env.get_template('new_stock_info_page.html')
+    return template.render()
+
+
 @security.context_processor
 def security_global_context_processor():
     def get_form_error(form):

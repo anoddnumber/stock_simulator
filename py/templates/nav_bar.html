@@ -1,0 +1,49 @@
+ <nav class="navbar navbar-default" role="navigation">
+    <!-- Brand and toggle get grouped for better mobile display -->
+    <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="javascript:void(0)">Logo</a>
+    </div>
+
+    <!-- Collect the nav links, forms, and other content for toggling -->
+    <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul id="navbarTabs" class="nav navbar-nav" role="tablist">
+            <li class="active">
+                <a href="#profile" aria-controls="profile" role="tab" data-toggle="tab">Profile</a>
+            </li>
+            <li>
+                <a href="#stocks" aria-controls="stocks" role="tab" data-toggle="tab">Stocks</a>
+            </li>
+            <li>
+                <a href="#watching" aria-controls="watching" role="tab" data-toggle="tab">Watching</a>
+            </li>
+            <li>
+                <a href="#leaderboard" aria-controls="leaderboard" role="tab" data-toggle="tab">Leaderboard</a>
+            </li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+            <li><a href="javascript:void(0)">News</a></li>
+            <li class="dropdown">
+                <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">Username <b class="caret"></b></a>
+                <ul class="dropdown-menu">
+                    <li><a href="javascript:void(0)">Tutorial</a></li>
+                    <li><a href="javascript:void(0)">SM Wiki</a></li>
+                    <li><a href="javascript:void(0)">SM Community</a></li>
+                    <li class="divider"></li>
+                    <li><a href="javascript:void(0)">Settings</a></li>
+                </ul>
+            </li>
+            <li>
+                <!--<button type="submit" class="btn navbar-btn" action="logout" method="post">Log out</button>-->
+                <form action="logout">
+                    <button id="logoutButton" type="submit" class="btn navbar-btn" formaction="logout">Log Out</button>
+                </form>
+            </li>
+        </ul>
+    </div><!-- /.navbar-collapse -->
+</nav>

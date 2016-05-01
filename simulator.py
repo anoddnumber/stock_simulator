@@ -18,17 +18,19 @@ from flask_security import Security, current_user, login_required
 from flask_mail import Mail
 from py.user import User, Role
 from py.extended_register_form import ExtendedRegisterForm
-from stock_user_datastore import MongoEngineStockUserDatastore
+from py.stock_user_datastore import MongoEngineStockUserDatastore
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='', template_folder='py/templates')
 app.secret_key = 'i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
+
 
 def init_logger():
     global logger
     py.logging_setup.setup()
     logger = logging.getLogger(__name__)
 init_logger()
+
 
 # MongoDB Config
 def set_db_config():
@@ -98,6 +100,7 @@ mail = Mail(app)
 # security.app.login_manager.login_view = 'root' # this will give a ?next= in the URL.
 # Using the unauthorized handler will give more control, we can add the next parameter later
 
+
 @security.app.login_manager.unauthorized_handler
 def unauthorized_callback():
     # list_routes()
@@ -121,10 +124,31 @@ def root():
 # @login_required
 def stock_info_page(symbol):
     print "stock info page"
-    print "the symbol: " + str(symbol)
+    print "the symbol: " + str(type(symbol))
     template = env.get_template('new_stock_info_page.html')
+    print "current user: " + str(current_user)
     print "THE user info: " + str(get_user_info())
-    return template.render(symbol=symbol)
+    # print "THE stock info: " + str(get_stock_info_helper([str(symbol)]))
+
+    print "more stock info: " + str(cache.json.get(symbol))
+    info = cache.json.get(symbol)
+
+    logger.info("Retrieving information for symbol " + str(symbol) + ": " + str(info))
+
+    name = info.get("name")  # Company name
+    price = info.get("price")
+    day_low = info.get("day_low")
+    daily_percent_change = info.get("daily_percent_change")
+    daily_price_change = info.get("daily_price_change")
+    day_open = info.get("day_open")
+    day_high = info.get("day_high")
+
+    if price:
+        return template.render(name=name, symbol=symbol, price=price, day_low=day_low,
+                               daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
+                               day_open=day_open, day_high=day_high)
+    else:
+        return "Requested stock does not exist in our database"
 
 
 @security.context_processor
@@ -224,10 +248,10 @@ def get_stock_symbol_map():
     logger.info("Retrieving the stockSymbolsMap")
     seconds_left = cache.update(5)
 
-    lenient_time = 2 # give extra time for the server to update before the client calls again
+    lenient_time = 2  # give extra time for the server to update before the client calls again
     delay = seconds_left + lenient_time
 
-    info_dict = {'stockSymbolsMap' : cache.json, 'delay' : delay * 1000}
+    info_dict = {'stockSymbolsMap': cache.json, 'delay': delay * 1000}
 
     # time.sleep(5)
     return jsonify(info_dict)
@@ -300,6 +324,7 @@ def buy_stock():
     # return users_db_access.add_stock_to_user(username, symbol, stock_price, quantity)
     return stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)
 
+
 @app.route("/sellStock", methods=['POST'])
 @login_required
 def sell_stock():
@@ -366,6 +391,7 @@ def handle_invalid_usage(error):
 
 def init_cache(cache_path=None):
     global cache
+    logger.info("initializing cache")
     cache = Cache(cache_path)
             
 if __name__ == "__main__":

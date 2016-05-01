@@ -9,10 +9,13 @@ def setup(path='./config/logging.json', level=logging.INFO, env_key='LOG_CFG',
     """
     value = os.getenv(env_key, None)
     if value:
-        print "value"
         path = value
+        print "setting the path to value of environment variable env_key: " + str(env_key)
+        print "path: " + str(path)
 
     if not os.path.exists(log_dir):
+        print "path of log directory does not exist, automatically creating the directories"
+        print "path created: " + str(log_dir)
         os.makedirs(log_dir)
 
     if os.path.exists(path):

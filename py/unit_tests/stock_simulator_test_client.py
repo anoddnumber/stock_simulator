@@ -6,9 +6,8 @@ from datetime import datetime
 class StockSimulatorTestClient:
 
     def __init__(self):
-        # simulator.config['TESTING'] = True
         simulator.config['DEBUG'] = True  # Set to bypass reCaptcha
-        simulator.app.config['TESTING'] = True  # Set so that no emails are sent during testing
+        simulator.app.config['SECURITY_SEND_REGISTER_EMAIL'] = False  # Set to False so that no emails are sent during testing
         simulator.init_logger()
         simulator.init_cache('./static/cache.json')
 

@@ -174,6 +174,14 @@ def stock_info_page(symbol):
         return "Requested stock does not exist in our database"
 
 
+@app.route("/profile", methods=['GET'])
+@login_required
+def profile():
+    print "profile page"
+    template = env.get_template('new_profile_page.html')
+    return template.render()
+
+
 @security.context_processor
 def security_global_context_processor():
     def get_form_error(form):

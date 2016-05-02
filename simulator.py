@@ -182,6 +182,13 @@ def profile():
     return template.render(userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json))
 
 
+@app.route("/stocks", methods=['GET'])
+@login_required
+def stocks():
+    template = env.get_template('new_stocks_page.html')
+    return template.render(userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
+
+
 @security.context_processor
 def security_global_context_processor():
     def get_form_error(form):

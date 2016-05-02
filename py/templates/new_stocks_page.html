@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
+<meta content="utf-8" http-equiv="encoding">
+
+<title>Stock Simulator</title>
+
+<script>
+    var userInfo = {{userInfo}};
+    var stockSymbolsMap = {{stockSymbolsMap}};
+</script>
+
+<head>
+    <!--Code to prevent flash of unstyled content-->
+    <style type="text/css">
+      .js #flash {display: none;}
+    </style>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+    <script type="text/javascript">
+      $('html').addClass('js');
+      $(document).ready(function() {
+        // Stuff to do as soon as the DOM is ready
+        $('#flash').show();
+      });
+    </script>
+</head>
+<body id="flash">
+    <div id="stock_simulator">
+        {% include 'nav_bar.html' %}
+
+        <!-- Stocks Tab -->
+        {% include 'stocks_table.html' %}
+    </div>
+
+    <!-- DataTables -->
+    <script type="text/javascript" language="javascript" src="../../DataTables/datatables.min.js"></script>
+    <link rel="stylesheet" type="text/css" href="../../DataTables/datatables.min.css">
+
+    <!-- Bootstrap core CSS -->
+    <link href="../../bootstrap-3.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="../css/simulator.css">
+</body>
+
+</html>

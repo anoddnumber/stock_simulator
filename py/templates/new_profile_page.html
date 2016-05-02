@@ -25,18 +25,10 @@
 </head>
 <body id="flash">
     <div id="stock_simulator">
-       {% include 'nav_bar.html' %}
+        {% include 'nav_bar.html' %}
 
-        <!-- All the tab markup will be in here -->
-        <div class="tab-content">
-
-            <!-- Profile Tab -->
-            <div role="tabpanel" class="tab-pane active" id="profile">
-                <div>
-                    <div id="profileTableContainer"> {% include 'profile_table.html' %} </div>
-                </div>
-            </div>
-        </div>
+        <!-- Profile Tab -->
+        {% include 'profile_table.html' %}
     </div>
 
     <!-- DataTables -->

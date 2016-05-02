@@ -121,9 +121,12 @@ $( document ).ready(function() {
             search: "_INPUT_", //Don't display any label left of the search box
             searchPlaceholder: "Search"
         },
-        "columns": [
-            { "width": "10%" }, { "width": "30%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }
-        ],
+        // the "columns" key below makes the table static and not dynamic, so if you resize the browser window after
+        // the page loads, then the table won't change. The "autoWidth" seems to be okay for now
+//        "columns": [
+//            { "width": "10%" }, { "width": "30%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }
+//        ],
+        "autoWidth": false,
         "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
     });
 

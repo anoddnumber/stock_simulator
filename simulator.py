@@ -177,9 +177,9 @@ def stock_info_page(symbol):
 @app.route("/profile", methods=['GET'])
 @login_required
 def profile():
-    print "profile page"
+    cache.update(5)
     template = env.get_template('new_profile_page.html')
-    return template.render()
+    return template.render(userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json))
 
 
 @security.context_processor

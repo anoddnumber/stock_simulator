@@ -17,6 +17,7 @@
                 } else {
                     profileTab.createTable();
                 }
+                $('.availableCash').text("Available Cash: $" + userInfo.cash);
             },
 
             //TODO probably a better way to do this with DataTables
@@ -99,7 +100,7 @@
          }
 
          return {
-            update : profileTab.updatePage,
+            updatePage : profileTab.updatePage,
             getTable : profileTab.getTable,
         };
     }
@@ -116,6 +117,8 @@ $( document ).ready(function() {
             search: "_INPUT_", //Don't display any label left of the search box
             searchPlaceholder: "Search"
         },
-        "dom": 'f<"stockInfoPageTotalCash availableCash">tip' //TODO change the stockInfoPageTotalCash class..
+        "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
     });
+
+    ProfileTab.updatePage();
 });

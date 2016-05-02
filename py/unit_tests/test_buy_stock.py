@@ -3,7 +3,8 @@ from base_unit_test import BaseUnitTest
 import simulator
 from stock_simulator_test_client import StockSimulatorTestClient
 
-#TODO: Test buying a stock at different prices (somewhat difficult to test this..)
+
+# TODO: Test buying a stock at different prices (somewhat difficult to test this..)
 class TestBuyStock(BaseUnitTest):
 
     def test_basic_buy(self):

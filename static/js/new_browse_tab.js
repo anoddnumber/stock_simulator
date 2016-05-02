@@ -130,6 +130,14 @@ $( document ).ready(function() {
         "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
     });
 
+    $('#stocks_table tbody').on('click', 'tr', function(event) {
+        table = BrowseTab.getTable();
+        var data = table.row( this ).data();
+        var symbol = data[0];
+
+        window.location.href = '/stock/' + symbol
+    });
+
     BrowseTab.updatePage();
 });
 

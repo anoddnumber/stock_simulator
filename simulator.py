@@ -185,6 +185,7 @@ def profile():
 @app.route("/stocks", methods=['GET'])
 @login_required
 def stocks():
+    cache.update(5)
     template = env.get_template('new_stocks_page.html')
     return template.render(userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
 

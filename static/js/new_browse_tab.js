@@ -16,6 +16,7 @@
                 } else {
                     browseTab.createTable();
                 }
+                $('.availableCash').text("Available Cash: $" + userInfo.cash);
             },
 
             //TODO probably a better way to do this with DataTables
@@ -82,6 +83,9 @@
                 var rows = new Array();
                 for (var i = 0; i < symbols.length; i++) {
                     var symbol = symbols[i];
+                    if (symbol == "last_updated") {
+                        continue;
+                    }
                     var row = browseTab.getRow(symbol);
                     rows.push(row);
                 }
@@ -117,10 +121,13 @@ $( document ).ready(function() {
             search: "_INPUT_", //Don't display any label left of the search box
             searchPlaceholder: "Search"
         },
-        "dom": 'f<"stockInfoPageTotalCash availableCash">tip' //TODO change the stockInfoPageTotalCash class..
+        "columns": [
+            { "width": "10%" }, { "width": "30%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }
+        ],
+        "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
     });
 
-//    BrowseTab.updatePage();
+    BrowseTab.updatePage();
 });
 
 

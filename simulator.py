@@ -249,7 +249,7 @@ def buy_stock():
 
     total_cost = quantity * stock_price
     # check that the user has enough cash to buy the stocks requested
-    if total_cost >= current_user.cash:
+    if total_cost > float(current_user.cash):
         logger.warning("User " + str(username) + " tried to buy more stocks than he/she can afford")
         logger.warning("total_cost: " + str(total_cost) + ", user.cash: " + str(current_user.cash))
         return "Not enough cash"

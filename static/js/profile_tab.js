@@ -53,6 +53,7 @@
                     for (var j = 0; j < pricesBought.length; j++) {
                         var price = pricesBought[j];
                         var quantity = Number(symbolData[price]);
+                        if (price === "total") continue;
                         price = price.replace("_", ".");
                         price = Number(price);
 

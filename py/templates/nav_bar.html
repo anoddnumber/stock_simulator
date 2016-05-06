@@ -14,11 +14,11 @@
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul id="navbarTabs" class="nav navbar-nav" role="tablist">
 
-            <li {% if activeTab is not defined or activeTab=="profile" %} class="active" {% endif %}>
-                <a href="/profile">Profile</a>
+            <li id="profileTab" {% if activeTab is not defined or activeTab=="profile" %} class="active" {% endif %}>
+                <a href="/profile" class="profileTabLink">Profile</a>
             </li>
-            <li {% if activeTab=="stocks" %} class="active" {% endif %}>
-                <a href="/stocks">Stocks</a>
+            <li id="stocksTab" {% if activeTab=="stocks" %} class="active" {% endif %}>
+                <a href="/stocks" class="stocksTabLink">Stocks</a>
             </li>
             <li {% if activeTab=="watching" %} class="active" {% endif %}>
                 <a href="#watching" aria-controls="watching" role="tab" data-toggle="tab">Watching</a>

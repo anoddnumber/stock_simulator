@@ -97,11 +97,41 @@
 
                 return rows;
             },
+
+            init : function() {
+                table = undefined;
+
+                // https://datatables.net/reference/option/dom
+                // https://datatables.net/examples/advanced_init/dom_toolbar.html
+                $('#profile_table').DataTable({
+                    "lengthChange" : false,
+                    language: {
+                        search: "_INPUT_", //Don't display any label left of the search box
+                        searchPlaceholder: "Search"
+                    },
+                    "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
+                });
+
+                $('#profile_table tbody').on('click', 'tr', function(event) {
+                    table = ProfileTab.getTable();
+                    var data = table.row( this ).data();
+                    if (! data) {
+                        return;
+                    }
+
+                    var symbol = data[0];
+
+                    window.location.href = '/stock/' + symbol
+                });
+
+                ProfileTab.updatePage();
+            },
          }
 
          return {
             updatePage : profileTab.updatePage,
             getTable : profileTab.getTable,
+            init : profileTab.init,
         };
     }
 })(jQuery);
@@ -109,28 +139,5 @@
 var ProfileTab = $.ProfileTab();
 
 $( document ).ready(function() {
-    // https://datatables.net/reference/option/dom
-    // https://datatables.net/examples/advanced_init/dom_toolbar.html
-    $('#profile_table').DataTable({
-        "lengthChange" : false,
-        language: {
-            search: "_INPUT_", //Don't display any label left of the search box
-            searchPlaceholder: "Search"
-        },
-        "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
-    });
-
-    $('#profile_table tbody').on('click', 'tr', function(event) {
-        table = ProfileTab.getTable();
-        var data = table.row( this ).data();
-        if (! data) {
-            return;
-        }
-
-        var symbol = data[0];
-
-        window.location.href = '/stock/' + symbol
-    })
-
-    ProfileTab.updatePage();
+    ProfileTab.init();
 });

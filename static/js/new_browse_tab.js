@@ -99,6 +99,37 @@
                 $('#previewBuyStockPrice').text(stockSymbolsMap[symbol].price);
             },
 
+            init : function() {
+                table = undefined;
+
+                // https://datatables.net/reference/option/dom
+                // https://datatables.net/examples/advanced_init/dom_toolbar.html
+                $('#stocks_table').DataTable({
+                    "lengthChange" : false,
+                    language: {
+                        search: "_INPUT_", //Don't display any label left of the search box
+                        searchPlaceholder: "Search"
+                    },
+//                     the "columns" key below makes the table static and not dynamic, so if you resize the browser window after
+//                     the page loads, then the table won't change. The "autoWidth" seems to be okay for now
+//                    "columns": [
+//                        { "width": "10%" }, { "width": "30%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }
+//                    ],
+                    "autoWidth": false,
+                    "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
+                });
+
+                $('#stocks_table tbody').on('click', 'tr', function(event) {
+                    table = browseTab.getTable();
+                    var data = table.row( this ).data();
+                    var symbol = data[0];
+
+                    window.location.href = '/stock/' + symbol
+                });
+
+                browseTab.updatePage();
+            },
+
             //TODO: add an update method for the browseTab
         }
 
@@ -106,6 +137,7 @@
             updatePage : browseTab.updatePage,
             displaySortedArray : browseTab.displaySortedArray,
             getTable : browseTab.getTable,
+            init : browseTab.init,
         };
     };
 })(jQuery);
@@ -113,35 +145,8 @@
 var BrowseTab = $.BrowseTab();
 
 $( document ).ready(function() {
-    // https://datatables.net/reference/option/dom
-    // https://datatables.net/examples/advanced_init/dom_toolbar.html
-    $('#stocks_table').DataTable({
-        "lengthChange" : false,
-        language: {
-            search: "_INPUT_", //Don't display any label left of the search box
-            searchPlaceholder: "Search"
-        },
-        // the "columns" key below makes the table static and not dynamic, so if you resize the browser window after
-        // the page loads, then the table won't change. The "autoWidth" seems to be okay for now
-//        "columns": [
-//            { "width": "10%" }, { "width": "30%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }
-//        ],
-        "autoWidth": false,
-        "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
-    });
-
-    $('#stocks_table tbody').on('click', 'tr', function(event) {
-        table = BrowseTab.getTable();
-        var data = table.row( this ).data();
-        var symbol = data[0];
-
-        window.location.href = '/stock/' + symbol
-    });
-
-    BrowseTab.updatePage();
+    BrowseTab.init();
 });
-
-
 
 
 

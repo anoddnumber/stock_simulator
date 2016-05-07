@@ -113,13 +113,10 @@
           }
           
         }).done(function(data) {
-            console.log("done");
           if ( history.replaceState && settings.replaceURL == true ) history.pushState( {}, document.title, href );
           if (settings.done) {
-            console.log("settings.done");
             settings.done(data, target)
           } else {
-            console.log("settings not done");
             $(target).html(data)
           }
           

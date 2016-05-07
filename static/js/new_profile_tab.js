@@ -104,6 +104,18 @@
                 // https://datatables.net/reference/option/dom
                 // https://datatables.net/examples/advanced_init/dom_toolbar.html
                 $('#profile_table').DataTable({
+                    "columns": [
+                        { className: "symbol" },
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                    ],
                     "lengthChange" : false,
                     language: {
                         search: "_INPUT_", //Don't display any label left of the search box
@@ -112,19 +124,35 @@
                     "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
                 });
 
-                $('#profile_table tbody').on('click', 'tr', function(event) {
-                    table = ProfileTab.getTable();
-                    var data = table.row( this ).data();
-                    if (! data) {
-                        return;
-                    }
+                ProfileTab.updatePage();
 
-                    var symbol = data[0];
+                $('#profile_table tbody tr').each(function (i, row) {
+                    var symbol = $(row).find('.symbol').text();
+                    $(row).attr("href", "/stock/" + symbol);
 
-                    window.location.href = '/stock/' + symbol
+                    $(row).loadingbar({
+                        target: "#loadingbar-frame",
+                        replaceURL: true,
+                        direction: "right",
+
+                        /* Default Ajax Parameters.  */
+                        async: true,
+                        complete: function(xhr, text) {},
+                        cache: true,
+                        error: function(xhr, text, e) {},
+                        global: true,
+                        headers: {},
+                        statusCode: {},
+                        success: function(data, text, xhr) {},
+                        dataType: "html",
+                        done: function(data) {
+                            var simulator = $(data).find("#stock_simulator");
+                            $(this.target).html(simulator.get(0));
+                        }
+                    });
                 });
 
-                ProfileTab.updatePage();
+
             },
          }
 

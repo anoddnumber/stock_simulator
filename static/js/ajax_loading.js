@@ -1,11 +1,11 @@
 $( document ).ready(function() {
     changePageHelper($(".stocksTabLink"), BrowseTab, 'stocksTab');
     changePageHelper($(".profileTabLink"), ProfileTab, 'profileTab');
+//    changePageHelper($(".profileTabLink"), StockInfoPage, '');
 });
 
 
-function changePageHelper(selector, tab, tabId) {
-    console.log("selector: " + selector);
+function changePageHelper(selector, page, tabId) {
     selector.loadingbar({
         target: "#loadingbar-frame",
         replaceURL: true,
@@ -25,9 +25,13 @@ function changePageHelper(selector, tab, tabId) {
             var simulator = $(data).find("#stock_simulator");
 
             $(this.target).html(simulator.get(0));
-            tab.init();
-            $('#navbarTabs > li').removeClass('active');
-            $('#' + tabId).addClass('active');
+            page.init();
+
+            if (tabId != '') {
+                $('#navbarTabs > li').removeClass('active');
+                $('#' + tabId).addClass('active');
+            }
+
         }
     });
 }

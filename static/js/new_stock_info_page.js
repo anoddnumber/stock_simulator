@@ -81,11 +81,20 @@
                         if ($('.buyStockRadioButton').is(':checked')) {
                             ApiClient.buyStock(symbol, quantity, price, function(data) {
                                 data = JSON.parse(data);
+
+                                $('.stockInfoPageAmountOwned').text(data.stocks_owned[symbol].total);
                                 $('.stockInfoPageTotalCash').text("Available Cash: $" + data.cash);
                             });
                         } else if ($('.sellStockRadioButton').is(':checked')) {
                             ApiClient.sellStock(symbol, quantity, price, function(data) {
                                 data = JSON.parse(data);
+
+                                if (data.stocks_owned[symbol]) {
+                                    $('.stockInfoPageAmountOwned').text(data.stocks_owned[symbol].total);
+                                } else {
+                                    $('.stockInfoPageAmountOwned').text("0");
+                                }
+
                                 $('.stockInfoPageTotalCash').text("Available Cash: $" + data.cash);
                             });
                         } else {

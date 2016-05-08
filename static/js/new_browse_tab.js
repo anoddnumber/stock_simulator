@@ -157,7 +157,10 @@
 var BrowseTab = $.BrowseTab();
 
 $( document ).ready(function() {
-    BrowseTab.init();
+    var url = window.location.href;
+    if (url.indexOf("stocks") > -1) {
+        BrowseTab.init();
+    }
 });
 
 

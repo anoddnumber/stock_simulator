@@ -1,29 +1,10 @@
 <!DOCTYPE html>
-<meta content="text/html;charset=utf-8" http-equiv="Content-Type">
-<meta content="utf-8" http-equiv="encoding">
-
-<title>Stock Simulator</title>
+{% include 'standard_head.html' %}
 
 <script>
     var userInfo = {{userInfo}};
     var stockSymbolsMap = {{stockSymbolsMap}};
 </script>
-
-<head>
-    <!--Code to prevent flash of unstyled content-->
-    <style type="text/css">
-      .js #flash {display: none;}
-    </style>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
-    <script type="text/javascript">
-      $('html').addClass('js');
-      $(document).ready(function() {
-        // Stuff to do as soon as the DOM is ready
-        $('#flash').show();
-      });
-    </script>
-    {% include 'nav_bar.html' %}
-</head>
 
 <body id="flash">
     <div id="loadingbar-frame">
@@ -32,7 +13,6 @@
             {% include 'profile_table.html' %}
         </div>
     </div>
-    {% include 'standard_imports.html' %}
 </body>
 
 </html>

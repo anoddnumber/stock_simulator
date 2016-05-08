@@ -1,4 +1,19 @@
-{% include 'nav_bar.html' %}
+<head>
+    {% include 'standard_imports.html' %}
+    <!--Code to prevent flash of unstyled content-->
+    <style type="text/css">
+      .js #flash {display: none;}
+    </style>
+
+    <script type="text/javascript">
+      $('html').addClass('js');
+      $(document).ready(function() {
+        // Stuff to do as soon as the DOM is ready
+        $('#flash').show();
+      });
+    </script>
+    {% include 'nav_bar.html' %}
+</head>
 
 <div id="loadingbar-frame">
     <div id="stock_simulator">
@@ -74,7 +89,3 @@
         </div>
     </div>
 </div>
-<!-- Bootstrap core CSS -->
-<link href="../../bootstrap-3.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
-<link rel="stylesheet" type="text/css" href="../css/simulator.css">
-<link rel="stylesheet" type="text/css" href="../css/stock_info_page.css">

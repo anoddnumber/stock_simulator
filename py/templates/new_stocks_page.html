@@ -1,14 +1,13 @@
 <!DOCTYPE html>
 {% include 'standard_head.html' %}
 
-<script>
-    var userInfo = {{userInfo}};
-    var stockSymbolsMap = {{stockSymbolsMap}};
-</script>
-
 <body id="flash">
     <div id="loadingbar-frame">
         <div id="stock_simulator">
+            <script>
+                var userInfo = {{userInfo}};
+                var stockSymbolsMap = {{stockSymbolsMap}};
+            </script>
             <!-- Stocks Tab -->
             {% include 'stocks_table.html' %}
         </div>

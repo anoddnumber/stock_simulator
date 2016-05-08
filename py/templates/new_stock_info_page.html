@@ -1,19 +1,5 @@
-<head>
-    {% include 'standard_imports.html' %}
-    <!--Code to prevent flash of unstyled content-->
-    <style type="text/css">
-      .js #flash {display: none;}
-    </style>
-
-    <script type="text/javascript">
-      $('html').addClass('js');
-      $(document).ready(function() {
-        // Stuff to do as soon as the DOM is ready
-        $('#flash').show();
-      });
-    </script>
-    {% include 'nav_bar.html' %}
-</head>
+<!DOCTYPE html>
+{% include 'standard_head.html' %}
 
 <div id="loadingbar-frame">
     <div id="stock_simulator">
@@ -89,3 +75,5 @@
         </div>
     </div>
 </div>
+
+</html>

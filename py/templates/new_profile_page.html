@@ -32,22 +32,7 @@
             {% include 'profile_table.html' %}
         </div>
     </div>
-    <!-- Youtube-like ajax loading bar -->
-    <script type="text/javascript" language="javascript" src="../../youtube-like-ajax-loading-bar/js/jquery.loadingbar.js"></script>
-    <link rel="stylesheet" type="text/css" href="../../youtube-like-ajax-loading-bar/css/loadingbar.css">
-
-    <!-- DataTables -->
-    <script type="text/javascript" language="javascript" src="../../DataTables/datatables.min.js"></script>
-    <link rel="stylesheet" type="text/css" href="../../DataTables/datatables.min.css">
-
-    <script src="js/new_profile_tab.js"></script>
-    <script src="js/new_browse_tab.js"></script>
-    <script src="js/ajax_loading.js"></script>
-    <script src="js/utility.js"></script>
-
-    <!-- Bootstrap core CSS -->
-    <link href="../../bootstrap-3.3.6/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="../css/simulator.css">
+    {% include 'standard_imports.html' %}
 </body>
 
 </html>

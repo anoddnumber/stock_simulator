@@ -61,7 +61,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         user.cash = round(float(user['cash']) - total_cost, 2)
 
         user.save()
-        return "Success"
+        return user
 
     def sell_stocks_from_user(self, username, symbol, quantity, cache):
         """"
@@ -124,4 +124,4 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         self.logger.info("Updating the database for a sell transaction for username " + username)
         self.logger.info("Stock(s) sold successfully")
 
-        return "Success"
+        return user

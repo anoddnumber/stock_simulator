@@ -70,25 +70,38 @@
             },
 
             setupButtons : function(parent) {
-                $(parent + ' .stockInfoPageStocksConfirmButton').click(function() {
-                    var value = $(parent + ' .stockInfoPage input[name=amountInput]').val().trim();
-                    var price = $(parent + ' .stockInfoPageStockPrice').text().trim();
+                $('.stockInfoPageStocksConfirmButton').click(function() {
+                    var value = $('.stockInfoPage input[name=amountInput]').val().trim();
+
+                    var price = $('.stockInfoPageStockPrice').text().trim();
                     quantity = Utility.isPositiveInteger(value);
+
                     if (quantity) {
-                        var symbol = $(parent + " .stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
-                        if ($(parent + ' .buyStockRadioButton').is(':checked')) {
-                            ApiClient.buyStock(symbol, quantity, price);
-                        } else if ($(parent + ' .sellStockRadioButton').is(':checked')) {
-                            ApiClient.sellStock(symbol, quantity, price);
+                        var symbol = $(".stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
+                        if ($('.buyStockRadioButton').is(':checked')) {
+                            ApiClient.buyStock(symbol, quantity, price, function(data) {
+                                data = JSON.parse(data);
+                                $('.stockInfoPageTotalCash').text("Available Cash: $" + data.cash);
+                            });
+                        } else if ($('.sellStockRadioButton').is(':checked')) {
+                            ApiClient.sellStock(symbol, quantity, price, function(data) {
+                                data = JSON.parse(data);
+                                $('.stockInfoPageTotalCash').text("Available Cash: $" + data.cash);
+                            });
+                        } else {
+                            console.log("nothing happened");
+                            //TODO show error
                         }
                     } else {
                         //TODO show error
                     }
+
                 });
             },
 
             init : function() {
                 //nothing to do
+                stockInfoPage.setupButtons();
             },
         };
 

@@ -177,7 +177,7 @@ def stock_info_page(symbol):
 @app.route("/profile", methods=['GET'])
 @login_required
 def profile():
-    cache.update(5)
+    # cache.update(5)
     template = env.get_template('new_profile_page.html')
     return template.render(userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json))
 
@@ -185,7 +185,7 @@ def profile():
 @app.route("/stocks", methods=['GET'])
 @login_required
 def stocks():
-    cache.update(5)
+    # cache.update(5)
     template = env.get_template('new_stocks_page.html')
     return template.render(userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
 
@@ -361,7 +361,9 @@ def buy_stock():
                 ", totaling a cost of " + str(total_cost))
     # buy the stock
     # return users_db_access.add_stock_to_user(username, symbol, stock_price, quantity)
-    return stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)
+    user = stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)
+    user_dict = {'cash': str(user.cash), 'stocks_owned': user.stocks_owned}
+    return json.dumps(user_dict, sort_keys=True)
 
 
 @app.route("/sellStock", methods=['POST'])
@@ -405,7 +407,10 @@ def sell_stock():
     logger.info("User with username " + str(username) + " passed all validations for selling " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price))
     # sell the stock
-    return stock_user_datastore.sell_stocks_from_user(username, symbol, quantity, cache)
+    user = stock_user_datastore.sell_stocks_from_user(username, symbol, quantity, cache)
+    print "user: " + str(user)
+    user_dict = {'cash': str(user.cash), 'stocks_owned': user.stocks_owned}
+    return json.dumps(user_dict, sort_keys=True)
 
 
 @app.route("/getUserInfo", methods=['GET'])

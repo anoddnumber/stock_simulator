@@ -124,35 +124,21 @@
                     "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
                 });
 
-                ProfileTab.updatePage();
+                profileTab.updatePage();
+                profileTab.setupRows();
 
+                // when changing pages in the table, we have to attach hrefs and the ajax loading plugin to the rows
+                $('#profile_table').on( 'draw.dt', function () {
+                    profileTab.setupRows();
+                });
+            },
+
+            setupRows : function() {
                 $('#profile_table tbody tr').each(function (i, row) {
                     var symbol = $(row).find('.symbol').text();
                     $(row).attr("href", "/stock/" + symbol);
-
-                    $(row).loadingbar({
-                        target: "#loadingbar-frame",
-                        replaceURL: true,
-                        direction: "right",
-
-                        /* Default Ajax Parameters.  */
-                        async: true,
-                        complete: function(xhr, text) {},
-                        cache: true,
-                        error: function(xhr, text, e) {},
-                        global: true,
-                        headers: {},
-                        statusCode: {},
-                        success: function(data, text, xhr) {},
-                        dataType: "html",
-                        done: function(data) {
-                            var simulator = $(data).find("#stock_simulator");
-                            $(this.target).html(simulator.get(0));
-                        }
-                    });
+                    ChangePageHelper.attachChangePageAction($(row), StockInfoPage, 'profileTab');
                 });
-
-
             },
          }
 

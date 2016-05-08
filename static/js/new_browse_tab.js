@@ -106,6 +106,14 @@
                 // https://datatables.net/examples/advanced_init/dom_toolbar.html
                 $('#stocks_table').DataTable({
                     "lengthChange" : false,
+                    "columns": [
+                        { className: "symbol" },
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                    ],
                     language: {
                         search: "_INPUT_", //Don't display any label left of the search box
                         searchPlaceholder: "Search"
@@ -119,18 +127,22 @@
                     "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
                 });
 
-                $('#stocks_table tbody').on('click', 'tr', function(event) {
-                    table = browseTab.getTable();
-                    var data = table.row( this ).data();
-                    var symbol = data[0];
-
-                    window.location.href = '/stock/' + symbol
-                });
-
                 browseTab.updatePage();
+                browseTab.setupRows();
+
+                // when changing pages in the table, we have to attach hrefs and the ajax loading plugin to the rows
+                $('#stocks_table').on( 'draw.dt', function () {
+                    browseTab.setupRows();
+                });
             },
 
-            //TODO: add an update method for the browseTab
+            setupRows : function() {
+                $('#stocks_table tbody tr').each(function (i, row) {
+                    var symbol = $(row).find('.symbol').text();
+                    $(row).attr("href", "/stock/" + symbol);
+                    ChangePageHelper.attachChangePageAction($(row), StockInfoPage, 'stocksTab');
+                });
+            },
         }
 
         return {

@@ -165,7 +165,7 @@ def stock_info_page(symbol):
             day_open and day_high and day_low:
 
         template = env.get_template('new_stock_info_page.html')
-        return template.render(name=name, symbol=symbol, price=price, day_low=day_low,
+        return template.render(username=current_user.username, name=name, symbol=symbol, price=price, day_low=day_low,
                                daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
                                day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change,
                                activeTab='stocks')
@@ -178,7 +178,7 @@ def stock_info_page(symbol):
 def profile():
     # cache.update(5)
     template = env.get_template('new_profile_page.html')
-    return template.render(userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json))
+    return template.render(username=current_user.username, userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json))
 
 
 @app.route("/stocks", methods=['GET'])
@@ -186,7 +186,7 @@ def profile():
 def stocks():
     # cache.update(5)
     template = env.get_template('new_stocks_page.html')
-    return template.render(userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
+    return template.render(username=current_user.username, userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
 
 
 @security.context_processor

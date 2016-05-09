@@ -4,72 +4,48 @@
              options : $.extend({
              }, options),
 
-             populatePage : function(symbol, parent) {
-                $(parent + ' .stockInfoPageStockSymbolName').text("(" + symbol + ")");
-
-                var userStockMap = userInfo.stocks_owned[symbol]; //shows what prices the user bought the stock at
-                var totalNumOfStock = 0;
-                if (userStockMap) {
-                    totalNumOfStock = userStockMap.total;
-                }
-                var stockInfo = stockSymbolsMap[symbol];
-                var stockName = stockInfo['name'];
-                var stockPercentChange = stockInfo['daily_percent_change']
-                var stockPriceChange = stockInfo['daily_price_change']
-                var currentPrice = stockInfo['price'];
-                var day_open = stockInfo.day_open;
-                var day_high = stockInfo.day_high;
-                var day_low = stockInfo.day_low;
-
-                $(parent + ' .stockName').text(stockName);
-                $(parent + ' .stockPercentChange').text(stockPercentChange);
-                $(parent + ' .stockPriceChange').text(stockPriceChange);
-                $(parent + ' .stockInfoPageAmountOwned').text(totalNumOfStock);
-                $(parent + ' .stockInfoPageStockPrice').text(currentPrice);
-                $(parent + ' .stockInfoPageDayOpen').text(day_open);
-                $(parent + ' .stockInfoPageDayHigh').text(day_high);
-                $(parent + ' .stockInfoPageDayLow').text(day_low);
+             setupSlider : function() {
+                var cash = $('.stockInfoPageTotalCash').text();
+                var price = $('.stockInfoPageStockPrice').text();
+                var numOwned = $('.stockInfoPageAmountOwned').text();
 
                 // by default, the buy radio button is selected
                 // TODO refactor to make a "set slider bar max/min" function
-                $(parent + ' .stockInfoPage input').attr({
+                $('.stockInfoPage input').attr({
                     "min" : 0,
-                    "max" : Math.floor(userInfo.cash / currentPrice),
+                    "max" : Math.floor(cash / price),
                 });
 
                 //make sure we don't stack up actions on the click event..
-                $(parent + " input[name=market]").unbind("click");
+                $("input[name=market]").unbind("click");
 
-                $(parent + " input[name=market]").click(function(){
+                $("input[name=market]").click(function(){
                     var defaultValue = 0;
-                    $(parent + ' .stockInfoPage input[name=amountRange]')[0].value = defaultValue;
-                    $(parent + ' .stockInfoPage input[name=amountInput]')[0].value = defaultValue;
+                    $('.stockInfoPage input[name=amountRange]')[0].value = defaultValue;
+                    $('.stockInfoPage input[name=amountInput]')[0].value = defaultValue;
 
-                    if ($(parent + ' .buyStockRadioButton').is(':checked')) {
+                    if ($('.buyStockRadioButton').is(':checked')) {
                         // clicked the buy radio button
 
-                        $(parent + ' .stockInfoPage input[name=amountRange]').attr({
+                        $('.stockInfoPage input[name=amountRange]').attr({
                             "min" : 0,
-                            "max" : Math.floor(userInfo.cash / currentPrice),
+                            "max" : Math.floor(cash / price),
                         });
-                    } else if ($(parent + ' .sellStockRadioButton').is(':checked')) {
+                    } else if ($('.sellStockRadioButton').is(':checked')) {
                         // clicked the sell radio button
 
-                        var maxAvailableToSell = 0;
-                        if (userInfo.stocks_owned[symbol]) {
-                            maxAvailableToSell = userInfo.stocks_owned[symbol].total
-                        }
-
-                        $(parent + ' .stockInfoPage input[name=amountRange]').attr({
+                        $('.stockInfoPage input[name=amountRange]').attr({
                             "min" : 0,
-                            "max" : maxAvailableToSell,
+                            "max" : numOwned,
                         });
 
                     }
                 });
             },
 
-            setupButtons : function(parent) {
+            setupButtons : function() {
+                $(".stockInfoPageStocksConfirmButton").unbind("click");
+
                 $('.stockInfoPageStocksConfirmButton').click(function() {
                     var value = $('.stockInfoPage input[name=amountInput]').val().trim();
 
@@ -83,7 +59,9 @@
                                 data = JSON.parse(data);
 
                                 $('.stockInfoPageAmountOwned').text(data.stocks_owned[symbol].total);
-                                $('.stockInfoPageTotalCash').text("Available Cash: $" + data.cash);
+                                $('.stockInfoPageTotalCash').text(data.cash);
+
+                                stockInfoPage.init();
                             });
                         } else if ($('.sellStockRadioButton').is(':checked')) {
                             ApiClient.sellStock(symbol, quantity, price, function(data) {
@@ -95,7 +73,9 @@
                                     $('.stockInfoPageAmountOwned').text("0");
                                 }
 
-                                $('.stockInfoPageTotalCash').text("Available Cash: $" + data.cash);
+                                $('.stockInfoPageTotalCash').text(data.cash);
+
+                                stockInfoPage.init();
                             });
                         } else {
                             console.log("nothing happened");
@@ -109,14 +89,12 @@
             },
 
             init : function() {
-                //nothing to do
                 stockInfoPage.setupButtons();
+                stockInfoPage.setupSlider();
             },
         };
 
         return {
-            populatePage : stockInfoPage.populatePage,
-            setupButtons : stockInfoPage.setupButtons,
             init : stockInfoPage.init,
         };
     }
@@ -141,5 +119,5 @@ function onStockQuantityInputChange(form, value) {
 }
 
 function onStockQuantityBarChange(form, value) {
-    form.amountInput.value=value
+    form.amountInput.value=value;
 }

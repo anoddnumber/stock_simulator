@@ -9,7 +9,7 @@
                     <button class="stockInfoPageBackButton" type="button">Back</button>
                 </div>
                 <div class="col-xs-6 availableCash">
-                    <span class="stockInfoPageTotalCash">Available Cash: ${{cash|e}}</span><br>
+                    Available Cash: $<span class="stockInfoPageTotalCash">{{cash|e}}</span><br>
                 </div>
             </div>
             <div class="row">
@@ -60,9 +60,11 @@
 
                         Quantity:<br>
                         <div class="quantityBar">
-                            <input class="slider" type="range" name="amountRange" min="0" max="100" value="0" oninput="this.form.amountInput.value=this.value" />
+                            <input class="slider" type="range" name="amountRange" min="0" max="100" value="0"
+                                   oninput="onStockQuantityBarChange(this.form, this.value)" />
                             &nbsp;&nbsp;
-                            <input class="stockInfoPageStockQuantity" type="number" name="amountInput" min="0" max="100" value="0" oninput="this.form.amountRange.value=this.value=this.value.replace(/[^0-9]/g,'0');" />
+                            <input class="stockInfoPageStockQuantity" type="number" name="amountInput" min="0" max="100"
+                                   value="0" oninput="onStockQuantityInputChange(this.form, this.value)" />
                         </div>
                         Commission: <span class="stockInfoPageCommission">0.00</span><br>
                         Total Price: <span class="stockInfoPageStockTotalPrice">0.00</span><br>

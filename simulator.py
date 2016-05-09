@@ -123,8 +123,6 @@ def root():
 @app.route("/stock/<symbol>", methods=['GET'])
 @login_required
 def stock_info_page(symbol):
-    template = env.get_template('new_stock_info_page.html')
-
     user_dict = get_user_dict()
 
     stocks_owned = user_dict.get("stocks_owned")
@@ -166,6 +164,7 @@ def stock_info_page(symbol):
     if stock_info and user_dict and cash and name and price and daily_percent_change and daily_price_change and \
             day_open and day_high and day_low:
 
+        template = env.get_template('new_stock_info_page.html')
         return template.render(name=name, symbol=symbol, price=price, day_low=day_low,
                                daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
                                day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change,

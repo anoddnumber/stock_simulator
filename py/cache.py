@@ -21,7 +21,7 @@ class Cache:
         self.logger.info("Initialized cache logger")
 
         # current directory is always /stock_simulator
-        self.path = './static/cache.json' 
+        self.path = './static/cache.json'
         self.parsed_json = None  # the object that holds the cache info
         self.load_from_file_path = load_from_file_path
 
@@ -133,18 +133,18 @@ class Cache:
         new_json['last_updated'] = str(datetime.datetime.utcnow().isoformat())
         
         return new_json
-    
-    """
-    Helps to build the new cache
-    Calls Yahoo's Stock API to get up to date stock prices. Builds a JSON object with the stock symbols as keys and
-    the price as the value. This JSON object represents the new cache.
-    
-    newJson - the JSON object to populate.
-    keys - an array of keys (strings) to be inserted into the JSON object.
-    names - an array of names (strings) of the stocks that we are retrieving that will be inserted into the JSON object
-    """
+
     def __add_results_to_new_cache(self, new_json, keys, names):
-        api = YahooStockAPI(keys, 'l1c1p2ohg')
+        """
+        Helps to build the new cache
+        Calls Yahoo's Stock API to get up to date stock prices. Builds a JSON object with the stock symbols as keys and
+        the price as the value. This JSON object represents the new cache.
+
+        newJson - the JSON object to populate.
+        keys - an array of keys (strings) to be inserted into the JSON object.
+        names - an array of names (strings) of the stocks that we are retrieving that will be inserted into the JSON object
+        """
+        api = YahooStockAPI(keys, 'l1c1p2ohgj1ry')
 
         try:
             results = api.submit_request()
@@ -161,17 +161,21 @@ class Cache:
                 try:
                     name = names[i]
                     line = results[i]
-                    (decimal, daily_price_change, daily_percent_change, day_open, day_high, day_low) = tuple(line.split(','))
+                    (decimal, daily_price_change, daily_percent_change, day_open, day_high, day_low, market_cap,
+                     pe_ratio, div_yield) = tuple(line.split(','))
                     decimal = Decimal(float(decimal))
-                    daily_percent_change = daily_percent_change.replace('"','')
+                    daily_percent_change = daily_percent_change.replace('"', '')
                     price = str('{:.2f}'.format(round(decimal, 2)))
 
                     if float(price) > 0:
-                        new_json[key] = {"name": str(name), "price" : price, "daily_price_change" : daily_price_change,
-                                            "daily_percent_change" : daily_percent_change,
-                                            "day_open" : day_open,
-                                            "day_high" : day_high,
-                                            "day_low" : day_low
+                        new_json[key] = {"name": str(name), "price": price, "daily_price_change": daily_price_change,
+                                         "daily_percent_change": daily_percent_change,
+                                         "day_open": day_open,
+                                         "day_high": day_high,
+                                         "day_low": day_low,
+                                         "market_cap": market_cap,
+                                         "pe_ratio": pe_ratio,
+                                         "div_yield": div_yield,
                                          }
                 except ValueError as e:
                     self.logger.exception("Error while adding a stock to the new cache.\n" +
@@ -227,5 +231,3 @@ class Cache:
         new_json = json.loads(json_string)
         new_json['last_updated'] = str(datetime.datetime.utcnow().isoformat())
         self.parsed_json = new_json
-        
-        

@@ -152,6 +152,10 @@ def stock_info_page(symbol):
         day_open = stock_info.get("day_open")
         day_high = stock_info.get("day_high")
         day_low = stock_info.get("day_low")
+        market_cap = stock_info.get("market_cap")
+        pe_ratio = stock_info.get("pe_ratio")
+        div_yield = stock_info.get("div_yield")
+
         if daily_price_change is not None:
             price_change = float(daily_price_change)
             if price_change > 0:
@@ -161,13 +165,13 @@ def stock_info_page(symbol):
             else:
                 change = 'same'
 
-    if stock_info and user_dict and cash and name and price and daily_percent_change and daily_price_change and \
-            day_open and day_high and day_low:
+    if stock_info and user_dict:
 
         template = env.get_template('new_stock_info_page.html')
         return template.render(username=current_user.username, name=name, symbol=symbol, price=price, day_low=day_low,
                                daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
                                day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change,
+                               market_cap=market_cap, pe_ratio=pe_ratio, div_yield=div_yield,
                                activeTab='stocks')
     else:
         return "Requested stock does not exist in our database"
@@ -178,7 +182,8 @@ def stock_info_page(symbol):
 def stocks():
     # cache.update(5)
     template = env.get_template('new_stocks_page.html')
-    return template.render(username=current_user.username, userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
+    return template.render(username=current_user.username, userInfo=get_user_info(),
+                           stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
 
 
 @security.context_processor
@@ -244,7 +249,8 @@ def get_stock_info():
 
     The service has a cache where it looks for the data.
     The method attempts to update the cache every time it is called.
-    The cache will update if it has been more than n minutes since it has updated (specified in the argument, currently 15 minutes).
+    The cache will update if it has been more than n minutes since it has updated (specified in the argument,
+    currently 15 minutes).
     The stock prices will be returned in the same order as the arguments, delimited by newlines ("\n").
     """
     symbols = request.args.get('symbols')

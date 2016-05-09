@@ -1,66 +1,72 @@
 <div class="stockInfoPage" hidden>
 
-    <div class="row">
-        <div class="col-xs-6 back">
-            <button class="stockInfoPageBackButton" type="button">Back</button>
-        </div>
-        <div class="col-xs-6 availableCash">
-            <span class="stockInfoPageTotalCash"></span><br>
+    <div class ="container-fluid">
+        <div class="row">
+            <div class="col-xs-6 back">
+                <button class="stockInfoPageBackButton" type="button">Back</button>
+            </div>
+            <div class="col-xs-6 availableCash">
+                <span class="stockInfoPageTotalCash"></span><br>
+            </div>
         </div>
     </div>
-    <div class="row">
-        <div class="col-xs-6 column1">
-            <span class="stockName"></span>
-            <span class="stockInfoPageStockSymbolName"></span><br>
-            <div class ="stockPrice">
-                <span class="stockInfoPageStockPrice"></span><font size="2">&nbsp;USD</font>&nbsp;
-                <span class="glyphicon glyphicon-arrow-up" style="color:#4CC417"></span>
-                <span class="glyphicon glyphicon-arrow-down" style="color:#E42217"></span>
-                <span class="stockPriceChange"></span>
-                (<span class="stockPercentChange"></span>)<br>
-            </div>
-            <!--Insert Graph-->
-            <div style="max-width:500px;">
-                <img src="../../resources/images/Graph_Placeholder.jpg" class="graph"><br>
-            </div>
-            <!--Day Week Month Year Link-->
-            <div class="row">
-                <div class="col-xs-2"><a href="url">Day</a></div>
-                <div class="col-xs-2"><a href="url">Week</a></div>
-                <div class="col-xs-2"><a href="url">Month</a></div>
-                <div class="col-xs-2"><a href="url">Year</a></div>
-            </div><br>
-            <div class="col-xs-4 column3">
-                Open: <span class="stockInfoPageDayOpen"></span><br>
-                High: <span class="stockInfoPageDayHigh"></span><br>
-                Low: <span class="stockInfoPageDayLow"></span><br>
-            </div>
-            <div class="col-xs-8 column4">
-                Mkt Cap<br>
-                P/E Ratio<br>
-                Div Yield<br>
-            </div>
-        </div>
-        <div class="col-xs-6 column2">
-            Amount Owned: <span class="stockInfoPageAmountOwned"></span><br>
-            <form>
-                <div class="buySellRadioInput">
-                    <input type="radio" name="market" value="buy" class="buyStockRadioButton" checked> Buy
-                    &nbsp;&nbsp;&nbsp;
-                    <input type="radio" name="market" value="sell" class="sellStockRadioButton"> Sell
+    <div class ="container-fluid">
+        <div class="row">
+            <div class="col-xs-6 column1">
+                <span class="stockName"></span>
+                <span class="stockInfoPageStockSymbolName"></span><br>
+                <div class ="stockPrice">
+                    <span class="stockInfoPageStockPrice"></span><font size="2">&nbsp;USD</font>&nbsp;
+                    <span class="glyphicon glyphicon-arrow-up" style="color:#4CC417"></span>
+                    <span class="glyphicon glyphicon-arrow-down" style="color:#E42217"></span>
+                    <span class="stockPriceChange"></span>
+                    (<span class="stockPercentChange"></span>)<br>
                 </div>
+                <!--Insert Graph-->
+                <div style="max-width:500px;">
+                    <img src="../../resources/images/Graph_Placeholder.jpg" class="graph"><br>
+                </div>
+                <div class ="container-fluid">
+                    <!--Day Week Month Year Link-->
+                    <div class="row">
+                        <div class="col-xs-2"><a href="url">Day</a></div>
+                        <div class="col-xs-2"><a href="url">Week</a></div>
+                        <div class="col-xs-2"><a href="url">Month</a></div>
+                        <div class="col-xs-2"><a href="url">Year</a></div>
+                    </div><br>
+                </div>
+                <div class="col-xs-4 column3">
+                    Open: <span class="stockInfoPageDayOpen"></span><br>
+                    High: <span class="stockInfoPageDayHigh"></span><br>
+                    Low: <span class="stockInfoPageDayLow"></span><br>
+                </div>
+                <div class="col-xs-8 column4">
+                    Mkt Cap<br>
+                    P/E Ratio<br>
+                    Div Yield<br>
+                </div>
+            </div>
+            <div class="col-xs-6 column2">
+                Amount Owned: <span class="stockInfoPageAmountOwned"></span><br>
+                <form>
+                    <div class="buySellRadioInput">
+                        <input type="radio" name="market" value="buy" class="buyStockRadioButton" checked> Buy
+                        &nbsp;&nbsp;&nbsp;
+                        <input type="radio" name="market" value="sell" class="sellStockRadioButton"> Sell
+                    </div>
 
-                Quantity:<br>
-                <div class="quantityBar">
-                    <input class="slider" type="range" name="amountRange" min="0" max="100" value="0" oninput="this.form.amountInput.value=this.value" />
-                    &nbsp;&nbsp;
-                    <input class="stockInfoPageStockQuantity" type="number" name="amountInput" min="0" max="100" value="0" oninput="this.form.amountRange.value=this.value=this.value.replace(/[^0-9]/g,'0');" />
-                </div>
-                Commission: <span class="stockInfoPageCommission">0.00</span><br>
-                Total Price: <span class="stockInfoPageStockTotalPrice">0.00</span><br>
-                <button class="stockInfoPageStocksConfirmButton" type="button">Confirm</button>
-            <!--                <input type="submit"> -->
-            </form>
+                    Quantity:<br>
+                    <div class="quantityBar">
+                        <input class="slider" type="range" name="amountRange" min="0" max="100" value="0" oninput="this.form.amountInput.value=this.value" />
+                        &nbsp;&nbsp;
+                        <input class="stockInfoPageStockQuantity" type="number" name="amountInput" min="0" max="100" value="0" oninput="this.form.amountRange.value=this.value=this.value.replace(/[^0-9]/g,'0');" />
+                    </div>
+                    Commission: <span class="stockInfoPageCommission">0.00</span><br>
+                    Total Price: <span class="stockInfoPageStockTotalPrice">0.00</span><br>
+                    <button class="stockInfoPageStocksConfirmButton" type="button">Confirm</button>
+                <!--                <input type="submit"> -->
+               </form>
+            </div>
         </div>
     </div>
 

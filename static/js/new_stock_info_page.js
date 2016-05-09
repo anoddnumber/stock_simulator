@@ -5,6 +5,8 @@
              }, options),
 
              setupSlider : function() {
+                $('.stockInfoPageStockTotalPrice').text("0.00");
+
                 var cash = $('.stockInfoPageTotalCash').text();
                 var price = $('.stockInfoPageStockPrice').text();
                 var numOwned = $('.stockInfoPageAmountOwned').text();

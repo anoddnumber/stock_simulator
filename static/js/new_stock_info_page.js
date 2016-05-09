@@ -106,8 +106,8 @@
 var StockInfoPage = $.StockInfoPage();
 
 $( document ).ready(function() {
-    var url = window.location.href;
-    if (url.indexOf("stock/") > -1) {
+    var path = window.document.location.pathname;
+    if (path.indexOf("stock/") > -1) {
         StockInfoPage.init();
     }
 });

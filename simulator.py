@@ -116,8 +116,8 @@ def root():
     # list_routes()  # for debugging
 
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
-    template = env.get_template('simulator.html')
-    return template.render()
+    template = env.get_template('new_profile_page.html')
+    return template.render(username=current_user.username, userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json))
 
 
 @app.route("/stock/<symbol>", methods=['GET'])
@@ -171,14 +171,6 @@ def stock_info_page(symbol):
                                activeTab='stocks')
     else:
         return "Requested stock does not exist in our database"
-
-
-@app.route("/profile", methods=['GET'])
-@login_required
-def profile():
-    # cache.update(5)
-    template = env.get_template('new_profile_page.html')
-    return template.render(username=current_user.username, userInfo=get_user_info(), stockSymbolsMap=json.dumps(cache.json))
 
 
 @app.route("/stocks", methods=['GET'])

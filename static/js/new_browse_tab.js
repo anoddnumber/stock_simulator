@@ -157,8 +157,8 @@
 var BrowseTab = $.BrowseTab();
 
 $( document ).ready(function() {
-    var url = window.location.href;
-    if (url.indexOf("stocks") > -1) {
+    var path = window.document.location.pathname;
+    if (path.indexOf("stocks") > -1) {
         BrowseTab.init();
     }
 });

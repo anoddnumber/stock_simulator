@@ -153,8 +153,8 @@
 var ProfileTab = $.ProfileTab();
 
 $( document ).ready(function() {
-    var url = window.location.href;
-    if (url.indexOf("profile") > -1) {
+    var path = window.document.location.pathname;
+    if (path == "/") {
         ProfileTab.init();
     }
 });

@@ -20,9 +20,9 @@ class Cache:
         self.logger = logging.getLogger(__name__)
         self.logger.info("Initialized cache logger")
 
-        #current directory is always /stock_simulator
+        # current directory is always /stock_simulator
         self.path = './static/cache.json' 
-        self.parsed_json = None #the object that holds the cache info
+        self.parsed_json = None  # the object that holds the cache info
         self.load_from_file_path = load_from_file_path
 
         try:
@@ -60,7 +60,7 @@ class Cache:
     timeInMinutes - the number of minutes that should have passed before actually updating the cache
     returns the number of seconds until the next expected update
     """
-    def update(self, time_in_minutes = 0):
+    def update(self, time_in_minutes=0):
         time_in_seconds = time_in_minutes * 60
         try:
             last_updated_date = self.get_last_updated_date()
@@ -70,12 +70,12 @@ class Cache:
             return time_in_seconds
 
         if last_updated_date is not None:
-            limit = datetime.timedelta(minutes = time_in_minutes)
+            limit = datetime.timedelta(minutes=time_in_minutes)
             difference = datetime.datetime.utcnow() - last_updated_date
 
             if difference > limit:
                 self.logger.info("The difference, " + str(difference) + ", is greater than the limit, " + str(limit) +
-                                 ", so the cache will update" )
+                                 ", so the cache will update")
                 self.__update_cache()
                 return time_in_seconds
             else:
@@ -93,14 +93,14 @@ class Cache:
     """
     def __update_cache(self):
         self.logger.info("Attempting to update the cache")
-        #current directory is always /stock_simulator
+        # current directory is always /stock_simulator
         parsed_symbols_file = open('./static/parsed_symbols.json', 'r')
         json_string = ''
         for line in parsed_symbols_file:
             json_string += line
-            
+
         if self.load_from_file_path is not None:
-            self.load_cache_from_file() #for testing purposes only
+            self.load_cache_from_file() # for testing purposes only
         else:
             self.parsed_json = self.__get_new_json(json.loads(json_string))
         
@@ -194,15 +194,18 @@ class Cache:
         self.logger.info("Retrieving stock prices for the following symbols: " + str(symbols))
         prices = ''
         for i, symbol in enumerate(symbols):
-            try:
-                info = self.parsed_json[symbol]
-                price = info["price"]
-                if i == len(symbols) - 1:
-                    prices += price
-                else:
-                    prices += price + '\n'
-            except KeyError, e:
-                self.logger.exception("Stock symbol " + str(symbol) + " not found")
+            info = self.parsed_json.get(symbol)
+            if not info:
+                self.logger.warning("Stock symbol " + str(symbol) + " not found")
+                return None
+            price = info.get("price")
+            if not price:
+                self.logger.error("No price found for an existing symbol. This should not happen and "
+                                  "needs investigation")
+            if i == len(symbols) - 1:
+                prices += price
+            else:
+                prices += price + '\n'
         return prices
 
     def get_stock_price(self, symbol):

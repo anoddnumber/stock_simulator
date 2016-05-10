@@ -127,6 +127,10 @@
                     "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
                 });
 
+                //TODO: make a highlight or change tabs function in Utility
+                $('#navbarTabs li').removeClass('active');
+                $('#stocksTab').addClass('active');
+
                 browseTab.updatePage();
                 browseTab.setupRows();
 
@@ -140,7 +144,7 @@
                 $('#stocks_table tbody tr').each(function (i, row) {
                     var symbol = $(row).find('.symbol').text();
                     $(row).attr("href", "/stock/" + symbol);
-                    ChangePageHelper.attachChangePageAction($(row), StockInfoPage, 'stocksTab');
+                    ChangePageHelper.attachChangePageAction($(row), StockInfoPage);
                 });
             },
         }
@@ -155,13 +159,3 @@
 })(jQuery);
 
 var BrowseTab = $.BrowseTab();
-
-$( document ).ready(function() {
-    var path = window.document.location.pathname;
-    if (path.indexOf("stocks") > -1) {
-        BrowseTab.init();
-    }
-});
-
-
-

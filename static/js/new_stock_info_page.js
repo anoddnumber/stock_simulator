@@ -94,6 +94,8 @@
             },
 
             init : function() {
+                $('#navbarTabs li').removeClass('active');
+                $('#stocksTab').addClass('active');
                 stockInfoPage.setupButtons();
                 stockInfoPage.setupSlider();
             },
@@ -106,13 +108,6 @@
 })(jQuery);
 
 var StockInfoPage = $.StockInfoPage();
-
-$( document ).ready(function() {
-    var path = window.document.location.pathname;
-    if (path.indexOf("stock/") > -1) {
-        StockInfoPage.init();
-    }
-});
 
 function onStockQuantityInputChange(form, value) {
     form.amountRange.value = value.replace(/[^0-9]/g,'0');

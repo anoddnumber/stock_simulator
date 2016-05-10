@@ -171,8 +171,7 @@ def stock_info_page(symbol):
         return template.render(username=current_user.username, name=name, symbol=symbol, price=price, day_low=day_low,
                                daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
                                day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change,
-                               market_cap=market_cap, pe_ratio=pe_ratio, div_yield=div_yield,
-                               activeTab='stocks')
+                               market_cap=market_cap, pe_ratio=pe_ratio, div_yield=div_yield)
     else:
         return "Requested stock does not exist in our database"
 
@@ -183,7 +182,7 @@ def stocks():
     # cache.update(5)
     template = env.get_template('new_stocks_page.html')
     return template.render(username=current_user.username, userInfo=get_user_info(),
-                           stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
+                           stockSymbolsMap=json.dumps(cache.json))
 
 
 @security.context_processor

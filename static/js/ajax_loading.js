@@ -2,7 +2,7 @@
     $.ChangePageHelper = function(options) {
 
         var changePageHelper = {
-            attachChangePageAction : function (selector, page, tabId) {
+            attachChangePageAction : function (selector, page) {
                 selector.loadingbar({
                     target: "#loadingbar-frame",
                     replaceURL: true,
@@ -23,12 +23,6 @@
 
                         $(this.target).html(simulator.get(0));
                         page.init();
-
-                        if (tabId != '') {
-                            $('#navbarTabs > li').removeClass('active');
-                            $('#' + tabId).addClass('active');
-                        }
-
                     }
                 });
             }
@@ -43,7 +37,6 @@
 var ChangePageHelper = $.ChangePageHelper();
 
 $( document ).ready(function() {
-    ChangePageHelper.attachChangePageAction($(".stocksTabLink"), BrowseTab, 'stocksTab');
-    ChangePageHelper.attachChangePageAction($(".profileTabLink"), ProfileTab, 'profileTab');
-//    changePageHelper($(".profileTabLink"), StockInfoPage, '');
+    ChangePageHelper.attachChangePageAction($(".stocksTabLink"), BrowseTab);
+    ChangePageHelper.attachChangePageAction($(".profileTabLink"), ProfileTab);
 });

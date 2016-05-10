@@ -47,6 +47,11 @@
       el.click(function (e){
         // keep the default behavior for middle click (open in new tab)
         if (e.which == 2) {
+            // "a" elements open new tabs by default so we don't want to open another tab.
+            // Other elements will need to be told to open a new tab. (Like the data tables)
+            if ( ! el.is("a")) {
+                window.open(href);
+            }
             return;
         }
 

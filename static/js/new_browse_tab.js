@@ -116,7 +116,7 @@
                     ],
                     language: {
                         search: "_INPUT_", //Don't display any label left of the search box
-                        searchPlaceholder: "Search"
+                        searchPlaceholder: ""
                     },
 //                     the "columns" key below makes the table static and not dynamic, so if you resize the browser window after
 //                     the page loads, then the table won't change. The "autoWidth" seems to be okay for now
@@ -138,6 +138,14 @@
                 $('#stocks_table').on( 'draw.dt', function () {
                     browseTab.setupRows();
                 });
+
+                // select the search bar
+                $('.dataTables_wrapper .dataTables_filter label input[type=search]').focus();
+            },
+
+            onPageLoad : function() {
+                // select the search bar
+                $('.dataTables_wrapper .dataTables_filter label input[type=search]').focus();
             },
 
             setupRows : function() {
@@ -154,6 +162,7 @@
             displaySortedArray : browseTab.displaySortedArray,
             getTable : browseTab.getTable,
             init : browseTab.init,
+            onPageLoad : browseTab.onPageLoad
         };
     };
 })(jQuery);

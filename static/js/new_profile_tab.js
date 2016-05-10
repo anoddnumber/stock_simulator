@@ -119,7 +119,7 @@
                     "lengthChange" : false,
                     language: {
                         search: "_INPUT_", //Don't display any label left of the search box
-                        searchPlaceholder: "Search"
+                        searchPlaceholder: ""
                     },
                     "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
                 });
@@ -134,6 +134,14 @@
                 $('#profile_table').on( 'draw.dt', function () {
                     profileTab.setupRows();
                 });
+
+                // select the search bar
+                $('.dataTables_wrapper .dataTables_filter label input[type=search]').focus();
+            },
+
+            onPageLoad : function() {
+                // select the search bar
+                $('.dataTables_wrapper .dataTables_filter label input[type=search]').focus();
             },
 
             setupRows : function() {
@@ -149,6 +157,7 @@
             updatePage : profileTab.updatePage,
             getTable : profileTab.getTable,
             init : profileTab.init,
+            onPageLoad : profileTab.onPageLoad,
         };
     }
 })(jQuery);

@@ -93,6 +93,10 @@
                 });
             },
 
+            onPageLoad : function() {
+
+            },
+
             init : function() {
                 $('#navbarTabs li').removeClass('active');
                 $('#stocksTab').addClass('active');
@@ -103,6 +107,7 @@
 
         return {
             init : stockInfoPage.init,
+            onPageLoad : stockInfoPage.onPageLoad,
         };
     }
 })(jQuery);

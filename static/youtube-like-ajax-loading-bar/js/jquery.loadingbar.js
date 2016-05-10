@@ -44,7 +44,12 @@
         datatype = (el.data("datatype")) ? el.data("datatype") : settings.dataType
       
     return this.each(function(){
-      el.click(function (){
+      el.click(function (e){
+        // keep the default behavior for middle click (open in new tab)
+        if (e.which == 2) {
+            return;
+        }
+
         $.ajax({
           type: type,
           url: href,

@@ -84,7 +84,7 @@ class StockSimulatorTestClient:
 
     @staticmethod
     def is_post_create_account_page(data):
-        return 'Please confirm your account through your email address' in data
+        return 'Please follow the link in the email to confirm your account to gain access to the site' in data
 
     # only useful if follow_redirects is false
     @staticmethod

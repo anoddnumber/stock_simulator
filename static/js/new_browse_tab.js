@@ -114,6 +114,7 @@
                         null,
                         null,
                     ],
+                    "pageLength": 10,
                     language: {
                         search: "_INPUT_", //Don't display any label left of the search box
                         searchPlaceholder: ""

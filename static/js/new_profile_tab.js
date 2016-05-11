@@ -119,6 +119,7 @@
                         null,
                         null,
                     ],
+                    "pageLength": 10,
                     "lengthChange" : false,
                     language: {
                         search: "_INPUT_", //Don't display any label left of the search box

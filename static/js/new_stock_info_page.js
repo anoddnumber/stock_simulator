@@ -91,6 +91,10 @@
                     }
 
                 });
+
+                $('#backButton').click(function() {
+                    history.back();
+                })
             },
 
             onPageLoad : function() {

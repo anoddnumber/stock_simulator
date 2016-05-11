@@ -1,6 +1,7 @@
 (function($) {
     $.ProfileTab = function(options) {
         var table;
+        var totalEquities;
 
         var profileTab = {
             options : $.extend({
@@ -17,7 +18,6 @@
                 } else {
                     profileTab.createTable();
                 }
-                $('.availableCash').text("Available Cash: $" + userInfo.cash);
             },
 
             //TODO probably a better way to do this with DataTables
@@ -71,6 +71,8 @@
                     totalPriceBought = totalPriceBought.toFixed(2);
                     var currentTotalValue = (totalQuantity * currentPrice).toFixed(2);
 
+                    totalEquities += parseFloat(currentTotalValue);
+
                     var row = [symbol, totalQuantity, avgPrice, currentPrice, priceDifference, percentDifference,
                     dayPriceDifference, dayPercentDifference, totalPriceBought, currentTotalValue]
 
@@ -100,6 +102,7 @@
 
             init : function() {
                 table = undefined;
+                totalEquities = 0
 
                 // https://datatables.net/reference/option/dom
                 // https://datatables.net/examples/advanced_init/dom_toolbar.html
@@ -121,7 +124,7 @@
                         search: "_INPUT_", //Don't display any label left of the search box
                         searchPlaceholder: ""
                     },
-                    "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
+                    "dom": 'f<"availableCash"><"totalEquities"><"total">tip' //TODO change the stockInfoPageTotalCash class..
                 });
 
                 $('#navbarTabs li').removeClass('active');
@@ -137,6 +140,9 @@
 
                 // select the search bar
                 $('.dataTables_wrapper .dataTables_filter label input[type=search]').focus();
+                $('.availableCash').text("Available Cash: $" + userInfo.cash);
+                $('.totalEquities').text("Total Equities: $" + totalEquities);
+                $('.total').text( "Total: $" + (parseFloat(userInfo.cash) + totalEquities).toFixed(2) );
             },
 
             onPageLoad : function() {

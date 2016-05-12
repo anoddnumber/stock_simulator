@@ -130,7 +130,7 @@
 
                 profileTab.updatePage();
 
-                var page = Math.floor(getUrlParameter("page")) - 1;
+                var page = Math.floor(Utility.getUrlParameter("page")) - 1;
                 if (isNaN(page) || page < 0) {
                     page = 0;
                 }
@@ -156,7 +156,7 @@
                     var newUrl = document.location.origin;
 
                     if (info.page != 0) {
-                        newUrl = replaceUrlParam(url, "page", info.page + 1);
+                        newUrl = Utility.replaceUrlParam(url, "page", info.page + 1);
                     }
 
                     history.pushState( {}, document.title, newUrl);
@@ -194,26 +194,3 @@
 })(jQuery);
 
 var ProfileTab = $.ProfileTab();
-
-function replaceUrlParam(url, paramName, paramValue){
-    var pattern = new RegExp('\\b('+paramName+'=).*?(&|$)')
-    if(url.search(pattern)>=0){
-        return url.replace(pattern,'$1' + paramValue + '$2');
-    }
-    return url + (url.indexOf('?')>0 ? '&' : '?') + paramName + '=' + paramValue
-}
-
-function getUrlParameter(sParam) {
-    var sPageURL = decodeURIComponent(window.location.search.substring(1)),
-        sURLVariables = sPageURL.split('&'),
-        sParameterName,
-        i;
-
-    for (i = 0; i < sURLVariables.length; i++) {
-        sParameterName = sURLVariables[i].split('=');
-
-        if (sParameterName[0] === sParam) {
-            return sParameterName[1] === undefined ? true : sParameterName[1];
-        }
-    }
-};

@@ -21,7 +21,31 @@
 
             //TODO probably a better way to do this with DataTables
             createTable : function() {
-                table = $('#stocks_table').DataTable();
+                // https://datatables.net/reference/option/dom
+                // https://datatables.net/examples/advanced_init/dom_toolbar.html
+                table = $('#stocks_table').DataTable({
+                    "lengthChange" : false,
+                    "columns": [
+                        { className: "symbol" },
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                    ],
+                    "pageLength": 10,
+                    language: {
+                        search: "_INPUT_", //Don't display any label left of the search box
+                        searchPlaceholder: ""
+                    },
+//                     the "columns" key below makes the table static and not dynamic, so if you resize the browser window after
+//                     the page loads, then the table won't change. The "autoWidth" seems to be okay for now
+//                    "columns": [
+//                        { "width": "10%" }, { "width": "30%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }
+//                    ],
+                    "autoWidth": false,
+                    "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
+                });
                 table.clear();
 
                 var rows = browseTab.buildTable();
@@ -102,38 +126,35 @@
             init : function() {
                 table = undefined;
 
-                // https://datatables.net/reference/option/dom
-                // https://datatables.net/examples/advanced_init/dom_toolbar.html
-                $('#stocks_table').DataTable({
-                    "lengthChange" : false,
-                    "columns": [
-                        { className: "symbol" },
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                    ],
-                    "pageLength": 10,
-                    language: {
-                        search: "_INPUT_", //Don't display any label left of the search box
-                        searchPlaceholder: ""
-                    },
-//                     the "columns" key below makes the table static and not dynamic, so if you resize the browser window after
-//                     the page loads, then the table won't change. The "autoWidth" seems to be okay for now
-//                    "columns": [
-//                        { "width": "10%" }, { "width": "30%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }
-//                    ],
-                    "autoWidth": false,
-                    "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
-                });
-
                 //TODO: make a highlight or change tabs function in Utility
                 $('#navbarTabs li').removeClass('active');
                 $('#stocksTab').addClass('active');
 
                 browseTab.updatePage();
+
+                var page = Math.floor(Utility.getUrlParameter("page")) - 1;
+                if (isNaN(page) || page < 0) {
+                    page = 0;
+                }
+                table.page(page).draw("page");
+
                 browseTab.setupRows();
+
+                // https://datatables.net/reference/event/page
+                $('#stocks_table').on('page.dt', function () {
+                    var info = table.page.info();
+
+                    // info.page has a range of [0, info.pages)
+                    var url = document.URL;     // Returns full URL
+                    var newUrl = document.location.origin;
+
+                    if (info.page != 0) {
+                        newUrl = Utility.replaceUrlParam(url, "page", info.page + 1);
+                    }
+
+                    history.pushState( {}, document.title, newUrl);
+                } );
+
 
                 // when changing pages in the table, we have to attach hrefs and the ajax loading plugin to the rows
                 $('#stocks_table').on( 'draw.dt', function () {

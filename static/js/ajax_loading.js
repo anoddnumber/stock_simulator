@@ -3,6 +3,7 @@
 
         var changePageHelper = {
             attachChangePageAction : function (selector, page) {
+                selector.unbind("click");
                 selector.loadingbar({
                     target: "#loadingbar-frame",
                     replaceURL: true,

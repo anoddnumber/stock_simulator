@@ -1,0 +1,70 @@
+/* Custom Stylesheet */
+body, html {
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      background: #ebebeb;
+      text-align: center;
+      height: 100%;
+}
+
+body .header{
+  color: #fff;
+}
+
+.container {
+  float: left;
+  width: 100%;
+}
+
+/* ALL DEMO */
+h1 {
+  color: #000;
+}
+
+.menu a {
+  color: #666;
+  border: 4px solid #CECECE;
+  background: #F3F3F3;
+}
+
+.reload, .reload:visited{
+  display: block;
+  color: white;
+  width: 185px;
+  margin: 65px auto 55px;
+  border: 4px solid #a2261e;
+  border-radius: 5px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  background: #cc3126;
+  display: inline-block;
+  font-size: 1em;
+  line-height: 100%;
+  padding: 0.7em;
+  font-weight: bold;
+  text-decoration: none;
+}
+.reload:hover {
+  background: #b02b21;
+  color: white;
+}
+
+.frame {
+  width: 900px;
+  text-align: center;
+  margin: 0 auto 50px;
+}
+.frame img{
+  margin: 0 1px;
+}
+/* DEMO 5 */
+.demo5 #loadingbar.down {
+  width: 100%;
+  opacity: 0.2;
+  background: #000;
+}
+.demo5 #loadingbar.down dd, .demo5 #loadingbar.down dt {
+  width: 100%;
+}
+
+

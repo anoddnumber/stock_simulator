@@ -1,20 +1,16 @@
 import simulator
 from test_info import TestInfo
-from py.db_access import UsersDbAccess
 from datetime import datetime
 
 
 class StockSimulatorTestClient:
 
     def __init__(self):
-        # simulator.config['TESTING'] = True
         simulator.config['DEBUG'] = True  # Set to bypass reCaptcha
-        simulator.app.config['TESTING'] = True  # Set so that no emails are sent during testing
+        simulator.app.config['SECURITY_SEND_REGISTER_EMAIL'] = False  # Set to False so that no emails are sent during testing
         simulator.init_logger()
         simulator.init_cache('./static/cache.json')
-        simulator.init_db()
 
-        self.db_access = UsersDbAccess(simulator.user_datastore)
         self.client = simulator.app.test_client()
 
     def __enter__(self):
@@ -62,6 +58,9 @@ class StockSimulatorTestClient:
             stockPrice=stock_price,
         ), follow_redirects=True)
 
+    def stock_info_page(self, symbol):
+        return self.client.get('/stock/' + str(symbol), follow_redirects=True)
+
     def get_stock_info(self, symbols):
         return self.client.get('/info?symbols=' + str(symbols))
 
@@ -71,9 +70,9 @@ class StockSimulatorTestClient:
     def confirm_test_account(self):
         """Update the db directly just for test purposes"""
 
-        user = self.db_access.get_user_by_username(TestInfo.user_name)
+        user = simulator.stock_user_datastore.find_user(username=TestInfo.user_name)
         user.confirmed_at = datetime.utcnow()
-        self.db_access.user_datastore.put(user)
+        user.save()
 
     @staticmethod
     def is_login_page(data):
@@ -85,7 +84,7 @@ class StockSimulatorTestClient:
 
     @staticmethod
     def is_post_create_account_page(data):
-        return 'Please confirm your account through your email address' in data
+        return 'Please follow the link in the email to confirm your account to gain access to the site' in data
 
     # only useful if follow_redirects is false
     @staticmethod

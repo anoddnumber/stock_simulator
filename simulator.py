@@ -1,31 +1,64 @@
 import json
+import os
+import re
 
-from flask import Flask, redirect, request, jsonify, url_for, g, current_app
+from flask import Flask, redirect, request, jsonify, url_for
 from jinja2 import Environment, PackageLoader
 from flask_debugtoolbar import DebugToolbarExtension
 
-from py.db_access import UsersDbAccess
 from py.exceptions.invalid_usage import InvalidUsage
 from py.cache import Cache
-from werkzeug.serving import run_simple
+# from werkzeug.serving import run_simple
 
 import py.logging_setup
 import logging
 from flask_mongoengine import MongoEngine
-from py.db_info import DBInfo
-from flask_security import Security, MongoEngineUserDatastore, current_user, login_required
+from py.db_info import DevoDBInfo
+from flask_security import Security, current_user, login_required
 from flask_mail import Mail
 from py.user import User, Role
 from py.extended_register_form import ExtendedRegisterForm
+from py.stock_user_datastore import MongoEngineStockUserDatastore
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='', template_folder='py/templates')
 app.secret_key = 'i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 
+
+def init_logger():
+    global logger
+    py.logging_setup.setup()
+    logger = logging.getLogger(__name__)
+init_logger()
+
+
 # MongoDB Config
-app.config['MONGODB_DB'] = DBInfo.db_name
-app.config['MONGODB_HOST'] = 'localhost'
-app.config['MONGODB_PORT'] = DBInfo.db_port
+def set_db_config():
+    # split on multiple strings
+    mongodb_uri = os.environ.get('MONGODB_URI')
+    # mongodb_uri = 'mongodb://heroku_jnccm4lq:81b5jm0qkg0frk5j1o8bd63t84@ds021751.mlab.com:21751/heroku_jnccm4lq'
+
+    if mongodb_uri:
+        (mongo_db, db_user, db_password, host, db_port, db_name) = re.split('://|:|@|,|/', mongodb_uri)
+        app.config['MONGODB_USERNAME'] = db_user
+        app.config['MONGODB_PASSWORD'] = db_password
+        app.config['MONGODB_HOST'] = host
+        app.config['MONGODB_PORT'] = int(db_port)
+        app.config['MONGODB_DB'] = db_name
+
+        logger.info("setting db configs")
+        logger.info("mongo_db: " + str(mongo_db))
+        logger.info("db_user: " + db_user)
+        logger.info("db_password: " + db_password)
+        logger.info("host: " + str(host))
+        logger.info("port: " + str(db_port))
+        logger.info("db_name: " + str(db_name))
+    else:
+        app.config['MONGODB_DB'] = DevoDBInfo.db_name
+        app.config['MONGODB_HOST'] = DevoDBInfo.host
+        app.config['MONGODB_PORT'] = DevoDBInfo.db_port
+set_db_config()
+
 app.config['SECURITY_PASSWORD_SALT'] = 'Zafaw9rtnisO9QCIi7ekdGNFu4cbIjtedzhWmMwebLE='
 app.config['SECURITY_PASSWORD_HASH'] = 'sha512_crypt'
 
@@ -60,9 +93,8 @@ app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = ('This account is disabled.', 'err
 
 config = {'defaultCash': 50000}
 db = MongoEngine(app)
-user_datastore = MongoEngineUserDatastore(db, User, Role)
-# security = Security(app, user_datastore, register_blueprint=False)
-security = Security(app, user_datastore, confirm_register_form=ExtendedRegisterForm)
+stock_user_datastore = MongoEngineStockUserDatastore(db, User, Role)
+security = Security(app, stock_user_datastore, confirm_register_form=ExtendedRegisterForm)
 mail = Mail(app)
 
 # security.app.login_manager.login_view = 'root' # this will give a ?next= in the URL.
@@ -71,7 +103,7 @@ mail = Mail(app)
 
 @security.app.login_manager.unauthorized_handler
 def unauthorized_callback():
-    list_routes()
+    # list_routes()
     return redirect(url_for('security.login'))
 
 
@@ -81,11 +113,78 @@ def root():
     """
     The actual application
     """
-    list_routes()  # for debugging
+    # list_routes()  # for debugging
 
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
-    template = env.get_template('simulator.html')
-    return template.render()
+    template = env.get_template('new_profile_page.html')
+    return template.render(username=current_user.username, userInfo=get_user_info(),
+                           stockSymbolsMap=json.dumps(cache.json), activeTab='profile')
+
+
+@app.route("/stock/<symbol>", methods=['GET'])
+@login_required
+def stock_info_page(symbol):
+    user_dict = get_user_dict()
+
+    stocks_owned = user_dict.get("stocks_owned")
+    cash = user_dict.get("cash")
+
+    num_owned = 0
+    if stocks_owned is not None:
+        stock_owned_info = stocks_owned.get(symbol)
+        if stock_owned_info:
+            num_owned = stock_owned_info.get("total")
+            if not num_owned:
+                num_owned = 0
+                logger.exception("User " + str(current_user) + "'s stock data is corrupted. " +
+                                 "Symbol " + str(symbol) + " exists in stocks_owned but does not contain " +
+                                 "a total field")
+    else:
+        logger.exception("Corrupted data. User " + str(current_user) + " does not have a stocks_owned field." +
+                         " user_dict:" + str(user_dict) + " stocks_owned: " + str(stocks_owned))
+
+    stock_info = cache.json.get(symbol)
+
+    if stock_info:
+        name = stock_info.get("name")  # Company name
+        price = stock_info.get("price")
+        daily_percent_change = stock_info.get("daily_percent_change")
+        daily_price_change = stock_info.get("daily_price_change")
+        day_open = stock_info.get("day_open")
+        day_high = stock_info.get("day_high")
+        day_low = stock_info.get("day_low")
+        market_cap = stock_info.get("market_cap")
+        pe_ratio = stock_info.get("pe_ratio")
+        div_yield = stock_info.get("div_yield")
+
+        if daily_price_change is not None:
+            price_change = float(daily_price_change)
+            if price_change > 0:
+                change = 'increase'
+            elif price_change < 0:
+                change = 'decrease'
+            else:
+                change = 'same'
+
+    if stock_info and user_dict:
+
+        template = env.get_template('new_stock_info_page.html')
+        return template.render(username=current_user.username, name=name, symbol=symbol, price=price, day_low=day_low,
+                               daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
+                               day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change,
+                               market_cap=market_cap, pe_ratio=pe_ratio, div_yield=div_yield,
+                               activeTab='stocks')
+    else:
+        return "Requested stock does not exist in our database"
+
+
+@app.route("/stocks", methods=['GET'])
+@login_required
+def stocks():
+    # cache.update(5)
+    template = env.get_template('new_stocks_page.html')
+    return template.render(username=current_user.username, userInfo=get_user_info(),
+                           stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
 
 
 @security.context_processor
@@ -151,7 +250,8 @@ def get_stock_info():
 
     The service has a cache where it looks for the data.
     The method attempts to update the cache every time it is called.
-    The cache will update if it has been more than n minutes since it has updated (specified in the argument, currently 15 minutes).
+    The cache will update if it has been more than n minutes since it has updated (specified in the argument,
+    currently 15 minutes).
     The stock prices will be returned in the same order as the arguments, delimited by newlines ("\n").
     """
     symbols = request.args.get('symbols')
@@ -185,10 +285,10 @@ def get_stock_symbol_map():
     logger.info("Retrieving the stockSymbolsMap")
     seconds_left = cache.update(5)
 
-    lenient_time = 2 # give extra time for the server to update before the client calls again
+    lenient_time = 2  # give extra time for the server to update before the client calls again
     delay = seconds_left + lenient_time
 
-    info_dict = {'stockSymbolsMap' : cache.json, 'delay' : delay * 1000}
+    info_dict = {'stockSymbolsMap': cache.json, 'delay': delay * 1000}
 
     # time.sleep(5)
     return jsonify(info_dict)
@@ -258,7 +358,10 @@ def buy_stock():
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price) +
                 ", totaling a cost of " + str(total_cost))
     # buy the stock
-    return users_db_access.add_stock_to_user(username, symbol, stock_price, quantity)
+    # return users_db_access.add_stock_to_user(username, symbol, stock_price, quantity)
+    user = stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)
+    user_dict = {'cash': str(user.cash), 'stocks_owned': user.stocks_owned}
+    return json.dumps(user_dict, sort_keys=True)
 
 
 @app.route("/sellStock", methods=['POST'])
@@ -302,16 +405,23 @@ def sell_stock():
     logger.info("User with username " + str(username) + " passed all validations for selling " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price))
     # sell the stock
-    return users_db_access.sell_stocks_from_user(username, symbol, quantity, cache)
+    user = stock_user_datastore.sell_stocks_from_user(username, symbol, quantity, cache)
+    print "user: " + str(user)
+    user_dict = {'cash': str(user.cash), 'stocks_owned': user.stocks_owned}
+    return json.dumps(user_dict, sort_keys=True)
 
 
 @app.route("/getUserInfo", methods=['GET'])
 @login_required
 def get_user_info():
-    user_dict = {'cash': str(current_user.cash), 'stocks_owned': current_user.stocks_owned}
+    user_dict = get_user_dict()
     logger.info("Returning user information for " + str(current_user.username))
     logger.info("user_dict: " + str(user_dict))
     return json.dumps(user_dict, sort_keys=True)
+
+
+def get_user_dict():
+    return {'cash': str(current_user.cash), 'stocks_owned': current_user.stocks_owned}
 
 
 @app.errorhandler(InvalidUsage)
@@ -325,27 +435,23 @@ def handle_invalid_usage(error):
     return response
 
 
-def init_logger():
-    global logger
-    py.logging_setup.setup()
-    logger = logging.getLogger(__name__)
-
-
-def init_db():
-    global users_db_access
-    users_db_access = UsersDbAccess(user_datastore)
-
-
 def init_cache(cache_path=None):
     global cache
+    logger.info("initializing cache")
     cache = Cache(cache_path)
             
 if __name__ == "__main__":
-    app.debug = False
+    app.debug = True
     toolbar = DebugToolbarExtension(app)
-    init_logger()
+
     init_cache()
-    init_db()
+
+    # Heroku will define the PORT environment variable, so use it if it is defined, otherwise default to 5000.
+    port = int(os.environ.get('PORT', 5000))
 
     logger.info("Starting server")
-    run_simple('localhost', 5000, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))  # use HTTPS in devo
+    # run_simple('localhost', port, app, ssl_context=('./ssl_key.crt', './ssl_key.key'))  # use HTTPS in devo
+
+    # host='0.0.0.0' tells your operating system to listen on all public IPs.
+    app.run(host='0.0.0.0', port=port)
+    # app.run()

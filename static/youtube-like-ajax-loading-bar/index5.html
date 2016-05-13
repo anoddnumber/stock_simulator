@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" class="demo5 no-js">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"> 
+		<title>Youtube-like Ajax Loading Bar Demo 5: Endless Possibilities</title>
+		<meta name="description" content="" />
+		<meta name="keywords" content="" />
+		<meta name="author" content="Pete R." />
+		<link rel="shortcut icon" href="../file/favicon.gif"> 
+		<link rel="stylesheet" type="text/css" href="css/default.css" />
+		
+		<!-- Edit Below -->
+		<script type="text/javascript" src="http://code.jquery.com/jquery-1.9.1.js"></script>
+	    <script type="text/javascript" src="js/jquery.loadingbar.js"></script>
+	    <link rel="stylesheet" type="text/css" href="css/style.css" />
+	    <link rel="stylesheet" type="text/css" href="css/loadingbar.css" />
+	    <link rel="stylesheet" type="text/css" href="css/elusive-webfont.css" />
+	</head>
+	<body class="demo5">
+		<div class="container">
+			<!-- Top Navi -->
+			<div class="nav-top clearfix">
+				<span class="right"><a class="nav-icon icon-th" href="http://www.onextrapixel.com/category/tutorials/"><span>View all Tutorials</span></a></span>
+				<span class="right"><a class="nav-icon icon-left" href="http://www.onextrapixel.com/2013/09/02/loadingbar-js-adding-a-youtube-like-loading-bar-to-your-website/"><span>Back to Tutorial Article</span></a></span>
+			</div>
+			
+			<div class="header">
+				<h1>Youtube-like Ajax Loading Bar Demo 5<span>Endless Possibilities</span></h1>	
+			</div>
+
+			<div class="menu">
+				<a href="index.html">Demo 1</a>
+				<a href="index2.html">Demo 2</a>
+				<a href="index3.html">Demo 3</a>
+				<a href="index4.html">Demo 4</a>
+				<a class="active" href="index5.html">Demo 5</a>
+			</div>
+		
+			<div class="main">
+			  	<a href="http://api.flickr.com/services/feeds/photos_public.gne?jsoncallback=?&tags=everest&tagmode=any&format=json" data-datatype="json" data-type="GET" data-target="#frame" class="reload" id="clickme"><i class="customicon-download-alt"></i> Load Test Data</a>
+        		<div class="frame" id="frame"></div>
+	    	</div>
+		</div><!-- Container -->
+		
+	
+	<script type="text/javascript">
+	    $("#clickme").loadingbar({
+	      direction: "down",
+	      done: function(data) {
+	        $.each( data.items, function( i, item ) {
+	          $( "<img/>" ).attr( "src", item.media.m ).prependTo( $("#frame") );
+	          if ( i === 2 ) {
+	            return false;
+	          }
+	        });
+	      }
+	    });
+  	</script>
+		
+	</body>
+</html>

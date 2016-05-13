@@ -3,7 +3,8 @@ from base_unit_test import BaseUnitTest
 import simulator
 from stock_simulator_test_client import StockSimulatorTestClient
 
-#TODO: Test buying a stock at different prices (somewhat difficult to test this..)
+
+# TODO: Test buying a stock at different prices (somewhat difficult to test this..)
 class TestBuyStock(BaseUnitTest):
 
     def test_basic_buy(self):
@@ -21,9 +22,16 @@ class TestBuyStock(BaseUnitTest):
 
         rv = self.client.buy_stock(symbol, quantity, price)
 
-        assert "Success" in rv.data
+        # assert "Success" in rv.data TODO: add new assert here
         self.assert_user_info({"AMZN": {price.replace(".", "_"): quantity, "total": quantity}},
                               starting_cash - quantity * float(price))
+
+        # buy the same stock again
+        rv = self.client.buy_stock(symbol, quantity, price)
+
+        # assert "Success" in rv.data TODO: add new assert here
+        self.assert_user_info({"AMZN": {price.replace(".", "_"): quantity * 2, "total": quantity * 2}},
+                              starting_cash - quantity * float(price) * 2)
 
     def test_buy_as_much_as_possible(self):
         print "test_buy_as_much_as_possible"
@@ -42,7 +50,7 @@ class TestBuyStock(BaseUnitTest):
         max_quantity_possible = int(starting_cash / float(price))
         rv = self.client.buy_stock(symbol, max_quantity_possible, price)
 
-        assert "Success" in rv.data
+        # assert "Success" in rv.data TODO: add new assert here
         self.assert_user_info({"AMZN": {price.replace(".", "_"): max_quantity_possible,
                                         "total": max_quantity_possible
                                         }},

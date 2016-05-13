@@ -19,7 +19,7 @@ class ExtendedRegisterForm(RegisterForm):
         self.recaptcha_secret_key = '6Lf7ZBoTAAAAAHIKbm4AnecJxycyM5PIjmWt3eO_'
 
     def validate(self):
-        from simulator import config, user_datastore
+        from simulator import config, stock_user_datastore
 
         # Use standard validator
         validation = Form.validate(self)
@@ -28,7 +28,7 @@ class ExtendedRegisterForm(RegisterForm):
             return False
 
         # Check if username already exists
-        user = user_datastore.find_user(username=self.username.data)
+        user = stock_user_datastore.find_user(username=self.username.data)
         if user is not None:
             # Text displayed to the user
             self.username.errors.append('Username already taken')

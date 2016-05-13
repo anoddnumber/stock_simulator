@@ -9,6 +9,9 @@
 
                 var userStockMap = userInfo.stocks_owned[symbol]; //shows what prices the user bought the stock at
                 var totalNumOfStock = 0;
+                if (userStockMap) {
+                    totalNumOfStock = userStockMap.total;
+                }
                 var stockInfo = stockSymbolsMap[symbol];
                 var stockName = stockInfo['name'];
                 var stockPercentChange = stockInfo['daily_percent_change']
@@ -18,11 +21,6 @@
                 var day_high = stockInfo.day_high;
                 var day_low = stockInfo.day_low;
 
-                for (var key in userStockMap) {
-                    var value = userStockMap[key];
-                    totalNumOfStock += value;
-                }
-                
                 $(parent + ' .stockName').text(stockName);
                 $(parent + ' .stockPercentChange').text(stockPercentChange);
                 $(parent + ' .stockPriceChange').text(stockPriceChange);

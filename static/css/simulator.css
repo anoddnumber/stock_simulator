@@ -34,10 +34,11 @@ a:visited{
 .dataTables_wrapper .dataTables_filter label input {
     width: 65%;
     height: 40px;
-    margin-left: 0;
+    margin-left: 20px;
     margin-bottom: 0.4%;
     border-style: solid;
     border-color: #585858;
+    padding-left: 10px;
 }
 
 .profileDataTablesCash {
@@ -110,15 +111,17 @@ a:visited{
   }
 }
 
+
 /* Stock Info Page */
 .back {
     text-align: left;
 }
 
-.availableCash {
+.availableCash, .totalEquities, .total {
     text-align: right;
     font-size: 20px;
-    padding-right: 45px;
+    padding-right: 30px;
+    padding-top: 5px;
 }
 
 .stockInfoPage {

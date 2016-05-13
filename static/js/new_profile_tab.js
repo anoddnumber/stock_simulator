@@ -1,6 +1,7 @@
 (function($) {
     $.ProfileTab = function(options) {
         var table;
+        var totalEquities;
 
         var profileTab = {
             options : $.extend({
@@ -17,12 +18,35 @@
                 } else {
                     profileTab.createTable();
                 }
-                $('.availableCash').text("Available Cash: $" + userInfo.cash);
             },
 
             //TODO probably a better way to do this with DataTables
             createTable : function() {
-                table = $('#profile_table').DataTable();
+                // https://datatables.net/reference/option/dom
+                // https://datatables.net/examples/advanced_init/dom_toolbar.html
+                table = $('#profile_table').DataTable({
+                    "columns": [
+                        { className: "symbol" },
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                    ],
+                    "pageLength": 10,
+                    "paging": true,
+                    "lengthChange" : false,
+                    language: {
+                        search: "_INPUT_", //Don't display any label left of the search box
+                        searchPlaceholder: ""
+                    },
+                    "dom": 'f<"availableCash"><"totalEquities"><"total">tip' //TODO change the stockInfoPageTotalCash class..
+                });
+
                 table.clear();
 
                 var rows = profileTab.buildTable();
@@ -71,6 +95,8 @@
                     totalPriceBought = totalPriceBought.toFixed(2);
                     var currentTotalValue = (totalQuantity * currentPrice).toFixed(2);
 
+                    totalEquities += parseFloat(currentTotalValue);
+
                     var row = [symbol, totalQuantity, avgPrice, currentPrice, priceDifference, percentDifference,
                     dayPriceDifference, dayPercentDifference, totalPriceBought, currentTotalValue]
 
@@ -100,44 +126,60 @@
 
             init : function() {
                 table = undefined;
-
-                // https://datatables.net/reference/option/dom
-                // https://datatables.net/examples/advanced_init/dom_toolbar.html
-                $('#profile_table').DataTable({
-                    "columns": [
-                        { className: "symbol" },
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                        null,
-                    ],
-                    "lengthChange" : false,
-                    language: {
-                        search: "_INPUT_", //Don't display any label left of the search box
-                        searchPlaceholder: "Search"
-                    },
-                    "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
-                });
+                totalEquities = 0;
 
                 profileTab.updatePage();
+
+                var page = Math.floor(Utility.getUrlParameter("page")) - 1;
+                if (isNaN(page) || page < 0) {
+                    page = 0;
+                }
+                table.page(page).draw("page");
+
                 profileTab.setupRows();
 
+                $('#navbarTabs li').removeClass('active');
+                $('#profileTab').addClass('active');
+
+                // select the search bar
+                $('.dataTables_wrapper .dataTables_filter label input[type=search]').focus();
+                $('.availableCash').text("Available Cash: $" + userInfo.cash);
+                $('.totalEquities').text("Total Equities: $" + totalEquities);
+                $('.total').text( "Total: $" + (parseFloat(userInfo.cash) + totalEquities).toFixed(2) );
+
+                // https://datatables.net/reference/event/page
+                $('#profile_table').on('page.dt', function () {
+                    var info = table.page.info();
+
+                    // info.page has a range of [0, info.pages)
+                    var url = document.URL;     // Returns full URL
+                    var newUrl = document.location.origin;
+
+                    if (info.page != 0) {
+                        newUrl = Utility.replaceUrlParam(url, "page", info.page + 1);
+                    }
+
+                    history.pushState( {}, document.title, newUrl);
+                } );
+
                 // when changing pages in the table, we have to attach hrefs and the ajax loading plugin to the rows
+                // this should come after table.page(page).draw("page"); or else the rows will be set up twice
+                // and the next page will be pushed onto the browser's history twice.
                 $('#profile_table').on( 'draw.dt', function () {
                     profileTab.setupRows();
                 });
+            },
+
+            onPageLoad : function() {
+                // select the search bar
+                $('.dataTables_wrapper .dataTables_filter label input[type=search]').focus();
             },
 
             setupRows : function() {
                 $('#profile_table tbody tr').each(function (i, row) {
                     var symbol = $(row).find('.symbol').text();
                     $(row).attr("href", "/stock/" + symbol);
-                    ChangePageHelper.attachChangePageAction($(row), StockInfoPage, 'profileTab');
+                    ChangePageHelper.attachChangePageAction($(row), StockInfoPage);
                 });
             },
          }
@@ -146,15 +188,9 @@
             updatePage : profileTab.updatePage,
             getTable : profileTab.getTable,
             init : profileTab.init,
+            onPageLoad : profileTab.onPageLoad,
         };
     }
 })(jQuery);
 
 var ProfileTab = $.ProfileTab();
-
-$( document ).ready(function() {
-    var url = window.location.href;
-    if (url.indexOf("profile") > -1) {
-        ProfileTab.init();
-    }
-});

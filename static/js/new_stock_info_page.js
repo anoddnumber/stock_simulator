@@ -5,6 +5,8 @@
              }, options),
 
              setupSlider : function() {
+                $('.stockInfoPageStockTotalPrice').text("0.00");
+
                 var cash = $('.stockInfoPageTotalCash').text();
                 var price = $('.stockInfoPageStockPrice').text();
                 var numOwned = $('.stockInfoPageAmountOwned').text();
@@ -89,9 +91,19 @@
                     }
 
                 });
+
+                $('#backButton').click(function() {
+                    history.back();
+                })
+            },
+
+            onPageLoad : function() {
+
             },
 
             init : function() {
+                $('#navbarTabs li').removeClass('active');
+                $('#stocksTab').addClass('active');
                 stockInfoPage.setupButtons();
                 stockInfoPage.setupSlider();
             },
@@ -99,18 +111,12 @@
 
         return {
             init : stockInfoPage.init,
+            onPageLoad : stockInfoPage.onPageLoad,
         };
     }
 })(jQuery);
 
 var StockInfoPage = $.StockInfoPage();
-
-$( document ).ready(function() {
-    var url = window.location.href;
-    if (url.indexOf("stock/") > -1) {
-        StockInfoPage.init();
-    }
-});
 
 function onStockQuantityInputChange(form, value) {
     form.amountRange.value = value.replace(/[^0-9]/g,'0');

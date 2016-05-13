@@ -15,7 +15,7 @@
         <ul id="navbarTabs" class="nav navbar-nav" role="tablist">
 
             <li id="profileTab" {% if activeTab is not defined or activeTab=="profile" %} class="active" {% endif %}>
-                <a href="/profile" class="profileTabLink">Profile</a>
+                <a href="/" class="profileTabLink">Profile</a>
             </li>
             <li id="stocksTab" {% if activeTab=="stocks" %} class="active" {% endif %}>
                 <a href="/stocks" class="stocksTabLink">Stocks</a>
@@ -30,7 +30,7 @@
         <ul class="nav navbar-nav navbar-right">
             <li><a href="javascript:void(0)">News</a></li>
             <li class="dropdown">
-                <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">Username <b class="caret"></b></a>
+                <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">{{username}}<b class="caret"></b></a>
                 <ul class="dropdown-menu">
                     <li><a href="javascript:void(0)">Tutorial</a></li>
                     <li><a href="javascript:void(0)">SM Wiki</a></li>

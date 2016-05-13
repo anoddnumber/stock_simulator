@@ -44,6 +44,15 @@ a:visited{
     display: inline;
 }
 
+.dataTables_info{
+    margin-left: 20px;
+}
+
+.paging_simple_numbers{
+    margin-right: 20px;
+}
+
+
 /* Navigation bar CSS */
 
 .navbar-default {

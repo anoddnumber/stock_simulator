@@ -91,7 +91,10 @@ app.config['SECURITY_MSG_PASSWORD_NOT_SET'] = ('Unexpected error.', 'error')
 app.config['SECURITY_MSG_INVALID_PASSWORD'] = ('Email or password is incorrect.', 'error')
 app.config['SECURITY_MSG_DISABLED_ACCOUNT'] = ('This account is disabled.', 'error')
 
-config = {'defaultCash': 50000}
+config = {
+    'defaultCash': 50000,
+    'commission': 8.95
+}
 db = MongoEngine(app)
 stock_user_datastore = MongoEngineStockUserDatastore(db, User, Role)
 security = Security(app, stock_user_datastore, confirm_register_form=ExtendedRegisterForm)
@@ -172,8 +175,8 @@ def stock_info_page(symbol):
         return template.render(username=current_user.username, name=name, symbol=symbol, price=price, day_low=day_low,
                                daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
                                day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change,
-                               market_cap=market_cap, pe_ratio=pe_ratio, div_yield=div_yield,
-                               activeTab='stocks')
+                               commission=config['commission'], market_cap=market_cap, pe_ratio=pe_ratio,
+                               div_yield=div_yield, activeTab='stocks')
     else:
         return "Requested stock does not exist in our database"
 
@@ -347,7 +350,7 @@ def buy_stock():
                        str(server_stock_price))
         return "Stock price changed, please try again."
 
-    total_cost = quantity * stock_price
+    total_cost = quantity * stock_price + config['commission']
     # check that the user has enough cash to buy the stocks requested
     if total_cost > float(current_user.cash):
         logger.warning("User " + str(username) + " tried to buy more stocks than he/she can afford")

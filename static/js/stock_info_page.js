@@ -5,8 +5,6 @@
              }, options),
 
              setupSlider : function() {
-                $('.stockInfoPageStockTotalPrice').text("0.00");
-
                 var cash = $('.stockInfoPageTotalCash').text();
                 var price = $('.stockInfoPageStockPrice').text();
                 var numOwned = $('.stockInfoPageAmountOwned').text();
@@ -16,7 +14,7 @@
                 $(".stockInfoPage .buyStockRadioButton").prop("checked", true);
                 $('.stockInfoPage input').attr({
                     "min" : 0,
-                    "max" : Math.floor(cash / price),
+                    "max" : Math.floor( (cash - commission) / price),
                 });
 
                 //make sure we don't stack up actions on the click event..
@@ -132,7 +130,6 @@ function updateTotalPrice() {
     var value = $('.stockInfoPage input[name=amountInput]').val().trim();
     var quantity = Utility.isPositiveInteger(value);
     var price = $('.stockInfoPageStockPrice').text();
-    var commission = 0;
 
     var totalPrice = quantity * price + commission;
     $('.stockInfoPageStockTotalPrice').text(totalPrice.toFixed(2));

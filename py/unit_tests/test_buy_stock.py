@@ -24,14 +24,14 @@ class TestBuyStock(BaseUnitTest):
 
         # assert "Success" in rv.data TODO: add new assert here
         self.assert_user_info({"AMZN": {price.replace(".", "_"): quantity, "total": quantity}},
-                              starting_cash - quantity * float(price))
+                              starting_cash - quantity * float(price) - simulator.config['commission'])
 
         # buy the same stock again
         rv = self.client.buy_stock(symbol, quantity, price)
 
         # assert "Success" in rv.data TODO: add new assert here
         self.assert_user_info({"AMZN": {price.replace(".", "_"): quantity * 2, "total": quantity * 2}},
-                              starting_cash - quantity * float(price) * 2)
+                              starting_cash - quantity * float(price) * 2 - simulator.config['commission'] * 2)
 
     def test_buy_as_much_as_possible(self):
         print "test_buy_as_much_as_possible"
@@ -47,14 +47,14 @@ class TestBuyStock(BaseUnitTest):
 
         self.assert_user_info({}, starting_cash)
 
-        max_quantity_possible = int(starting_cash / float(price))
+        max_quantity_possible = int( (starting_cash - simulator.config['commission']) / float(price))
         rv = self.client.buy_stock(symbol, max_quantity_possible, price)
 
         # assert "Success" in rv.data TODO: add new assert here
         self.assert_user_info({"AMZN": {price.replace(".", "_"): max_quantity_possible,
                                         "total": max_quantity_possible
                                         }},
-                              starting_cash - max_quantity_possible * float(price))
+                              starting_cash - max_quantity_possible * float(price) - simulator.config['commission'])
 
     def test_buy_without_account(self):
         print "test_buy_without_account"

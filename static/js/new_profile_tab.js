@@ -8,16 +8,7 @@
             }, options),
 
             updatePage : function() {
-                if (table) {
-                    var numRows = Object.keys(userInfo.stocks_owned).length;
-                    if (numRows != table.rows().count()) {
-                        profileTab.createTable();
-                    } else {
-                        profileTab.updateTable();
-                    }
-                } else {
-                    profileTab.createTable();
-                }
+                profileTab.createTable();
             },
 
             //TODO probably a better way to do this with DataTables
@@ -54,22 +45,6 @@
                 table.draw(true);
             },
 
-            updateTable : function() {
-                table.rows().every( function () {
-                    var d = this.data();
-
-                    d.counter++; // update data source for the row
-
-                    this.invalidate(); // invalidate the data DataTables has cached for this row
-                    var symbol = d[0];
-                    //TODO: some reason the table redraws on "this.data(row data here)" as well
-                    //Seems like a datatable bug. Should only be redrawing on table.draw(false);
-                    this.data(profileTab.getRow(symbol));
-                } );
-
-                table.draw(false);
-            },
-
             getRow : function(symbol) {
                     var symbolData = userInfo.stocks_owned[symbol];
                     var pricesBought = Object.keys(symbolData);
@@ -86,6 +61,12 @@
                         totalQuantity += quantity;
                     }
                     var symbolInfo = stockSymbolsMap[symbol];
+                    if ( ! symbolInfo) {
+                        console.log("User owns stock with symbol " + symbol + " but we do not have any information"
+                        + " about this stock");
+                        return;
+                    }
+
                     var avgPrice = (totalPriceBought / totalQuantity).toFixed(2);
                     var currentPrice = symbolInfo.price;
                     var priceDifference = (currentPrice - avgPrice).toFixed(2);
@@ -118,7 +99,9 @@
                 for (var i = 0; i < keys.length; i++) {
                     var symbol = keys[i];
                     var row = profileTab.getRow(symbol);
-                    rows.push(row);
+                    if (row) {
+                        rows.push(row);
+                    }
                 }
 
                 return rows;

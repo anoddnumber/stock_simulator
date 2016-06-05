@@ -11,11 +11,7 @@
             }, options),
 
             updatePage : function() {
-                if (table) {
-                    browseTab.updateTable();
-                } else {
-                    browseTab.createTable();
-                }
+                browseTab.createTable();
                 $('.availableCash').text("Available Cash: $" + userInfo.cash);
             },
 
@@ -53,22 +49,6 @@
                 table.draw(false);
             },
 
-            updateTable : function() {
-                table.rows().every( function () {
-                    var d = this.data();
-
-                    d.counter++; // update data source for the row
-
-                    this.invalidate(); // invalidate the data DataTables has cached for this row
-                    var symbol = d[0];
-                    //TODO: some reason the table redraws on "this.data(row data here)" as well
-                    //Seems like a datatable bug. Should only be redrawing on table.draw(false);
-                    this.data(browseTab.getRow(symbol));
-                } );
-
-                table.draw(false);
-            },
-
             enableButton: function(symbol) {
                 var buttonId = 'buy' + symbol + 'Button';
                 //add the on click event after inserting the button into the table
@@ -79,6 +59,13 @@
 
             getRow : function(symbol) {
                 var info = stockSymbolsMap[symbol];
+
+                if ( ! info) {
+                    console.log("Stock with symbol " + symbol + " trying to be displayed on stocks page but we do not"
+                                + " have any information about the stock");
+                    return;
+                }
+
                 var name = info['name'];
                 var dailyPercentChange = info.daily_percent_change;
                 var dailyPriceChange = info.daily_price_change;
@@ -111,7 +98,9 @@
                         continue;
                     }
                     var row = browseTab.getRow(symbol);
-                    rows.push(row);
+                    if (row) {
+                        rows.push(row);
+                    }
                 }
 
                 return rows;

@@ -185,11 +185,8 @@ def stock_info_page(symbol):
             for i, row in enumerate(csvReader):
                 if i == 0:
                     continue
-                # print(', '.join(row))
-                # print "row: " + str(row)
                 info.append({"date": row[0], "value": row[4]})
             info.reverse()
-            print info
 
         template = env.get_template('stock_info_page.html')
         return template.render(username=current_user.username, name=name, symbol=symbol, price=price, day_low=day_low,

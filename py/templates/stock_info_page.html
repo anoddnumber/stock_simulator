@@ -1,10 +1,14 @@
 <!DOCTYPE html>
 {% include 'standard_head.html' %}
+<script src="/amstockchart_3.20.7.free/amcharts/amcharts.js" type="text/javascript"></script>
+<script src="/amstockchart_3.20.7.free/amcharts/serial.js" type="text/javascript"></script>
+<script src="/amstockchart_3.20.7.free/amcharts/amstock.js" type="text/javascript"></script>
 
 <div id="loadingbar-frame">
     <div id="stock_simulator">
         <script>
             var commission = {{commission}};
+            var chartData = {{chartData}};
         </script>
         <div class="stockInfoPage">
             <div class ="container-fluid">
@@ -34,18 +38,18 @@
                             <span class="stockPercentChange">({{daily_percent_change|e}})</span><br>
                         </div>
                         <!--Insert Graph-->
-                        <div style="max-width:500px;">
-                            <img src="../../resources/images/Graph_Placeholder.jpg" class="graph"><br>
+                        <div id="stockGraph" style="height: 500px;width: 100%;>
+                            <!--<img src="../../resources/images/Graph_Placeholder.jpg" class="graph"><br>-->
                         </div>
                         <!--Day Week Month Year Link-->
-                        <div class ="container-fluid">
-                            <div class="row">
-                                <div class="col-xs-2"><a href="url">Day</a></div>
-                                <div class="col-xs-2"><a href="url">Week</a></div>
-                                <div class="col-xs-2"><a href="url">Month</a></div>
-                                <div class="col-xs-2"><a href="url">Year</a></div>
-                            </div><br>
-                        </div>
+                        <!--<div class ="container-fluid">-->
+                            <!--<div class="row">-->
+                                <!--<div class="col-xs-2"><a href="url">Day</a></div>-->
+                                <!--<div class="col-xs-2"><a href="url">Week</a></div>-->
+                                <!--<div class="col-xs-2"><a href="url">Month</a></div>-->
+                                <!--<div class="col-xs-2"><a href="url">Year</a></div>-->
+                            <!--</div><br>-->
+                        <!--</div>-->
                         <div class="col-xs-4 column3">
                             Open: <span class="stockInfoPageDayOpen">{{day_open|e}}</span><br>
                             High: <span class="stockInfoPageDayHigh">{{day_high|e}}</span><br>

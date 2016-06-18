@@ -19,6 +19,7 @@ from flask_mail import Mail
 from py.user import User, Role
 from py.extended_register_form import ExtendedRegisterForm
 from py.stock_user_datastore import MongoEngineStockUserDatastore
+import csv
 
 env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='', template_folder='py/templates')
@@ -124,6 +125,11 @@ def root():
                            stockSymbolsMap=json.dumps(cache.json), activeTab='profile')
 
 
+@app.route("/test")
+def test():
+    template = env.get_template('test.html')
+    return template.render()
+
 @app.route("/stock/<symbol>", methods=['GET'])
 @login_required
 def stock_info_page(symbol):
@@ -171,12 +177,26 @@ def stock_info_page(symbol):
 
     if stock_info and user_dict:
 
+        # TODO: make sure the file exists
+        with open('data/' + str(symbol) + '.csv') as csvfile:
+            csvReader = csv.reader(csvfile, delimiter=',')
+
+            info = []
+            for i, row in enumerate(csvReader):
+                if i == 0:
+                    continue
+                # print(', '.join(row))
+                # print "row: " + str(row)
+                info.append({"date": row[0], "value": row[4]})
+            info.reverse()
+            print info
+
         template = env.get_template('stock_info_page.html')
         return template.render(username=current_user.username, name=name, symbol=symbol, price=price, day_low=day_low,
                                daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
                                day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change,
                                commission=config['commission'], market_cap=market_cap, pe_ratio=pe_ratio,
-                               div_yield=div_yield, activeTab='stocks')
+                               div_yield=div_yield, activeTab='stocks', chartData=info)
     else:
         return "Requested stock does not exist in our database"
 

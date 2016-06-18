@@ -119,7 +119,7 @@ def root():
     # list_routes()  # for debugging
 
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
-    template = env.get_template('new_profile_page.html')
+    template = env.get_template('profile_page.html')
     return template.render(username=current_user.username, userInfo=get_user_info(),
                            stockSymbolsMap=json.dumps(cache.json), activeTab='profile')
 
@@ -171,7 +171,7 @@ def stock_info_page(symbol):
 
     if stock_info and user_dict:
 
-        template = env.get_template('new_stock_info_page.html')
+        template = env.get_template('stock_info_page.html')
         return template.render(username=current_user.username, name=name, symbol=symbol, price=price, day_low=day_low,
                                daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
                                day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change,
@@ -185,7 +185,7 @@ def stock_info_page(symbol):
 @login_required
 def stocks():
     # cache.update(5)
-    template = env.get_template('new_stocks_page.html')
+    template = env.get_template('stocks_page.html')
     return template.render(username=current_user.username, userInfo=get_user_info(),
                            stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
 

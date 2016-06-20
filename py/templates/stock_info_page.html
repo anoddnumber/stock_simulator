@@ -38,18 +38,7 @@
                             <span class="stockPercentChange">({{daily_percent_change|e}})</span><br>
                         </div>
                         <!--Insert Graph-->
-                        <div id="stockGraph" style="height: 500px;width: 100%;>
-                            <!--<img src="../../resources/images/Graph_Placeholder.jpg" class="graph"><br>-->
-                        </div>
-                        <!--Day Week Month Year Link-->
-                        <!--<div class ="container-fluid">-->
-                            <!--<div class="row">-->
-                                <!--<div class="col-xs-2"><a href="url">Day</a></div>-->
-                                <!--<div class="col-xs-2"><a href="url">Week</a></div>-->
-                                <!--<div class="col-xs-2"><a href="url">Month</a></div>-->
-                                <!--<div class="col-xs-2"><a href="url">Year</a></div>-->
-                            <!--</div><br>-->
-                        <!--</div>-->
+                        <div id="stockGraph">{% include 'loaders/spinner.html' %}</div>
                         <div class="col-xs-4 column3">
                             Open: <span class="stockInfoPageDayOpen">{{day_open|e}}</span><br>
                             High: <span class="stockInfoPageDayHigh">{{day_high|e}}</span><br>

@@ -51,7 +51,7 @@ var config = {
 
              logout : function() {
                 $.ajax("/logout", {
-                    method: "POST",
+                    method: "GET",
                     success: function(data) {
                         console.log(data);
                         $('#usernameBox').text("Not logged in");
@@ -65,23 +65,23 @@ var config = {
              },
 
              createAccount : function(formData) {
-                $.ajax("/createAccount", {
-                    method: "POST",
-                    data: formData,
-                    success: function(data) {
-                        console.log("successfully created account!");
-                    },
-                    error: function(jqXHR, textStatus, errorThrown ) {
-                        console.log("error when creating an account");
-                    }
-                });
+//                $.ajax("/register", {
+//                    method: "POST",
+//                    data: formData,
+//                    success: function(data) {
+//                        console.log("successfully created account!");
+//                    },
+//                    error: function(jqXHR, textStatus, errorThrown ) {
+//                        console.log("error when creating an account");
+//                    }
+//                });
             },
 
             /**
              * TODO, create a central helper for all the APIs, or maybe a client.
              *  since all the success and error parts of the functions are the same..
              */
-            buyStock : function(symbol, quantity, price) {
+            buyStock : function(symbol, quantity, price, onSuccess) {
                 if (price == undefined) {
                     price = stockSymbolsMap[symbol].price;
                 }
@@ -93,8 +93,7 @@ var config = {
                            'stockPrice' : price
                           },
                     success: function(data) {
-                        console.log(data);
-                        ApiClient.updateUserData();
+                        onSuccess(data);
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         console.log("JSON.parse(jqXHR.responseText).message: " + jqXHR.responseText);
@@ -103,7 +102,7 @@ var config = {
                 });
             },
 
-            sellStock : function(symbol, quantity, price) {
+            sellStock : function(symbol, quantity, price, onSuccess) {
                 if (price == undefined) {
                     price = stockSymbolsMap[symbol].price;
                 }
@@ -115,36 +114,11 @@ var config = {
                            'stockPrice' : price
                           },
                     success: function(data) {
-                        console.log(data);
-                        ApiClient.updateUserData();
+                        onSuccess(data);
                     },
                     error: function(jqXHR, textStatus, errorThrown) {
                         console.log("JSON.parse(jqXHR.responseText).message: " + jqXHR.responseText);
                         console.log("error, did not buy stock");
-                    }
-                });
-            },
-
-            updateUserData : function() {
-                $.ajax("/getUserInfo", {
-                    method: "GET",
-                    success: function(data) {
-                        try {
-                            userInfo = JSON.parse(data);
-                        } catch (err){
-                            console.log("getting user info error: " + err);
-                        }
-
-                        $('.stockInfoPageTotalCash').text("Available Cash: $" + userInfo.cash);
-                        $('#cashBox').text('Cash: $' + userInfo.cash);
-                        $('#previewBuyStockCash').text('$' + userInfo.cash);
-                        console.log("userInfo: " + JSON.stringify(userInfo));
-
-                        //TODO: Update stocks in profile page
-                        ProfileTab.update();
-                    },
-                    error: function(jqXHR, textStatus, errorThrown) {
-                        console.log("error, did not retrieve user data");
                     }
                 });
             },
@@ -197,7 +171,6 @@ var config = {
             logout : apiClient.logout,
             createAccount : apiClient.createAccount,
             buyStock : apiClient.buyStock,
-            updateUserData : apiClient.updateUserData,
             updateCache : apiClient.updateCache,
             sellStock : apiClient.sellStock,
         }

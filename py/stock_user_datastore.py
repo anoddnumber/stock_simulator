@@ -23,6 +23,8 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         return self.find_user(email=email)
 
     def add_stock_to_user(self, username, symbol, price_per_stock, quantity):
+        from simulator import config
+
         self.logger.info("Adding stock to user with username " + str(username))
         self.logger.info("Symbol: " + str(symbol) + "\n" +
                          "Price per stock: " + str(price_per_stock) + "\n" +
@@ -31,7 +33,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         user = self.find_user(username=username)
         print "user" + str(type(user))
         # user_dict = self.collection.find_one({"username": username})
-        total_cost = price_per_stock * quantity
+        total_cost = price_per_stock * quantity + config['commission']
 
         # format the price_per_stock to always have exactly 2 digits after the decimal
         price_per_stock = '{0:.2f}'.format(price_per_stock)

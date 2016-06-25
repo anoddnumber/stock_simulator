@@ -441,7 +441,7 @@ def init_cache(cache_path=None):
     cache = Cache(cache_path)
             
 if __name__ == "__main__":
-    app.debug = True
+    app.debug = False
     toolbar = DebugToolbarExtension(app)
 
     init_cache()

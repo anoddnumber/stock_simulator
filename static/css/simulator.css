@@ -155,10 +155,10 @@ a:visited{
     font-size: 25px;
 }
 
-.graph {
+#stockGraph {
     max-width: 100%;
-    height: auto;
-    width: auto;
+    height: 500px;
+    width: 100%;
 }
 
 .column3 {
@@ -384,6 +384,10 @@ input[type=range] {
         -ms-transform:scale(0.6);
         -webkit-transform:scale(0.6);
         -moz-transform:scale(0.6);
+
+    /* Center the spinner vertically */
+    top: 50%;
+    transform: translateY(-50%);
 }
 
 .f_circleG{

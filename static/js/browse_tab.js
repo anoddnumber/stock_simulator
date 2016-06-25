@@ -11,36 +11,41 @@
             }, options),
 
             updatePage : function() {
-                if (table) {
-                    browseTab.updateTable();
-                } else {
-                    browseTab.createTable();
-                }
+                browseTab.createTable();
+                $('.availableCash').text("Available Cash: $" + userInfo.cash);
             },
 
             //TODO probably a better way to do this with DataTables
             createTable : function() {
-                table = $('#stocks_table').DataTable();
+                // https://datatables.net/reference/option/dom
+                // https://datatables.net/examples/advanced_init/dom_toolbar.html
+                table = $('#stocks_table').DataTable({
+                    "lengthChange" : false,
+                    "columns": [
+                        { className: "symbol" },
+                        null,
+                        null,
+                        null,
+                        null,
+                        null,
+                    ],
+                    "pageLength": 10,
+                    language: {
+                        search: "_INPUT_", //Don't display any label left of the search box
+                        searchPlaceholder: ""
+                    },
+//                     the "columns" key below makes the table static and not dynamic, so if you resize the browser window after
+//                     the page loads, then the table won't change. The "autoWidth" seems to be okay for now
+//                    "columns": [
+//                        { "width": "10%" }, { "width": "30%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }, { "width": "15%" }
+//                    ],
+                    "autoWidth": false,
+                    "dom": 'f<"availableCash">tip' //TODO change the stockInfoPageTotalCash class..
+                });
                 table.clear();
 
                 var rows = browseTab.buildTable();
                 table.rows.add(rows);
-                table.draw(false);
-            },
-
-            updateTable : function() {
-                table.rows().every( function () {
-                    var d = this.data();
-
-                    d.counter++; // update data source for the row
-
-                    this.invalidate(); // invalidate the data DataTables has cached for this row
-                    var symbol = d[0];
-                    //TODO: some reason the table redraws on "this.data(row data here)" as well
-                    //Seems like a datatable bug. Should only be redrawing on table.draw(false);
-                    this.data(browseTab.getRow(symbol));
-                } );
-
                 table.draw(false);
             },
 
@@ -54,6 +59,13 @@
 
             getRow : function(symbol) {
                 var info = stockSymbolsMap[symbol];
+
+                if ( ! info) {
+                    console.log("Stock with symbol " + symbol + " trying to be displayed on stocks page but we do not"
+                                + " have any information about the stock");
+                    return;
+                }
+
                 var name = info['name'];
                 var dailyPercentChange = info.daily_percent_change;
                 var dailyPriceChange = info.daily_price_change;
@@ -82,10 +94,15 @@
                 var rows = new Array();
                 for (var i = 0; i < symbols.length; i++) {
                     var symbol = symbols[i];
+                    if (symbol == "last_updated") {
+                        continue;
+                    }
                     var row = browseTab.getRow(symbol);
-                    rows.push(row);
+                    if (row) {
+                        rows.push(row);
+                    }
                 }
-                
+
                 return rows;
             },
 
@@ -95,80 +112,70 @@
                 $('#previewBuyStockPrice').text(stockSymbolsMap[symbol].price);
             },
 
-            //TODO: add an update method for the browseTab
+            init : function() {
+                table = undefined;
+
+                //TODO: make a highlight or change tabs function in Utility
+                $('#navbarTabs li').removeClass('active');
+                $('#stocksTab').addClass('active');
+
+                browseTab.updatePage();
+
+                var page = Math.floor(Utility.getUrlParameter("page")) - 1;
+                if (isNaN(page) || page < 0) {
+                    page = 0;
+                }
+                table.page(page).draw("page");
+
+                browseTab.setupRows();
+
+                // https://datatables.net/reference/event/page
+                $('#stocks_table').on('page.dt', function () {
+                    var info = table.page.info();
+
+                    // info.page has a range of [0, info.pages)
+                    var url = document.URL;     // Returns full URL
+                    var newUrl = document.location.origin;
+
+                    if (info.page != 0) {
+                        newUrl = Utility.replaceUrlParam(url, "page", info.page + 1);
+                    }
+
+                    history.pushState( {}, document.title, newUrl);
+                } );
+
+
+                // when changing pages in the table, we have to attach hrefs and the ajax loading plugin to the rows
+                $('#stocks_table').on( 'draw.dt', function () {
+                    browseTab.setupRows();
+                });
+
+                // select the search bar
+                $('.dataTables_wrapper .dataTables_filter label input[type=search]').focus();
+            },
+
+            onPageLoad : function() {
+                // select the search bar
+                $('.dataTables_wrapper .dataTables_filter label input[type=search]').focus();
+            },
+
+            setupRows : function() {
+                $('#stocks_table tbody tr').each(function (i, row) {
+                    var symbol = $(row).find('.symbol').text();
+                    $(row).attr("href", "/stock/" + symbol);
+                    ChangePageHelper.attachChangePageAction($(row), StockInfoPage);
+                });
+            },
         }
 
         return {
             updatePage : browseTab.updatePage,
             displaySortedArray : browseTab.displaySortedArray,
             getTable : browseTab.getTable,
+            init : browseTab.init,
+            onPageLoad : browseTab.onPageLoad
         };
     };
 })(jQuery);
 
 var BrowseTab = $.BrowseTab();
-
-$( document ).ready(function() {
-    var stocksTableContainer = $.MutuallyExclusiveContainer({
-        'selectors' : ['#stockTableContainer', '#stocks .stockInfoPage']
-    });
-
-    // https://datatables.net/reference/option/dom
-    // https://datatables.net/examples/advanced_init/dom_toolbar.html
-    $('#stocks_table').DataTable({
-        "lengthChange" : false,
-        language: {
-            search: "_INPUT_", //Don't display any label left of the search box
-            searchPlaceholder: "Search"
-        },
-        "dom": 'f<"stockInfoPageTotalCash availableCash">tip' //TODO change the stockInfoPageTotalCash class..
-    });
-
-    ApiClient.updateCache(function() {
-        ApiClient.updateUserData();
-    });
-
-    /**
-     * Computes the total amount of money required to buy the number of stocks
-     */
-    $("#previewBuyStockQuantity").keyup(function() {
-        var value = $('#previewBuyStockBox input[name=quantitybar]').val().trim();
-        var stockSymbol = $("#previewBuyStockSymolName").html();
-        var stockPrice = stockSymbolsMap[stockSymbol].price;
-        var quantity = Utility.isPositiveInteger(value);
-        if (quantity && stockPrice) {
-            var totalPrice = quantity * stockPrice;
-            $('#previewBuyStockBox #previewBuyStockTotalPrice').text('$' + totalPrice.toFixed(2));
-        } else {
-            $('#previewBuyStockBox #previewBuyStockTotalPrice').text("Please input a positive integer");
-        }
-    });
-
-    $('#previewBuyStocksBuyButton').click(function() {
-        var value = $('#previewBuyStockBox input[name=quantitybar]').val().trim();
-        quantity = Utility.isPositiveInteger(value);
-        if (quantity) {
-            ApiClient.buyStock($("#previewBuyStockSymolName").html(), quantity);
-        }
-    });
-
-    $('#stocks_table tbody').on('click', 'tr', function(event) {
-        table = BrowseTab.getTable();
-        var data = table.row( this ).data();
-        var symbol = data[0];
-
-        StockInfoPage.populatePage(symbol, '#stocks');
-        stocksTableContainer.show('#stocks .stockInfoPage');
-    })
-
-    $('#stocks .stockInfoPageBackButton').click(function() {
-        stocksTableContainer.show('#stockTableContainer');
-    })
-
-    StockInfoPage.setupButtons('#stocks');
-});
-
-
-
-
-

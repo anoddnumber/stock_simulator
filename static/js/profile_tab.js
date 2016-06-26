@@ -127,7 +127,7 @@
                 // select the search bar
                 $('.dataTables_wrapper .dataTables_filter label input[type=search]').focus();
                 $('.availableCash').text("Available Cash: $" + userInfo.cash);
-                $('.totalEquities').text("Total Equities: $" + totalEquities);
+                $('.totalEquities').text("Total Equities: $" + totalEquities.toFixed(2));
                 $('.total').text( "Total: $" + (parseFloat(userInfo.cash) + totalEquities).toFixed(2) );
 
                 // https://datatables.net/reference/event/page

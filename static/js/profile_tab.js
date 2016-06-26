@@ -132,17 +132,7 @@
 
                 // https://datatables.net/reference/event/page
                 $('#profile_table').on('page.dt', function () {
-                    var info = table.page.info();
-
-                    // info.page has a range of [0, info.pages)
-                    var url = document.URL;     // Returns full URL
-                    var newUrl = document.location.origin;
-
-                    if (info.page != 0) {
-                        newUrl = Utility.replaceUrlParam(url, "page", info.page + 1);
-                    }
-
-                    history.pushState( {}, document.title, newUrl);
+                    Utility.modifyPageParam(table);
                 } );
 
                 // when changing pages in the table, we have to attach hrefs and the ajax loading plugin to the rows

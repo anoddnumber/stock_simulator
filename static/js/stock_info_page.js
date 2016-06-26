@@ -109,6 +109,7 @@
 
                 });
 
+                $("#backButton").unbind("click");
                 $('#backButton').click(function() {
                     history.back();
                 })

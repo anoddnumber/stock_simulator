@@ -186,13 +186,18 @@
                     label: "MAX"
                 }];
                 chart.periodSelector = periodSelector;
+                chart.dataDateFormat = "YYYY-MM-DD";
 
                 chart.write('stockGraph');
 
                 var lastDate = chartData[chartData.length - 1]["date"];
                 var end = new Date(lastDate);
-                var start = new Date(lastDate);
-                start.setDate(start.getDate() - 30);
+
+                // Set it to UTC time. The 22 is to have the end of the graph
+                // a little bit to the right of the last point
+                end.setHours(end.getHours() + 22 + end.getTimezoneOffset() / 60);
+                var start = new Date(end);
+                start.setDate(start.getDate() - 31);
                 chart.zoom(start, end);
             },
 

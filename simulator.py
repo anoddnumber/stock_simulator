@@ -338,21 +338,21 @@ def buy_stock():
 
     except ValueError:
         logger.warning("User trying to buy stock but there was an error trying to read the arguments")
-        return "Error reading arguments"
+        return json.dumps({"data": "Error reading arguments", "error": True})
     
     if symbol is None or quantity is None or stock_price is None:
         logger.warning("Missing argument when buying stock:\n" +
                        "symbol: " + str(symbol) + ", " +
                        "quantity: " + str(quantity) + ", " +
                        "stock_price: " + str(stock_price))
-        return 'Missing at least one argument: symbol, quantity, stockPrice required. No optional arguments.'
+        return json.dumps({"data": "Missing at least one argument: symbol, quantity, stockPrice required. No optional arguments.", "error": True})
 
     # check if the price that the user wants to buy the stock for is the same as the server's stock price
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
         logger.warning("User tried to buy stock with symbol " + str(symbol) + " but is not in the stocks map")
-        return "Invalid symbol"
+        return json.dumps({"data": "Invalid symbol", "error": True})
     server_stock_price = float(symbol_map.get("price"))
 
     # check if the passed in stock price and quantity are positive
@@ -360,28 +360,33 @@ def buy_stock():
         logger.warning("The stock price is either less than or equal to 0 or the user tried to zero or "
                        "fewer amount of stock")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return "Stock price or quantity less than 0"
+        return json.dumps({"data": "Stock price or quantity less than 0", "error": True})
 
     if stock_price != server_stock_price:
         logger.warning("User tried to buy the stock at price " + str(stock_price) + " but the server stock price was " +
                        str(server_stock_price))
-        return "Stock price changed, please try again."
+        return json.dumps({"data": "Stock price changed, please try again.", "error": True})
 
     total_cost = quantity * stock_price + config['commission']
     # check that the user has enough cash to buy the stocks requested
     if total_cost > float(current_user.cash):
         logger.warning("User " + str(username) + " tried to buy more stocks than he/she can afford")
         logger.warning("total_cost: " + str(total_cost) + ", user.cash: " + str(current_user.cash))
-        return "Not enough cash"
+        return json.dumps({"data": "Not enough cash", "error": True})
 
     logger.info("User " + str(username) + " passed all validation for buying " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price) +
                 ", totaling a cost of " + str(total_cost))
     # buy the stock
     # return users_db_access.add_stock_to_user(username, symbol, stock_price, quantity)
-    user = stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)
-    user_dict = {'cash': str(user.cash), 'stocks_owned': user.stocks_owned}
-    return json.dumps(user_dict, sort_keys=True)
+    rtn = stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)
+
+    if rtn.get("error"):
+        return json.dumps(rtn)
+    else:
+        user = rtn.get("data")
+        user_dict = {'cash': str(user.cash), 'stocks_owned': user.stocks_owned}
+        return json.dumps({"data": user_dict, "error": False})
 
 
 @app.route("/sellStock", methods=['POST'])

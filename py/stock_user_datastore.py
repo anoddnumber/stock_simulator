@@ -41,12 +41,12 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
 
         try:
             num_stocks_owned_at_price = user['stocks_owned'][symbol][price_per_stock]
-        except KeyError, e:
+        except KeyError:
             num_stocks_owned_at_price = 0
 
         try:
             total_num_stocks_owned = user['stocks_owned'][symbol]['total']
-        except KeyError, e:
+        except KeyError:
             total_num_stocks_owned = 0
 
         self.logger.info(str(username) + " already owns " + str(num_stocks_owned_at_price) + " of " + str(symbol) +
@@ -61,7 +61,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         user.cash = round(float(user['cash']) - total_cost, 2)
 
         user.save()
-        return user
+        return {"data": user, "error": False}
 
     def sell_stocks_from_user(self, username, symbol, quantity, cache):
         """"

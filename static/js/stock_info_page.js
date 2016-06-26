@@ -58,11 +58,23 @@
                     if (quantity) {
                         var symbol = $(".stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
                         if ($('.buyStockRadioButton').is(':checked')) {
-                            ApiClient.buyStock(symbol, quantity, price, function(data) {
-                                data = JSON.parse(data);
+                            ApiClient.buyStock(symbol, quantity, price, function(response) {
+                                response = JSON.parse(response);
+                                data = response["data"];
+                                error = response["error"];
 
-                                $('.stockInfoPageAmountOwned').text(data.stocks_owned[symbol].total);
-                                $('.stockInfoPageTotalCash').text(data.cash);
+                                if ( ! error) {
+                                    if (data.stocks_owned[symbol]) {
+                                        $('.stockInfoPageAmountOwned').text(data.stocks_owned[symbol].total);
+                                    } else {
+                                        $('.stockInfoPageAmountOwned').text("0");
+                                    }
+
+                                    $('.stockInfoPageTotalCash').text(data.cash);
+                                } else {
+                                    console.log("error buying stock");
+                                    //TODO show error
+                                }
 
                                 stockInfoPage.init();
                             });

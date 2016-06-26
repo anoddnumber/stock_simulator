@@ -67,18 +67,25 @@
                                 stockInfoPage.init();
                             });
                         } else if ($('.sellStockRadioButton').is(':checked')) {
-                            ApiClient.sellStock(symbol, quantity, price, function(data) {
-                                data = JSON.parse(data);
+                            ApiClient.sellStock(symbol, quantity, price, function(response) {
+                                response = JSON.parse(response);
+                                data = response["data"];
+                                error = response["error"];
 
-                                if (data.stocks_owned[symbol]) {
-                                    $('.stockInfoPageAmountOwned').text(data.stocks_owned[symbol].total);
+                                if ( ! error) {
+                                    if (data.stocks_owned[symbol]) {
+                                        $('.stockInfoPageAmountOwned').text(data.stocks_owned[symbol].total);
+                                    } else {
+                                        $('.stockInfoPageAmountOwned').text("0");
+                                    }
+
+                                    $('.stockInfoPageTotalCash').text(data.cash);
+
+                                    stockInfoPage.init();
                                 } else {
-                                    $('.stockInfoPageAmountOwned').text("0");
+                                    console.log("error selling stock");
+                                    //TODO show error
                                 }
-
-                                $('.stockInfoPageTotalCash').text(data.cash);
-
-                                stockInfoPage.init();
                             });
                         } else {
                             console.log("nothing happened");

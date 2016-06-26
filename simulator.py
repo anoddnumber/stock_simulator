@@ -395,40 +395,44 @@ def sell_stock():
         stock_price = float(request.form['stockPrice'])
     except ValueError:
         logger.warning("User trying to sell stock but there was an error trying to read the arguments")
-        return "Error reading arguments"
+        return json.dumps({"data": "Error reading arguments", "error": True})
     
     if symbol is None or quantity is None or stock_price is None:
         logger.warning("Missing argument when selling stock:\n" +
                        "symbol: " + str(symbol) + ", " +
                        "quantity: " + str(quantity) + ", " +
                        "stock_price: " + str(stock_price))
-        return 'Missing at least one argument: symbol, quantity, stockPrice required. No optional arguments.'
+        return json.dumps({"data": "Missing at least one argument: symbol, quantity, stockPrice required."
+                        " No optional arguments.", "error": True})
 
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
         logger.warning("User tried to sell stock with symbol " + str(symbol) + " but is not in the stocks map")
-        return "Invalid symbol"
+        return json.dumps({"data": "Invalid symbol", "error": True})
     server_stock_price = float(symbol_map.get("price"))
 
     if stock_price < 0 or quantity < 0:
         logger.warning("User with username " + str(username) +
                        " tried to sell a negative amount of stock or for a negative price")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return "Stock price or quantity less than 0"
+        return json.dumps({"data": "Stock price or quantity less than 0", "error": True})
 
     if stock_price != server_stock_price:
         logger.warning("User tried to sell the stock at price " + str(stock_price) +
                        " but the server stock price was " + str(server_stock_price))
-        return "Stock price changed, please try again."
+        return json.dumps({"data": "Stock price changed, please try again.", "error": True})
 
     logger.info("User with username " + str(username) + " passed all validations for selling " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price))
     # sell the stock
-    user = stock_user_datastore.sell_stocks_from_user(username, symbol, quantity, cache)
-    print "user: " + str(user)
-    user_dict = {'cash': str(user.cash), 'stocks_owned': user.stocks_owned}
-    return json.dumps(user_dict, sort_keys=True)
+    rtn = stock_user_datastore.sell_stocks_from_user(username, symbol, quantity, cache)
+    if rtn.get("error"):
+        return json.dumps(rtn)
+    else:
+        user = rtn.get("data")
+        user_dict = {'cash': str(user.cash), 'stocks_owned': user.stocks_owned}
+        return json.dumps({"data": user_dict, "error": False})
 
 
 @app.route("/getUserInfo", methods=['GET'])

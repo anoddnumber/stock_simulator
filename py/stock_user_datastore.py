@@ -31,8 +31,6 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
                          "Quantity: " + str(quantity))
 
         user = self.find_user(username=username)
-        print "user" + str(type(user))
-        # user_dict = self.collection.find_one({"username": username})
         total_cost = price_per_stock * quantity + config['commission']
 
         # format the price_per_stock to always have exactly 2 digits after the decimal
@@ -72,7 +70,6 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         """
         # user_dict = self.collection.find_one({"username": username})
         user = self.find_user(username=username)
-        print "user: " + str(user)
         self.logger.info("Selling stocks from user with username " + str(username))
         self.logger.info("Symbol: " + str(symbol) + "\n" +
                          "Quantity: " + str(quantity))
@@ -82,7 +79,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
             user_stock_symbol_info = user['stocks_owned'][symbol]
         except KeyError, e:
             self.logger.exception("User " + str(username) + " does not own stock with symbol " + str(symbol))
-            return "User does not own stock"
+            return {"data": "User does not own stock", "error": True}
 
         user_stock_symbol_info.pop('total', None)  # remove the total and add it back at the end
         # TODO: use the total quantity field
@@ -93,7 +90,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         if num_stocks_owned < quantity:
             self.logger.warning("User " + str(username) + " does not own enough of " + str(symbol) + "." +
                                 " Trying to sell " + str(quantity) + " but only owns " + str(num_stocks_owned) + ".")
-            return "User does not own enough stock"
+            return {"data": "User does not own enough stock", "error": True}
 
         quantity_left = quantity
         keys_to_remove = []
@@ -113,9 +110,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
 
         # remove the stock entry from the stocks_owned if the user has sold all stocks of that symbol
         if not user_stock_symbol_info:
-            print "pop"
             user.stocks_owned.pop(symbol, None)
-            print "user pop: " + str(user)
         else:
             # otherwise update the total field
             user['stocks_owned'][symbol]['total'] = num_stocks_owned - quantity
@@ -126,4 +121,4 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         self.logger.info("Updating the database for a sell transaction for username " + username)
         self.logger.info("Stock(s) sold successfully")
 
-        return user
+        return {"data": user, "error": False}

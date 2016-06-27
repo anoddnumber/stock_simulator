@@ -151,8 +151,10 @@
             setupRows : function() {
                 $('#profile_table tbody tr').each(function (i, row) {
                     var symbol = $(row).find('.symbol').text();
-                    $(row).attr("href", "/stock/" + symbol);
-                    ChangePageHelper.attachChangePageAction($(row), StockInfoPage);
+                    if (symbol && symbol != "") {
+                        $(row).attr("href", "/stock/" + symbol);
+                        ChangePageHelper.attachChangePageAction($(row), StockInfoPage);
+                    }
                 });
             },
          }

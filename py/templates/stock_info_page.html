@@ -35,7 +35,13 @@
                             <span class="stockPercentChange">({{daily_percent_change|e}})</span><br>
                         </div>
                         <!--Insert Graph-->
-                        <div id="stockGraph">{% include 'loaders/spinner.html' %}</div>
+                        <div id="stockGraph">
+                            {% if chartData == "undefined" %}
+                                <div id="stockGraphError">No graph data available</div>
+                            {% else %}
+                                {% include 'loaders/spinner.html' %}
+                            {% endif %}
+                        </div>
                         <div class="col-xs-4 column3">
                             Open: <span class="stockInfoPageDayOpen">{{day_open|e}}</span><br>
                             High: <span class="stockInfoPageDayHigh">{{day_high|e}}</span><br>

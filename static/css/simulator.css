@@ -176,6 +176,13 @@ table.dataTable thead .sorting_desc{
     width: 100%;
 }
 
+#stockGraphError {
+    top: 50%;
+    transform: translateY(-50%);
+    position: relative;
+    text-align: center;
+}
+
 .column3 {
     padding: 0px;
 }

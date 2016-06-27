@@ -116,6 +116,10 @@
             },
 
             createStockChart : function() {
+                if ( ! chartData) {
+                    return;
+                }
+
                 var chart = new AmCharts.AmStockChart();
 
                 // DATASETS //////////////////////////////////////////

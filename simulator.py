@@ -178,15 +178,19 @@ def stock_info_page(symbol):
     if stock_info and user_dict:
 
         # TODO: make sure the file exists
-        with open('data/' + str(symbol) + '.csv') as csvfile:
-            csvReader = csv.reader(csvfile, delimiter=',')
+        path = 'data/' + str(symbol) + '.csv'
+        if os.path.isfile(path):
+            with open('data/' + str(symbol) + '.csv') as csv_file:
+                csv_reader = csv.reader(csv_file, delimiter=',')
 
-            info = []
-            for i, row in enumerate(csvReader):
-                if i == 0:
-                    continue
-                info.append({"date": row[0], "value": row[6]})
-            info.reverse()
+                info = []
+                for i, row in enumerate(csv_reader):
+                    if i == 0:
+                        continue
+                    info.append({"date": row[0], "value": row[6]})
+                info.reverse()
+        else:
+            info = 'undefined'
 
         template = env.get_template('stock_info_page.html')
         return template.render(username=current_user.username, name=name, symbol=symbol, price=price, day_low=day_low,

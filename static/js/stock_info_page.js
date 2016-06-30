@@ -260,4 +260,5 @@ function updateTotalPrice() {
 }
 
 $( document ).ready(function() {
+    StockInfoPage.init();
 });

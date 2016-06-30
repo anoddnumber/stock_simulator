@@ -133,8 +133,8 @@
         });
         return false
       });
-      
-      
+
+
     });
   }
   
@@ -218,7 +218,6 @@ $( document ).ready(function() {
             }).done(function(data) {
                 var simulator = $(data).find("#stock_simulator");
                 $(target).html(simulator);
-                initPage();
             });
             return false;
     });

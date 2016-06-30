@@ -155,7 +155,7 @@
                     var symbol = $(row).find('.symbol').text();
                     if (symbol && symbol != "") {
                         $(row).attr("href", "/stock/" + symbol);
-                        ChangePageHelper.attachChangePageAction($(row), StockInfoPage);
+                        ChangePageHelper.attachChangePageAction($(row));
                     }
                 });
             },
@@ -172,3 +172,8 @@
 })(jQuery);
 
 var BrowseTab = $.BrowseTab();
+
+$( document ).ready(function() {
+    BrowseTab.init();
+    $('#loadingbar-frame').show();
+});

@@ -2,7 +2,7 @@
     $.ChangePageHelper = function(options) {
 
         var changePageHelper = {
-            attachChangePageAction : function (selector, page) {
+            attachChangePageAction : function (selector) {
                 selector.unbind("click");
                 selector.loadingbar({
                     target: "#loadingbar-frame",
@@ -21,9 +21,7 @@
                     dataType: "html",
                     done: function(data) {
                         var simulator = $(data).find("#stock_simulator");
-
-                        $(this.target).html(simulator.get(0));
-                        page.init();
+                        $(this.target).html(simulator);
                     }
                 });
             }
@@ -38,6 +36,6 @@
 var ChangePageHelper = $.ChangePageHelper();
 
 $( document ).ready(function() {
-    ChangePageHelper.attachChangePageAction($(".stocksTabLink"), BrowseTab);
-    ChangePageHelper.attachChangePageAction($(".profileTabLink"), ProfileTab);
+    ChangePageHelper.attachChangePageAction($(".stocksTabLink"));
+    ChangePageHelper.attachChangePageAction($(".profileTabLink"));
 });

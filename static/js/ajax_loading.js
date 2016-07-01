@@ -36,6 +36,6 @@
 var ChangePageHelper = $.ChangePageHelper();
 
 $( document ).ready(function() {
-    ChangePageHelper.attachChangePageAction($(".stocksTabLink"));
-    ChangePageHelper.attachChangePageAction($(".profileTabLink"));
+    ChangePageHelper.attachChangePageAction($(".stocksPageLink"));
+    ChangePageHelper.attachChangePageAction($(".profilePageLink"));
 });

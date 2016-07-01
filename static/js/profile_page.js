@@ -1,14 +1,14 @@
 (function($) {
-    $.ProfileTab = function(options) {
+    $.ProfilePage = function(options) {
         var table;
         var totalEquities;
 
-        var profileTab = {
+        var profilePage = {
             options : $.extend({
             }, options),
 
             updatePage : function() {
-                profileTab.createTable();
+                profilePage.createTable();
             },
 
             //TODO probably a better way to do this with DataTables
@@ -40,7 +40,7 @@
 
                 table.clear();
 
-                var rows = profileTab.buildTable();
+                var rows = profilePage.buildTable();
                 table.rows.add(rows);
                 table.draw(true);
             },
@@ -98,7 +98,7 @@
                 var keys = Object.keys(userInfo.stocks_owned);
                 for (var i = 0; i < keys.length; i++) {
                     var symbol = keys[i];
-                    var row = profileTab.getRow(symbol);
+                    var row = profilePage.getRow(symbol);
                     if (row) {
                         rows.push(row);
                     }
@@ -111,7 +111,7 @@
                 table = undefined;
                 totalEquities = 0;
 
-                profileTab.updatePage();
+                profilePage.updatePage();
 
                 var page = Math.floor(Utility.getUrlParameter("page")) - 1;
                 if (isNaN(page) || page < 0) {
@@ -119,7 +119,7 @@
                 }
                 table.page(page).draw("page");
 
-                profileTab.setupRows();
+                profilePage.setupRows();
 
                 $('#navbarTabs li').removeClass('active');
                 $('#profileTab').addClass('active');
@@ -139,7 +139,7 @@
                 // this should come after table.page(page).draw("page"); or else the rows will be set up twice
                 // and the next page will be pushed onto the browser's history twice.
                 $('#profile_table').on( 'draw.dt', function () {
-                    profileTab.setupRows();
+                    profilePage.setupRows();
                 });
             },
 
@@ -160,19 +160,19 @@
          }
 
          return {
-            updatePage : profileTab.updatePage,
-            getTable : profileTab.getTable,
-            init : profileTab.init,
-            onPageLoad : profileTab.onPageLoad,
+            updatePage : profilePage.updatePage,
+            getTable : profilePage.getTable,
+            init : profilePage.init,
+            onPageLoad : profilePage.onPageLoad,
         };
     }
 })(jQuery);
 
-var ProfileTab = $.ProfileTab();
+var ProfilePage = $.ProfilePage();
 
 
 $( document ).ready(function() {
-    ProfileTab.init();
+    ProfilePage.init();
     $('#loadingbar-frame').show();
 });
 

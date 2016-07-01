@@ -15,10 +15,10 @@
         <ul id="navbarTabs" class="nav navbar-nav" role="tablist">
 
             <li id="profileTab" {% if activeTab is not defined or activeTab=="profile" %} class="active" {% endif %}>
-                <a href="/" class="profileTabLink">Profile</a>
+                <a href="/" class="profilePageLink">Profile</a>
             </li>
             <li id="stocksTab" {% if activeTab=="stocks" %} class="active" {% endif %}>
-                <a href="/stocks" class="stocksTabLink">Stocks</a>
+                <a href="/stocks" class="stocksPageLink">Stocks</a>
             </li>
             <li {% if activeTab=="watching" %} class="active" {% endif %}>
                 <a href="#watching" aria-controls="watching" role="tab" data-toggle="tab">Watching</a>

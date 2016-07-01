@@ -154,7 +154,7 @@ var config = {
                             onSuccess();
                         }
 
-                        BrowseTab.updatePage();
+                        StocksPage.updatePage();
                     },
                     error : function() {
                         console.log("error, did not get the stock symbols map");

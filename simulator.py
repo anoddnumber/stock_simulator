@@ -219,9 +219,9 @@ def security_global_context_processor():
     return dict(get_form_error=get_form_error)
 
 
-@app.route("/site-map")
-def site_map():
-    return str(list_routes())
+# @app.route("/site-map")
+# def site_map():
+#     return str(list_routes())
 
 
 def list_routes():

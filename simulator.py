@@ -125,11 +125,6 @@ def root():
                            stockSymbolsMap=json.dumps(cache.json), activeTab='profile')
 
 
-@app.route("/test")
-def test():
-    template = env.get_template('test.html')
-    return template.render()
-
 @app.route("/stock/<symbol>", methods=['GET'])
 @login_required
 def stock_info_page(symbol):

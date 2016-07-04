@@ -34,6 +34,8 @@
                             "min" : 0,
                             "max" : Math.floor(cash / price),
                         });
+
+                        $('.stockInfoPageStocksConfirmButton').attr("href", "/buyStock");
                     } else if ($('.sellStockRadioButton').is(':checked')) {
                         // clicked the sell radio button
 
@@ -42,6 +44,7 @@
                             "max" : numOwned,
                         });
 
+                        $('.stockInfoPageStocksConfirmButton').attr("href", "/sellStock");
                     }
                 });
             },
@@ -55,58 +58,25 @@
 
                     var price = $('.stockInfoPageStockPrice').text().trim();
 
-                    if (quantity) {
-                        var symbol = $(".stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
-                        if ($('.buyStockRadioButton').is(':checked')) {
-                            ApiClient.buyStock(symbol, quantity, price, function(response) {
-                                response = JSON.parse(response);
-                                data = response["data"];
-                                error = response["error"];
+                    var symbol = $(".stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
+                    target = "#loadingbar-frame";
+                    data = {
+                        'symbol': symbol,
+                        'quantity': quantity,
+                        'price': price
+                    };
+                    settings = {
+                        'direction': 'right',
+                        'replaceURL': false
+                    };
 
-                                if ( ! error) {
-                                    if (data.stocks_owned[symbol]) {
-                                        $('.stockInfoPageAmountOwned').text(data.stocks_owned[symbol].total);
-                                    } else {
-                                        $('.stockInfoPageAmountOwned').text("0");
-                                    }
-
-                                    $('.stockInfoPageTotalCash').text(data.cash);
-                                } else {
-                                    console.log("error buying stock");
-                                    //TODO show error
-                                }
-
-                                stockInfoPage.init();
-                            });
-                        } else if ($('.sellStockRadioButton').is(':checked')) {
-                            ApiClient.sellStock(symbol, quantity, price, function(response) {
-                                response = JSON.parse(response);
-                                data = response["data"];
-                                error = response["error"];
-
-                                if ( ! error) {
-                                    if (data.stocks_owned[symbol]) {
-                                        $('.stockInfoPageAmountOwned').text(data.stocks_owned[symbol].total);
-                                    } else {
-                                        $('.stockInfoPageAmountOwned').text("0");
-                                    }
-
-                                    $('.stockInfoPageTotalCash').text(data.cash);
-
-                                    stockInfoPage.init();
-                                } else {
-                                    console.log("error selling stock");
-                                    //TODO show error
-                                }
-                            });
-                        } else {
-                            console.log("nothing happened");
-                            //TODO show error
-                        }
-                    } else {
-                        //TODO show error
+                    if ($('.buyStockRadioButton').is(':checked')) {
+                        href = "/buyStock";
+                        doAjaxPost(href, target, data, settings);
+                    } else if ($('.sellStockRadioButton').is(':checked')) {
+                        href = "/sellStock";
+                        doAjaxPost(href, target, data, settings);
                     }
-
                 });
 
                 $("#backButton").unbind("click");

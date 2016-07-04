@@ -197,6 +197,13 @@ def stock_info_page(symbol):
         return "Requested stock does not exist in our database"
 
 
+@app.route("/confirmation", methods=['GET'])
+@login_required
+def confirmation_page():
+    template = env.get_template('confirmation_page.html')
+    return template.render(error='', message='You have successfully bought n number of shares of symbol')
+
+
 @app.route("/stocks", methods=['GET'])
 @login_required
 def stocks():
@@ -330,6 +337,9 @@ def post_register():
 def buy_stock():
     username = current_user.username
 
+    template = env.get_template('confirmation_page.html')
+    active_tab = 'stocks'
+
     try:
         symbol = request.form['symbol']
         quantity = int(request.form['quantity'])
@@ -337,21 +347,25 @@ def buy_stock():
 
     except ValueError:
         logger.warning("User trying to buy stock but there was an error trying to read the arguments")
-        return json.dumps({"data": "Error reading arguments", "error": True})
-    
+        return template.render(error='An unexpected error has occurred. Please try buying the stocks again.',
+                               activeTab=active_tab)
+
     if symbol is None or quantity is None or stock_price is None:
         logger.warning("Missing argument when buying stock:\n" +
                        "symbol: " + str(symbol) + ", " +
                        "quantity: " + str(quantity) + ", " +
                        "stock_price: " + str(stock_price))
-        return json.dumps({"data": "Missing at least one argument: symbol, quantity, stockPrice required. No optional arguments.", "error": True})
+        return template.render(error='An unexpected error has occurred. Please try buying the stocks again.',
+                               activeTab=active_tab)
 
     # check if the price that the user wants to buy the stock for is the same as the server's stock price
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
         logger.warning("User tried to buy stock with symbol " + str(symbol) + " but is not in the stocks map")
-        return json.dumps({"data": "Invalid symbol", "error": True})
+        return template.render(error='The stock you are trying to buy does not exist in our database.',
+                               activeTab=active_tab)
+
     server_stock_price = float(symbol_map.get("price"))
 
     # check if the passed in stock price and quantity are positive
@@ -359,19 +373,22 @@ def buy_stock():
         logger.warning("The stock price is either less than or equal to 0 or the user tried to zero or "
                        "fewer amount of stock")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return json.dumps({"data": "Stock price or quantity less than 0", "error": True})
+        return template.render(error='An unexpected error has occurred. Please try buying the stocks again.',
+                               activeTab=active_tab)
 
     if stock_price != server_stock_price:
         logger.warning("User tried to buy the stock at price " + str(stock_price) + " but the server stock price was " +
                        str(server_stock_price))
-        return json.dumps({"data": "Stock price changed, please try again.", "error": True})
+        return template.render(error='The stock price has changed, please try buying the stocks again.',
+                               activeTab=active_tab)
 
     total_cost = quantity * stock_price + config['commission']
     # check that the user has enough cash to buy the stocks requested
     if total_cost > float(current_user.cash):
         logger.warning("User " + str(username) + " tried to buy more stocks than he/she can afford")
         logger.warning("total_cost: " + str(total_cost) + ", user.cash: " + str(current_user.cash))
-        return json.dumps({"data": "Not enough cash", "error": True})
+        return template.render(error='You don\'t have enough cash to buy the stocks. Please try again.',
+                               activeTab=active_tab)
 
     logger.info("User " + str(username) + " passed all validation for buying " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price) +
@@ -381,17 +398,18 @@ def buy_stock():
     rtn = stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)
 
     if rtn.get("error"):
-        return json.dumps(rtn)
+        return template.render(error=rtn.get("error"), activeTab=active_tab)
     else:
-        user = rtn.get("data")
-        user_dict = {'cash': str(user.cash), 'stocks_owned': user.stocks_owned}
-        return json.dumps({"data": user_dict, "error": False})
+        # TODO: be more descriptive (say the price of the stock and total cost)
+        return template.render(message='You have successfully bought ' + str(quantity) + ' share(s) of ' + str(symbol))
 
 
 @app.route("/sellStock", methods=['POST'])
 @login_required
 def sell_stock():
     username = current_user.username
+    template = env.get_template('confirmation_page.html')
+    active_tab = 'stocks'
 
     try:
         symbol = request.form['symbol']
@@ -399,44 +417,48 @@ def sell_stock():
         stock_price = float(request.form['stockPrice'])
     except ValueError:
         logger.warning("User trying to sell stock but there was an error trying to read the arguments")
-        return json.dumps({"data": "Error reading arguments", "error": True})
+        return template.render(error='An unexpected error has occurred. Please try selling the stocks again.',
+                               activeTab=active_tab)
     
     if symbol is None or quantity is None or stock_price is None:
         logger.warning("Missing argument when selling stock:\n" +
                        "symbol: " + str(symbol) + ", " +
                        "quantity: " + str(quantity) + ", " +
                        "stock_price: " + str(stock_price))
-        return json.dumps({"data": "Missing at least one argument: symbol, quantity, stockPrice required."
-                        " No optional arguments.", "error": True})
+        return template.render(error='An unexpected error has occurred. Please try selling the stocks again.',
+                               activeTab=active_tab)
 
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
         logger.warning("User tried to sell stock with symbol " + str(symbol) + " but is not in the stocks map")
-        return json.dumps({"data": "Invalid symbol", "error": True})
+        return template.render(error='The stock you are trying to sell does not exist in our database.',
+                               activeTab=active_tab)
     server_stock_price = float(symbol_map.get("price"))
 
-    if stock_price < 0 or quantity < 0:
+    if stock_price < 0 or quantity <= 0:
         logger.warning("User with username " + str(username) +
                        " tried to sell a negative amount of stock or for a negative price")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return json.dumps({"data": "Stock price or quantity less than 0", "error": True})
+        return template.render(error='An unexpected error has occurred. Please try selling the stocks again.',
+                               activeTab=active_tab)
 
     if stock_price != server_stock_price:
         logger.warning("User tried to sell the stock at price " + str(stock_price) +
                        " but the server stock price was " + str(server_stock_price))
-        return json.dumps({"data": "Stock price changed, please try again.", "error": True})
+        return template.render(error='The stock price has changed, please try selling the stocks again.',
+                               activeTab=active_tab)
 
     logger.info("User with username " + str(username) + " passed all validations for selling " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price))
     # sell the stock
     rtn = stock_user_datastore.sell_stocks_from_user(username, symbol, quantity, cache)
     if rtn.get("error"):
-        return json.dumps(rtn)
+        return template.render(error=rtn.get("error"), activeTab=active_tab)
     else:
-        user = rtn.get("data")
-        user_dict = {'cash': str(user.cash), 'stocks_owned': user.stocks_owned}
-        return json.dumps({"data": user_dict, "error": False})
+        # TODO: be more descriptive
+        return template.render(message='You have successfully sold ' + str(quantity) +
+                                       ' share(s) of ' + str(symbol) + '.')
 
 
 @app.route("/getUserInfo", methods=['GET'])
@@ -469,7 +491,7 @@ def init_cache(cache_path=None):
     cache = Cache(cache_path)
             
 if __name__ == "__main__":
-    app.debug = False
+    app.debug = True
     toolbar = DebugToolbarExtension(app)
 
     init_cache()

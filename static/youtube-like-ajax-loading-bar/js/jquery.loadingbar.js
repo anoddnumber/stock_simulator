@@ -144,16 +144,11 @@
 
 
 function doAjaxPost(href, target, data, settings) {
-    console.log("settings: " + JSON.stringify(settings));
-    console.log("settings.direction: " + settings.direction);
     $.ajax({
         type: "POST",
         url: href,
         async: true,
-        data: {'symbol' : "AMZN",
-            'quantity' : 2,
-            'stockPrice' : 3
-        },
+        data: data,
         beforeSend: function() {
             if ($("#loadingbar").length === 0) {
                 $("body").append("<div id='loadingbar'></div>")
@@ -187,7 +182,6 @@ function doAjaxPost(href, target, data, settings) {
     }).always(function() {
         switch (settings.direction) {
             case 'right':
-                console.log("right")
                 $("#loadingbar").width("101%").delay(200).fadeOut(400, function() {
                     $(this).remove();
                 });

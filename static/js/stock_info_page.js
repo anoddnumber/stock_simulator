@@ -34,8 +34,6 @@
                             "min" : 0,
                             "max" : Math.floor(cash / price),
                         });
-
-                        $('.stockInfoPageStocksConfirmButton').attr("href", "/buyStock");
                     } else if ($('.sellStockRadioButton').is(':checked')) {
                         // clicked the sell radio button
 
@@ -43,8 +41,6 @@
                             "min" : 0,
                             "max" : numOwned,
                         });
-
-                        $('.stockInfoPageStocksConfirmButton').attr("href", "/sellStock");
                     }
                 });
             },
@@ -53,17 +49,15 @@
                 $(".stockInfoPageStocksConfirmButton").unbind("click");
 
                 $('.stockInfoPageStocksConfirmButton').click(function() {
-                    var value = $('.stockInfoPage input[name=amountInput]').val().trim();
-                    var quantity = Utility.isPositiveInteger(value);
-
+                    var quantity = $('.stockInfoPage input[name=amountInput]').val().trim();
                     var price = $('.stockInfoPageStockPrice').text().trim();
-
                     var symbol = $(".stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
+
                     target = "#loadingbar-frame";
                     data = {
                         'symbol': symbol,
                         'quantity': quantity,
-                        'price': price
+                        'stockPrice': price
                     };
                     settings = {
                         'direction': 'right',

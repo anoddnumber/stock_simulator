@@ -7,7 +7,7 @@
         <div class="confirmationPage">
             <button id="backButton" type="button">Back</button>
             {% if error is defined and error != '' %}
-                <div id="confirmationError">Error is defined {{error}}</div>
+                <div id="confirmationError">{{error}}</div>
             {% else %}
                 <div id="confirmationMessage">{{message}}</div>
             {% endif %}

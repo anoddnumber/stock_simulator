@@ -368,17 +368,20 @@ def buy_stock():
 
     server_stock_price = float(symbol_map.get("price"))
 
+    if quantity <= 0:
+        logger.info("The user tried to buy 0 or fewer stocks of " + str(symbol))
+        return template.render(error='Please buy 1 or more number of stocks.', activeTab=active_tab)
+
     # check if the passed in stock price and quantity are positive
-    if stock_price <= 0 or quantity <= 0:
-        logger.warning("The stock price is either less than or equal to 0 or the user tried to zero or "
-                       "fewer amount of stock")
+    if stock_price <= 0:
+        logger.warning("The stock price the client entered is less than or equal to 0")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
         return template.render(error='An unexpected error has occurred. Please try buying the stocks again.',
                                activeTab=active_tab)
 
     if stock_price != server_stock_price:
-        logger.warning("User tried to buy the stock at price " + str(stock_price) + " but the server stock price was " +
-                       str(server_stock_price))
+        logger.warning("User tried to buy the stock " + str(symbol) + " at price " + str(stock_price) +
+                       " but the server stock price was " + str(server_stock_price))
         return template.render(error='The stock price has changed, please try buying the stocks again.',
                                activeTab=active_tab)
 
@@ -393,6 +396,7 @@ def buy_stock():
     logger.info("User " + str(username) + " passed all validation for buying " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price) +
                 ", totaling a cost of " + str(total_cost))
+
     # buy the stock
     # return users_db_access.add_stock_to_user(username, symbol, stock_price, quantity)
     rtn = stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)

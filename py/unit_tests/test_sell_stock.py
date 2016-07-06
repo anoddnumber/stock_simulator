@@ -1,4 +1,5 @@
 import unittest
+import json
 from base_unit_test import BaseUnitTest
 import simulator
 from stock_simulator_test_client import StockSimulatorTestClient
@@ -29,11 +30,14 @@ class TestSellStock(BaseUnitTest):
                                "total": quantity - 1}},
                               float(starting_cash) - (int(quantity) - 1) * float(price) - simulator.config['commission']
                               )
+        response = json.loads(rv.data)
+        assert not response.get("error")
 
         rv = self.client.sell_stock(symbol, 1, price)
 
+        response = json.loads(rv.data)
+        assert not response.get("error")
         self.assert_user_info({}, starting_cash - simulator.config['commission'])
-        # assert "Success" in rv.data TODO: add new assert here
 
     def test_sell_without_account(self):
         print "test_sell_without_account"
@@ -65,7 +69,7 @@ class TestSellStock(BaseUnitTest):
         # does not own any of that stock
         rv = self.client.sell_stock(symbol, 1, price)
 
-        # assert "User does not own stock" in rv.data TODO: add new assert here
+        assert "User does not own stock" in rv.data
         self.assert_user_info({}, starting_cash)
 
         # buy 1 stock and try to sell 2
@@ -78,7 +82,7 @@ class TestSellStock(BaseUnitTest):
 
         rv = self.client.sell_stock(symbol, 2, price)
 
-        # assert "User does not own enough stock" in rv.data TODO: add new assert here
+        assert "User does not own enough stock" in rv.data
         # make sure nothing changed in the db
         self.assert_user_info({symbol: {price.replace(".", "_"): quantity_bought,
                                         "total": quantity_bought}},

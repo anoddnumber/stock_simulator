@@ -41,7 +41,6 @@
                             "min" : 0,
                             "max" : numOwned,
                         });
-
                     }
                 });
             },
@@ -50,52 +49,41 @@
                 $(".stockInfoPageStocksConfirmButton").unbind("click");
 
                 $('.stockInfoPageStocksConfirmButton').click(function() {
-                    var value = $('.stockInfoPage input[name=amountInput]').val().trim();
-                    var quantity = Utility.isPositiveInteger(value);
-
+                    var quantity = $('.stockInfoPage input[name=amountInput]').val().trim();
                     var price = $('.stockInfoPageStockPrice').text().trim();
+                    var symbol = $(".stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
 
-                    if (quantity) {
-                        var symbol = $(".stockInfoPageStockSymbolName").html().replace("(","").replace(")","");
-                        if ($('.buyStockRadioButton').is(':checked')) {
-                            ApiClient.buyStock(symbol, quantity, price, function(data) {
-                                data = JSON.parse(data);
+                    target = "#loadingbar-frame";
+                    data = {
+                        'symbol': symbol,
+                        'quantity': quantity,
+                        'stockPrice': price
+                    };
+                    settings = {
+                        'direction': 'right',
+                        'replaceURL': false
+                    };
 
-                                $('.stockInfoPageAmountOwned').text(data.stocks_owned[symbol].total);
-                                $('.stockInfoPageTotalCash').text(data.cash);
-
-                                stockInfoPage.init();
-                            });
-                        } else if ($('.sellStockRadioButton').is(':checked')) {
-                            ApiClient.sellStock(symbol, quantity, price, function(data) {
-                                data = JSON.parse(data);
-
-                                if (data.stocks_owned[symbol]) {
-                                    $('.stockInfoPageAmountOwned').text(data.stocks_owned[symbol].total);
-                                } else {
-                                    $('.stockInfoPageAmountOwned').text("0");
-                                }
-
-                                $('.stockInfoPageTotalCash').text(data.cash);
-
-                                stockInfoPage.init();
-                            });
-                        } else {
-                            console.log("nothing happened");
-                            //TODO show error
-                        }
-                    } else {
-                        //TODO show error
+                    if ($('.buyStockRadioButton').is(':checked')) {
+                        href = "/buyStock";
+                        doAjaxPost(href, target, data, settings);
+                    } else if ($('.sellStockRadioButton').is(':checked')) {
+                        href = "/sellStock";
+                        doAjaxPost(href, target, data, settings);
                     }
-
                 });
 
+                $("#backButton").unbind("click");
                 $('#backButton').click(function() {
                     history.back();
                 })
             },
 
             createStockChart : function() {
+                if ( ! chartData) {
+                    return;
+                }
+
                 var chart = new AmCharts.AmStockChart();
 
                 // DATASETS //////////////////////////////////////////
@@ -179,13 +167,18 @@
                     label: "MAX"
                 }];
                 chart.periodSelector = periodSelector;
+                chart.dataDateFormat = "YYYY-MM-DD";
 
                 chart.write('stockGraph');
 
                 var lastDate = chartData[chartData.length - 1]["date"];
                 var end = new Date(lastDate);
-                var start = new Date(lastDate);
-                start.setDate(start.getDate() - 30);
+
+                // Set it to UTC time. The 22 is to have the end of the graph
+                // a little bit to the right of the last point
+                end.setHours(end.getHours() + 22 + end.getTimezoneOffset() / 60);
+                var start = new Date(end);
+                start.setDate(start.getDate() - 31);
                 chart.zoom(start, end);
             },
 
@@ -231,4 +224,5 @@ function updateTotalPrice() {
 }
 
 $( document ).ready(function() {
+    StockInfoPage.init();
 });

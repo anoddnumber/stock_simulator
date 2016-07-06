@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+{% include 'standard_head.html' %}
+
+<div id="loadingbar-frame">
+    <div id="stock_simulator">
+        <script src="/js/confirmation_page.js"></script>
+        <div class="confirmationPage">
+            <button id="backButton" type="button">Back</button>
+            {% if error is defined and error != '' %}
+                <div id="confirmationError">{{error}}</div>
+            {% else %}
+                <div id="confirmationMessage">{{message}}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>s
+
+</html>

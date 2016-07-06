@@ -2,16 +2,16 @@
 * This defines an anonymous function that is executed right away with jQuery as the argument.
 */
 (function($) {
-    $.BrowseTab = function(options) {
+    $.StocksPage = function(options) {
         var buttonSymbols = new Array(); //TODO will be removed later...
         var table;
 
-        var browseTab = {
+        var stocksPage = {
             options : $.extend({
             }, options),
 
             updatePage : function() {
-                browseTab.createTable();
+                stocksPage.createTable();
                 $('.availableCash').text("Available Cash: $" + userInfo.cash);
             },
 
@@ -44,7 +44,7 @@
                 });
                 table.clear();
 
-                var rows = browseTab.buildTable();
+                var rows = stocksPage.buildTable();
                 table.rows.add(rows);
                 table.draw(false);
             },
@@ -53,7 +53,7 @@
                 var buttonId = 'buy' + symbol + 'Button';
                 //add the on click event after inserting the button into the table
                 $( "#stocks_table #" + buttonId ).on( "click", function() {
-                    browseTab.previewBuyStock(symbol);
+                    stocksPage.previewBuyStock(symbol);
                 });
             },
 
@@ -97,7 +97,7 @@
                     if (symbol == "last_updated") {
                         continue;
                     }
-                    var row = browseTab.getRow(symbol);
+                    var row = stocksPage.getRow(symbol);
                     if (row) {
                         rows.push(row);
                     }
@@ -119,7 +119,7 @@
                 $('#navbarTabs li').removeClass('active');
                 $('#stocksTab').addClass('active');
 
-                browseTab.updatePage();
+                stocksPage.updatePage();
 
                 var page = Math.floor(Utility.getUrlParameter("page")) - 1;
                 if (isNaN(page) || page < 0) {
@@ -127,27 +127,18 @@
                 }
                 table.page(page).draw("page");
 
-                browseTab.setupRows();
+                stocksPage.setupRows();
 
                 // https://datatables.net/reference/event/page
+                // This deals with changing pages in the stocks table
                 $('#stocks_table').on('page.dt', function () {
-                    var info = table.page.info();
-
-                    // info.page has a range of [0, info.pages)
-                    var url = document.URL;     // Returns full URL
-                    var newUrl = document.location.origin;
-
-                    if (info.page != 0) {
-                        newUrl = Utility.replaceUrlParam(url, "page", info.page + 1);
-                    }
-
-                    history.pushState( {}, document.title, newUrl);
+                    Utility.modifyPageParam(table);
                 } );
 
 
                 // when changing pages in the table, we have to attach hrefs and the ajax loading plugin to the rows
                 $('#stocks_table').on( 'draw.dt', function () {
-                    browseTab.setupRows();
+                    stocksPage.setupRows();
                 });
 
                 // select the search bar
@@ -162,20 +153,27 @@
             setupRows : function() {
                 $('#stocks_table tbody tr').each(function (i, row) {
                     var symbol = $(row).find('.symbol').text();
-                    $(row).attr("href", "/stock/" + symbol);
-                    ChangePageHelper.attachChangePageAction($(row), StockInfoPage);
+                    if (symbol && symbol != "") {
+                        $(row).attr("href", "/stock/" + symbol);
+                        ChangePageHelper.attachChangePageAction($(row));
+                    }
                 });
             },
         }
 
         return {
-            updatePage : browseTab.updatePage,
-            displaySortedArray : browseTab.displaySortedArray,
-            getTable : browseTab.getTable,
-            init : browseTab.init,
-            onPageLoad : browseTab.onPageLoad
+            updatePage : stocksPage.updatePage,
+            displaySortedArray : stocksPage.displaySortedArray,
+            getTable : stocksPage.getTable,
+            init : stocksPage.init,
+            onPageLoad : stocksPage.onPageLoad
         };
     };
 })(jQuery);
 
-var BrowseTab = $.BrowseTab();
+var StocksPage = $.StocksPage();
+
+$( document ).ready(function() {
+    StocksPage.init();
+    $('#loadingbar-frame').show();
+});

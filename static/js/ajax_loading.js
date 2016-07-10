@@ -2,11 +2,15 @@
     $.ChangePageHelper = function(options) {
 
         var changePageHelper = {
-            attachChangePageAction : function (selector) {
+            attachChangePageAction : function (selector, replaceURL) {
+                if ( ! replaceURL) {
+                    replaceURL = true;
+                }
+
                 selector.unbind("click");
                 selector.loadingbar({
                     target: "#loadingbar-frame",
-                    replaceURL: true,
+                    replaceURL: replaceURL,
                     direction: "right",
 
                     /* Default Ajax Parameters.  */

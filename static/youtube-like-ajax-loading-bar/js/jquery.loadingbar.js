@@ -203,8 +203,13 @@ function doAjaxPost(href, target, data, settings) {
                 break;
       }
     }).done(function(data) {
+        console.log("data: " + data);
         if ( history.replaceState && settings.replaceURL) {
-            history.pushState({}, document.title, href);
+            if (settings.replacementURL) {
+                history.pushState({}, document.title, settings.replacementURL);
+            } else {
+                history.pushState({}, document.title, href);
+            }
         }
         var simulator = $(data).find("#stock_simulator");
         $(target).html(simulator);

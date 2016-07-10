@@ -61,11 +61,12 @@
                     };
                     settings = {
                         'direction': 'right',
-                        'replaceURL': false
+                        'replaceURL': true,
+                        'replacementURL':'/confirmation'
                     };
 
                     if ($('.buyStockRadioButton').is(':checked')) {
-                        href = "/buyStock";
+                        href = "/buy";
                         doAjaxPost(href, target, data, settings);
                     } else if ($('.sellStockRadioButton').is(':checked')) {
                         href = "/sellStock";
@@ -76,7 +77,7 @@
                 $("#backButton").unbind("click");
                 $('#backButton').click(function() {
                     history.back();
-                })
+                });
             },
 
             createStockChart : function() {

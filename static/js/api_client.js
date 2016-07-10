@@ -86,7 +86,7 @@ var config = {
                     price = stockSymbolsMap[symbol].price;
                 }
 
-                $.ajax("/buyStock", {
+                $.ajax("/buy", {
                     method: "POST",
                     data: {'symbol' : symbol,
                            'quantity' : quantity,

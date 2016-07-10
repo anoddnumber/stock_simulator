@@ -59,6 +59,8 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         user.stocks_owned[symbol][price_per_stock] = updated_quantity
         user.stocks_owned[symbol]['total'] = total_num_stocks_owned + quantity
         user.cash = round(float(user['cash']) - total_cost, 2)
+        user.transactions['last_transaction'] = {"type": "buy", "symbol": symbol, "quantity": quantity,
+                                                 "price_per_stock": price_per_stock}
 
         user.save()
         return {"data": user, "error": False}

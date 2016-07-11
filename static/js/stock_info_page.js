@@ -69,7 +69,7 @@
                         href = "/buy";
                         doAjaxPost(href, target, data, settings);
                     } else if ($('.sellStockRadioButton').is(':checked')) {
-                        href = "/sellStock";
+                        href = "/sell";
                         doAjaxPost(href, target, data, settings);
                     }
                 });

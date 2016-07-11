@@ -52,7 +52,7 @@ class StockSimulatorTestClient:
         ), follow_redirects=True)
 
     def sell_stock(self, symbol, quantity, stock_price):
-        return self.client.post('/sellStock', data=dict(
+        return self.client.post('/sell', data=dict(
             symbol=symbol,
             quantity=quantity,
             stockPrice=stock_price,

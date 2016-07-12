@@ -151,6 +151,7 @@ table.dataTable thead .sorting_desc{
 .stockInfoPage {
     padding-left: 28px;
     font-size: 17px;
+    padding-bottom: 28px;
 }
 
 .stockInfoPageBackButton {
@@ -212,6 +213,17 @@ input[type=range] {
     font-size: 18px;
     margin-top: 10px;
     margin-left: 42%;
+}
+
+/* Confirmation Page */
+.confirmationPage {
+    padding-left: 28px;
+}
+
+#confirmationMessage {
+    font-size: 22px;
+    text-align: center;
+    color: #51db4f;
 }
 
 

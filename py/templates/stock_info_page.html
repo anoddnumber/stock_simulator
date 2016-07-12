@@ -42,13 +42,13 @@
                             {% else %}
                                 {% include 'loaders/spinner.html' %}
                             {% endif %}
-                        </div>
-                        <div class="col-xs-4 column3">
+                        </div><br>
+                        <div class="col-xs-5 column3">
                             Open: <span class="stockInfoPageDayOpen">{{day_open|e}}</span><br>
                             High: <span class="stockInfoPageDayHigh">{{day_high|e}}</span><br>
                             Low: <span class="stockInfoPageDayLow">{{day_low|e}}</span><br>
                         </div>
-                        <div class="col-xs-8 column4">
+                        <div class="col-xs-7 column4">
                             Mkt Cap: <span id="marketCap">{{market_cap|e}}</span><br>
                             P/E Ratio: <span id="peRatio">{{pe_ratio|e}}</span><br>
                             Div Yield: <span id="dividendYield">{{div_yield|e}}</span><br>

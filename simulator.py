@@ -329,8 +329,13 @@ def post_register():
 @app.route("/confirmation", methods=['GET'])
 @login_required
 def confirmation():
+    err_arg = request.args.get('err')
+    error = errors.ERROR_CODE_MAP.get(err_arg)
     active_tab = 'stocks'
     template = env.get_template('confirmation_page.html')
+
+    if error:
+        return template.render(error=error, activeTab=active_tab, err_arg=err_arg)
 
     try:
         last_transaction = current_user.transactions['last_transaction']
@@ -346,7 +351,8 @@ def confirmation():
     elif transaction_type == 'buy':
         message = messages.get_buy_success_message(quantity, symbol, price_per_stock)
     else:
-        return template.render(error=errors.UNEXPECTED_ERROR, activeTab=active_tab)
+        return template.render(error=errors.ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab, err_arg=errors.UNEXP)
+
     return template.render(message=message, activeTab=active_tab)
 
 
@@ -393,7 +399,7 @@ def buy_stock():
 
     if quantity <= 0:
         logger.info("The user tried to buy 0 or fewer stocks of " + str(symbol))
-        return template.render(error=errors.BUY_LESS_THAN_ONE, activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.BLESS))
 
     # check if the passed in stock price and quantity are positive
     if stock_price <= 0:

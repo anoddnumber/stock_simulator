@@ -10,6 +10,10 @@
                 $('#backButton').click(function() {
                     history.back();
                 });
+
+                var errArg = $('#err-arg').data('err-arg');
+                var a = Utility.replaceUrlParam("err", errArg);
+                history.replaceState({}, document.title, a);
             }
          }
 

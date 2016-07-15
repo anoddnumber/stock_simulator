@@ -92,7 +92,11 @@ var stockSymbolsMap;
                 return (newNum - oldNum)/oldNum * 100;
             },
 
-            replaceUrlParam : function(url, paramName, paramValue) {
+            replaceUrlParam(paramName, paramValue) {
+                return utility.replaceUrlParamHelper(document.URL, paramName, paramValue);
+            },
+
+            replaceUrlParamHelper : function(url, paramName, paramValue) {
                 var pattern = new RegExp('\\b('+paramName+'=).*?(&|$)')
                 if(url.search(pattern)>=0){
                     return url.replace(pattern,'$1' + paramValue + '$2');
@@ -124,7 +128,7 @@ var stockSymbolsMap;
                 var newUrl = window.location.href.split('?')[0];
 
                 if (info.page != 0) {
-                    newUrl = Utility.replaceUrlParam(url, "page", info.page + 1);
+                    newUrl = utility.replaceUrlParam("page", info.page + 1);
                 }
 
                 history.pushState( {}, document.title, newUrl);

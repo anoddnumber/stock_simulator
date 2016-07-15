@@ -12,8 +12,10 @@
                 });
 
                 var errArg = $('#err-arg').data('err-arg');
-                var a = Utility.replaceUrlParam("err", errArg);
-                history.replaceState({}, document.title, a);
+                if (errArg) {
+                    var a = Utility.replaceUrlParam("err", errArg);
+                    history.replaceState({}, document.title, a);
+                }
             }
          }
 

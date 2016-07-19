@@ -1,6 +1,8 @@
 from flask_security import MongoEngineUserDatastore
 from bson.objectid import ObjectId
 import logging
+from py.constants import errors
+from py.constants.errors import ERROR_CODE_MAP
 
 
 class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
@@ -81,7 +83,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
             user_stock_symbol_info = user['stocks_owned'][symbol]
         except KeyError, e:
             self.logger.exception("User " + str(username) + " does not own stock with symbol " + str(symbol))
-            return {"data": "User does not own stock", "error": True}
+            return {"data": ERROR_CODE_MAP.get(errors.NESTK), "error": True}
 
         user_stock_symbol_info.pop('total', None)  # remove the total and add it back at the end
         # TODO: use the total quantity field
@@ -92,7 +94,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         if num_stocks_owned < quantity:
             self.logger.warning("User " + str(username) + " does not own enough of " + str(symbol) + "." +
                                 " Trying to sell " + str(quantity) + " but only owns " + str(num_stocks_owned) + ".")
-            return {"data": "User does not own enough stock", "error": True}
+            return {"data": ERROR_CODE_MAP.get(errors.NESTK), "error": True}
 
         quantity_left = quantity
         keys_to_remove = []

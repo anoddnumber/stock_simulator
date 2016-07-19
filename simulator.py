@@ -20,6 +20,7 @@ from py.user import User, Role
 from py.extended_register_form import ExtendedRegisterForm
 from py.stock_user_datastore import MongoEngineStockUserDatastore
 from py.constants import errors, messages
+from py.constants.errors import ERROR_CODE_MAP
 import csv
 
 env = Environment(loader=PackageLoader('py', 'templates'))
@@ -330,7 +331,7 @@ def post_register():
 @login_required
 def confirmation():
     err_arg = request.args.get('err')
-    error = errors.ERROR_CODE_MAP.get(err_arg)
+    error = ERROR_CODE_MAP.get(err_arg)
     active_tab = 'stocks'
     template = env.get_template('confirmation_page.html')
 
@@ -344,24 +345,16 @@ def confirmation():
         quantity = last_transaction['quantity']
         price_per_stock = last_transaction['price_per_stock'].replace('_', '.')
     except KeyError:
-        return template.render(error=errors.UNEXPECTED_ERROR, activeTab=active_tab)
+        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
 
     if transaction_type == 'sell':
         message = messages.get_sell_success_message(quantity, symbol, price_per_stock)
     elif transaction_type == 'buy':
         message = messages.get_buy_success_message(quantity, symbol, price_per_stock)
     else:
-        return template.render(error=errors.ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab, err_arg=errors.UNEXP)
+        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab, err_arg=errors.UNEXP)
 
     return template.render(message=message, activeTab=active_tab)
-
-
-# @app.route("/buy", methods=['GET'])
-# @login_required
-# def buy_message():
-#     template = env.get_template('confirmation_page.html')
-#     return template.render(message='To buy more stocks, please navigate back to the stocks page.',
-#                            activeTab='stocks')
 
 
 @app.route("/buy", methods=['POST'])
@@ -379,21 +372,21 @@ def buy_stock():
 
     except ValueError:
         logger.warning("User trying to buy stock but there was an error trying to read the arguments")
-        return template.render(error=errors.UNEXPECTED_ERROR, activeTab=active_tab)
+        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
 
     if symbol is None or quantity is None or stock_price is None:
         logger.warning("Missing argument when buying stock:\n" +
                        "symbol: " + str(symbol) + ", " +
                        "quantity: " + str(quantity) + ", " +
                        "stock_price: " + str(stock_price))
-        return template.render(error=errors.UNEXPECTED_ERROR, activeTab=active_tab)
+        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
 
     # check if the price that the user wants to buy the stock for is the same as the server's stock price
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
         logger.warning("User tried to buy stock with symbol " + str(symbol) + " but is not in the stocks map")
-        return template.render(error=errors.UNEXPECTED_ERROR, activeTab=active_tab)
+        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
 
     server_stock_price = float(symbol_map.get("price"))
 
@@ -405,26 +398,25 @@ def buy_stock():
     if stock_price <= 0:
         logger.warning("The stock price the client entered is less than or equal to 0")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return template.render(error=errors.UNEXPECTED_ERROR, activeTab=active_tab)
+        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
 
     if stock_price != server_stock_price:
         logger.warning("User tried to buy the stock " + str(symbol) + " at price " + str(stock_price) +
                        " but the server stock price was " + str(server_stock_price))
-        return template.render(error=errors.PRICE_CHANGED, activeTab=active_tab)
+        return template.render(error=ERROR_CODE_MAP.get(errors.PRICH), activeTab=active_tab)
 
     total_cost = quantity * stock_price + config['commission']
     # check that the user has enough cash to buy the stocks requested
     if total_cost > float(current_user.cash):
         logger.warning("User " + str(username) + " tried to buy more stocks than he/she can afford")
         logger.warning("total_cost: " + str(total_cost) + ", user.cash: " + str(current_user.cash))
-        return template.render(error=errors.BUY_NOT_ENOUGH_CASH, activeTab=active_tab)
+        return template.render(error=ERROR_CODE_MAP.get(errors.BNEC), activeTab=active_tab)
 
     logger.info("User " + str(username) + " passed all validation for buying " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price) +
                 ", totaling a cost of " + str(total_cost))
 
     # buy the stock
-    # return users_db_access.add_stock_to_user(username, symbol, stock_price, quantity)
     rtn = stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)
 
     if rtn.get("error"):
@@ -446,32 +438,32 @@ def sell_stock():
         stock_price = float(request.form['stockPrice'])
     except ValueError:
         logger.warning("User trying to sell stock but there was an error trying to read the arguments")
-        return template.render(error=errors.UNEXPECTED_ERROR, activeTab=active_tab)
+        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
     
     if symbol is None or quantity is None or stock_price is None:
         logger.warning("Missing argument when selling stock:\n" +
                        "symbol: " + str(symbol) + ", " +
                        "quantity: " + str(quantity) + ", " +
                        "stock_price: " + str(stock_price))
-        return template.render(error=errors.UNEXPECTED_ERROR, activeTab=active_tab)
+        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
 
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
         logger.warning("User tried to sell stock with symbol " + str(symbol) + " but is not in the stocks map")
-        return template.render(error=errors.STOCK_DOES_NOT_EXIST, activeTab=active_tab)
+        return template.render(error=ERROR_CODE_MAP.get(errors.SDNE), activeTab=active_tab)
     server_stock_price = float(symbol_map.get("price"))
 
     if stock_price < 0 or quantity <= 0:
         logger.warning("User with username " + str(username) +
                        " tried to sell a negative amount of stock or for a negative price")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return template.render(error=errors.SELL_LESS_THAN_ONE, activeTab=active_tab)
+        return template.render(error=ERROR_CODE_MAP.get(errors.SLESS), activeTab=active_tab)
 
     if stock_price != server_stock_price:
         logger.warning("User tried to sell the stock at price " + str(stock_price) +
                        " but the server stock price was " + str(server_stock_price))
-        return template.render(error=errors.PRICE_CHANGED, activeTab=active_tab)
+        return template.render(error=ERROR_CODE_MAP.get(errors.PRICH), activeTab=active_tab)
 
     logger.info("User with username " + str(username) + " passed all validations for selling " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price))

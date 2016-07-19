@@ -343,7 +343,7 @@ def confirmation():
         transaction_type = last_transaction['type']
         symbol = last_transaction['symbol']
         quantity = last_transaction['quantity']
-        price_per_stock = last_transaction['price_per_stock'].replace('_', '.')
+        price_per_stock = last_transaction['price_per_stock']
     except KeyError:
         return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
 

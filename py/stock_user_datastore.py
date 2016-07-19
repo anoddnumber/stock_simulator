@@ -62,7 +62,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         user.stocks_owned[symbol]['total'] = total_num_stocks_owned + quantity
         user.cash = round(float(user['cash']) - total_cost, 2)
         user.transactions['last_transaction'] = {"type": "buy", "symbol": symbol, "quantity": quantity,
-                                                 "price_per_stock": price_per_stock}
+                                                 "price_per_stock": price_per_stock.replace('_', '.')}
 
         user.save()
         return {"data": user, "error": False}
@@ -119,7 +119,10 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
             # otherwise update the total field
             user['stocks_owned'][symbol]['total'] = num_stocks_owned - quantity
 
-        user.cash = round(float(user['cash']) + quantity * float(cache.get_stock_price(symbol)), 2)
+        stock_price = float(cache.get_stock_price(symbol))
+        user.cash = round(float(user['cash']) + quantity * stock_price, 2)
+        user.transactions['last_transaction'] = {"type": "sell", "symbol": symbol, "quantity": quantity,
+                                                 "price_per_stock": str(stock_price)}
         user.save()
 
         self.logger.info("Updating the database for a sell transaction for username " + username)

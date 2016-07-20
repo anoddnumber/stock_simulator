@@ -362,9 +362,6 @@ def confirmation():
 def buy_stock():
     username = current_user.username
 
-    template = env.get_template('confirmation_page.html')
-    active_tab = 'stocks'
-
     try:
         symbol = request.form['symbol']
         quantity = int(request.form['quantity'])
@@ -372,21 +369,21 @@ def buy_stock():
 
     except ValueError:
         logger.warning("User trying to buy stock but there was an error trying to read the arguments")
-        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.UNEXP))
 
-    if symbol is None or quantity is None or stock_price is None:
+    if symbol is None or symbol == "" or quantity is None or stock_price is None:
         logger.warning("Missing argument when buying stock:\n" +
                        "symbol: " + str(symbol) + ", " +
                        "quantity: " + str(quantity) + ", " +
                        "stock_price: " + str(stock_price))
-        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.UNEXP))
 
     # check if the price that the user wants to buy the stock for is the same as the server's stock price
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
         logger.warning("User tried to buy stock with symbol " + str(symbol) + " but is not in the stocks map")
-        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.SDNE))
 
     server_stock_price = float(symbol_map.get("price"))
 
@@ -398,19 +395,19 @@ def buy_stock():
     if stock_price <= 0:
         logger.warning("The stock price the client entered is less than or equal to 0")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.UNEXP))
 
     if stock_price != server_stock_price:
         logger.warning("User tried to buy the stock " + str(symbol) + " at price " + str(stock_price) +
                        " but the server stock price was " + str(server_stock_price))
-        return template.render(error=ERROR_CODE_MAP.get(errors.PRICH), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.PRICH))
 
     total_cost = quantity * stock_price + config['commission']
     # check that the user has enough cash to buy the stocks requested
     if total_cost > float(current_user.cash):
         logger.warning("User " + str(username) + " tried to buy more stocks than he/she can afford")
         logger.warning("total_cost: " + str(total_cost) + ", user.cash: " + str(current_user.cash))
-        return template.render(error=ERROR_CODE_MAP.get(errors.BNEC), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.BNEC))
 
     logger.info("User " + str(username) + " passed all validation for buying " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price) +
@@ -420,7 +417,7 @@ def buy_stock():
     rtn = stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)
 
     if rtn.get("error"):
-        return template.render(error=rtn.get("data"), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=rtn.get("data")))
     else:
         return redirect(url_for('confirmation'))
 

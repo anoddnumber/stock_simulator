@@ -420,7 +420,7 @@ def buy_stock():
     rtn = stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)
 
     if rtn.get("error"):
-        return template.render(error=rtn.get("error"), activeTab=active_tab)
+        return template.render(error=rtn.get("data"), activeTab=active_tab)
     else:
         return redirect(url_for('confirmation'))
 
@@ -429,8 +429,6 @@ def buy_stock():
 @login_required
 def sell_stock():
     username = current_user.username
-    template = env.get_template('confirmation_page.html')
-    active_tab = 'stocks'
 
     try:
         symbol = request.form['symbol']
@@ -438,39 +436,46 @@ def sell_stock():
         stock_price = float(request.form['stockPrice'])
     except ValueError:
         logger.warning("User trying to sell stock but there was an error trying to read the arguments")
-        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.UNEXP))
     
-    if symbol is None or quantity is None or stock_price is None:
+    if symbol is None or symbol == "" or quantity is None or stock_price is None:
         logger.warning("Missing argument when selling stock:\n" +
                        "symbol: " + str(symbol) + ", " +
                        "quantity: " + str(quantity) + ", " +
                        "stock_price: " + str(stock_price))
-        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.UNEXP))
+
+    logger.info("User with username " + str(username) + " is attempting to sell stock with symbol " + str(symbol) +
+                " at a price of " + str(stock_price))
 
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
         logger.warning("User tried to sell stock with symbol " + str(symbol) + " but is not in the stocks map")
-        return template.render(error=ERROR_CODE_MAP.get(errors.SDNE), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.SDNE))
     server_stock_price = float(symbol_map.get("price"))
 
-    if stock_price < 0 or quantity <= 0:
+    if stock_price < 0:
         logger.warning("User with username " + str(username) +
-                       " tried to sell a negative amount of stock or for a negative price")
-        logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return template.render(error=ERROR_CODE_MAP.get(errors.SLESS), activeTab=active_tab)
+                       " tried to sell stock for a negative price: " + str(stock_price))
+        return redirect(url_for('confirmation', err=errors.UNEXP))
+
+    if quantity <= 0:
+        logger.warning("User with username " + str(username) +
+                       " tried to sell a negative amount of stock: " + str(quantity))
+        return redirect(url_for('confirmation', err=errors.SLESS))
 
     if stock_price != server_stock_price:
         logger.warning("User tried to sell the stock at price " + str(stock_price) +
                        " but the server stock price was " + str(server_stock_price))
-        return template.render(error=ERROR_CODE_MAP.get(errors.PRICH), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.PRICH))
 
     logger.info("User with username " + str(username) + " passed all validations for selling " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price))
     # sell the stock
     rtn = stock_user_datastore.sell_stocks_from_user(username, symbol, quantity, cache)
     if rtn.get("error"):
-        return template.render(error=rtn.get("error"), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=rtn.get("data")))
     else:
         return redirect(url_for('confirmation'))
 

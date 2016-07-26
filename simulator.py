@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import threading
 
 from flask import Flask, redirect, request, jsonify, url_for
 from jinja2 import Environment, PackageLoader
@@ -202,7 +203,6 @@ def stock_info_page(symbol):
 @app.route("/stocks", methods=['GET'])
 @login_required
 def stocks():
-    # cache.update(5)
     template = env.get_template('stocks_page.html')
     return template.render(username=current_user.username, userInfo=get_user_info(),
                            stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
@@ -290,7 +290,6 @@ def get_stock_info_helper(symbols):
     """
     if symbols is None:
         return None
-    cache.update(5)
     return cache.get_stock_prices(symbols)
 
 
@@ -311,7 +310,6 @@ def get_stock_symbol_map():
 
     info_dict = {'stockSymbolsMap': cache.json, 'delay': delay * 1000}
 
-    # time.sleep(5)
     return jsonify(info_dict)
 
 
@@ -501,13 +499,31 @@ def handle_invalid_usage(error):
     return response
 
 
+def do_every(interval, worker_func, iterations=0):
+    """
+    Runs a function every interval number of seconds
+
+    :param interval: How often the function should run, in number of seconds
+    :param worker_func: The function to run
+    :param iterations: Number of iterations to do before stopping, defaults to infinite
+    """
+    if iterations != 1:
+        threading.Timer(
+            interval,
+            do_every, [interval, worker_func, 0 if iterations == 0 else iterations-1]
+        ).start()
+
+    worker_func()
+
+
 def init_cache(cache_path=None):
     global cache
     logger.info("initializing cache")
     cache = Cache(cache_path)
+    do_every(15 * 60, cache.update)  # update the cache every 15 minutes
             
 if __name__ == "__main__":
-    app.debug = True
+    app.debug = False
     toolbar = DebugToolbarExtension(app)
 
     init_cache()

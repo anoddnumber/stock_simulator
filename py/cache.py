@@ -33,11 +33,9 @@ class Cache:
                 json_string += line
             self.parsed_json = json.loads(json_string)
             self.logger.info("Successfully loaded cache from file")
-            self.update()
         except (ValueError, IOError) as e:
             self.logger.exception("Error while loading cache")
-            self.update()
-            
+
     @property
     def json(self):
         return self.parsed_json
@@ -99,6 +97,7 @@ class Cache:
         for line in parsed_symbols_file:
             json_string += line
 
+        self.load_from_file_path = './static/cache.json'
         if self.load_from_file_path is not None:
             self.load_cache_from_file() # for testing purposes only
         else:

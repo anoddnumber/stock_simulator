@@ -508,10 +508,12 @@ def do_every(interval, worker_func, iterations=0):
     :param iterations: Number of iterations to do before stopping, defaults to infinite
     """
     if iterations != 1:
-        threading.Timer(
+        t = threading.Timer(
             interval,
             do_every, [interval, worker_func, 0 if iterations == 0 else iterations-1]
-        ).start()
+        )
+        t.setDaemon(True)
+        t.start()
 
     worker_func()
 

@@ -174,8 +174,6 @@ def stock_info_page(symbol):
                 change = 'same'
 
     if stock_info and user_dict:
-
-        # TODO: make sure the file exists
         path = 'data/' + str(symbol) + '.csv'
         if os.path.isfile(path):
             with open('data/' + str(symbol) + '.csv') as csv_file:
@@ -245,20 +243,6 @@ def list_routes():
 
     return output
 
-# """
-# Returns a page where the user can buy/sell stocks as well as information regarding the stock.
-# """
-# @app.route("/stockInfo", methods=['GET'])
-# def stock_info():
-#     symbol = cgi.escape(request.args.get('symbol'))
-#     price = get_stock_info_helper([symbol])
-#
-#     logger.info("Retrieving information for stock with symbol " + str(symbol) +
-#                 "and price " + str(price))
-#
-#     template = env.get_template('stock_info_page.html')
-#     return template.render(symbol=symbol, price=price)
-
 
 @app.route("/info", methods=['GET'])
 @login_required
@@ -293,34 +277,12 @@ def get_stock_info_helper(symbols):
     return cache.get_stock_prices(symbols)
 
 
-@app.route("/stockSymbolsMap", methods=['GET'])
-@login_required
-def get_stock_symbol_map():
-    """
-    This service returns a json formatted string whose keys are available stock symbols
-    and whose values are the stock symbols' names and prices.
-
-    TODO: retrieve the NASDAQ file daily (currently called stock_symbols.txt) and generate the json file daily (currently called parsed_symbols.json).
-    """
-    logger.info("Retrieving the stockSymbolsMap")
-    seconds_left = cache.update(5)
-
-    lenient_time = 2  # give extra time for the server to update before the client calls again
-    delay = seconds_left + lenient_time
-
-    info_dict = {'stockSymbolsMap': cache.json, 'delay': delay * 1000}
-
-    return jsonify(info_dict)
-
-
 @app.route("/post_register", methods=['GET'])
 def post_register():
     """
     The view that is shown to the user after they create a new account. The user will still have to
     confirm their email address
     """
-    # logout_user()
-    # return redirect(url_for('root'))
     template = env.get_template('post_register.html')
     return template.render()
 
@@ -475,6 +437,7 @@ def sell_stock():
         return redirect(url_for('confirmation'))
 
 
+# for testing only, TODO: remove this API and get the user data a different way
 @app.route("/getUserInfo", methods=['GET'])
 @login_required
 def get_user_info():

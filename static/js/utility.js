@@ -1,6 +1,3 @@
-var userInfo;
-var stockSymbolsMap;
-
 (function($) {
     $.Utility = function(options) {
         var utility = {

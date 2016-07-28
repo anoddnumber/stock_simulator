@@ -64,19 +64,6 @@ var config = {
                 });
              },
 
-             createAccount : function(formData) {
-//                $.ajax("/register", {
-//                    method: "POST",
-//                    data: formData,
-//                    success: function(data) {
-//                        console.log("successfully created account!");
-//                    },
-//                    error: function(jqXHR, textStatus, errorThrown ) {
-//                        console.log("error when creating an account");
-//                    }
-//                });
-            },
-
             /**
              * TODO, create a central helper for all the APIs, or maybe a client.
              *  since all the success and error parts of the functions are the same..
@@ -122,56 +109,12 @@ var config = {
                     }
                 });
             },
-
-            /**
-             * Stores a map of stock symbols (the keys) to an object with stock information .
-             * Also updates the lastUpdatedDate variable.
-             *
-             * The object is as follows:
-             * {
-             *     'name' : *Stock Name*,
-             *     'price': *Stock Price*
-             * }
-             * Updates the cache: TODO move to global area
-             */
-            updateCache : function(onSuccess) {
-                $.ajax("/stockSymbolsMap", {
-                    success : function(data) {
-                        console.log("got the new cache");
-                        stockSymbolsMap = data.stockSymbolsMap;
-                        var delay = data.delay;
-
-                        //in case the delay is undefined, we don't want to continually call updateCache
-                        if ( ! delay) {
-                            delay = config.numMinutesToUpdate * 60 * 1000; //in milliseconds
-                        }
-                        setTimeout(apiClient.updateCache, delay);
-
-                        //the last_updated date should not be shown to the user
-                        delete stockSymbolsMap['last_updated'];
-
-                        if (onSuccess) {
-                            onSuccess();
-                        }
-
-                        StocksPage.updatePage();
-                    },
-                    error : function() {
-                        console.log("error, did not get the stock symbols map");
-                        //try again in a minute...
-                        var numMillisecondsToUpdate = 60000;
-                        setTimeout(apiClient.updateCache, numMillisecondsToUpdate);
-                    }
-                });
-            },
         }
 
         return {
             login : apiClient.login,
             logout : apiClient.logout,
-            createAccount : apiClient.createAccount,
             buyStock : apiClient.buyStock,
-            updateCache : apiClient.updateCache,
             sellStock : apiClient.sellStock,
         }
     }

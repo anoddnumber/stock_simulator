@@ -3,7 +3,7 @@
 
         var changePageHelper = {
             attachChangePageAction : function (selector, replaceURL) {
-                if ( ! replaceURL) {
+                if ( replaceURL == undefined) {
                     replaceURL = true;
                 }
 

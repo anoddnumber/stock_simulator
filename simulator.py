@@ -82,9 +82,14 @@ app.config['WTF_CSRF_ENABLED'] = False  # use for debugging to be able to send r
 app.config['SECURITY_LOGIN_URL'] = '/login'
 app.config['SECURITY_POST_LOGIN_VIEW'] = '/'
 app.config['SECURITY_POST_REGISTER_VIEW'] = '/post_register'
+app.config['SECURITY_CHANGE_URL'] = '/settings'
 
-# Flask-Security register configs
+# Flask-Security template paths
+app.config['SECURITY_CHANGE_PASSWORD_TEMPLATE'] = 'security/settings.html'
+
+# Flask-Security register configs, states that there should be a registerable endpoint.
 app.config['SECURITY_REGISTERABLE'] = True
+app.config['SECURITY_CHANGEABLE'] = True
 
 # Flask-Security login error messages
 app.config['SECURITY_MSG_CONFIRMATION_REQUIRED'] = ('Please confirm your account through your email.', 'error')

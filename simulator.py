@@ -129,7 +129,7 @@ def root():
 
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
     template = env.get_template('profile_page.html')
-    return template.render(username=current_user.username, userInfo=get_user_info(),
+    return template.render(current_user=current_user, userInfo=get_user_info(),
                            stockSymbolsMap=json.dumps(cache.json), activeTab='profile')
 
 
@@ -194,7 +194,7 @@ def stock_info_page(symbol):
             info = 'undefined'
 
         template = env.get_template('stock_info_page.html')
-        return template.render(username=current_user.username, name=name, symbol=symbol, price=price, day_low=day_low,
+        return template.render(current_user=current_user, name=name, symbol=symbol, price=price, day_low=day_low,
                                daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
                                day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change,
                                commission=config['commission'], market_cap=market_cap, pe_ratio=pe_ratio,
@@ -207,7 +207,7 @@ def stock_info_page(symbol):
 @login_required
 def stocks():
     template = env.get_template('stocks_page.html')
-    return template.render(username=current_user.username, userInfo=get_user_info(),
+    return template.render(current_user=current_user, userInfo=get_user_info(),
                            stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
 
 
@@ -301,7 +301,7 @@ def confirmation():
     template = env.get_template('confirmation_page.html')
 
     if error:
-        return template.render(error=error, activeTab=active_tab, err_arg=err_arg)
+        return template.render(current_user=current_user, error=error, activeTab=active_tab, err_arg=err_arg)
 
     try:
         last_transaction = current_user.transactions['last_transaction']
@@ -310,16 +310,16 @@ def confirmation():
         quantity = last_transaction['quantity']
         price_per_stock = last_transaction['price_per_stock']
     except KeyError:
-        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
+        return template.render(current_user=current_user, error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
 
     if transaction_type == 'sell':
         message = messages.get_sell_success_message(quantity, symbol, price_per_stock)
     elif transaction_type == 'buy':
         message = messages.get_buy_success_message(quantity, symbol, price_per_stock)
     else:
-        return template.render(error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab, err_arg=errors.UNEXP)
+        return template.render(current_user=current_user, error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab, err_arg=errors.UNEXP)
 
-    return template.render(message=message, activeTab=active_tab)
+    return template.render(current_user=current_user, message=message, activeTab=active_tab)
 
 
 @app.route("/buy", methods=['POST'])

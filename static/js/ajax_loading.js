@@ -28,6 +28,11 @@
                         done: function(data) {
                             var simulator = $(data).find("#stock_simulator");
                             $(this.target).html(simulator);
+
+                            var dropdownElem = $('.dropdown-toggle');
+                            if (dropdownElem && dropdownElem.attr('aria-expanded') === "true") {
+                                dropdownElem.dropdown("toggle");
+                            }
                         }
                     });
                 }

@@ -15,6 +15,10 @@ tr {
     margin-right : 5px;
 }
 
+a {
+    cursor : pointer;
+}
+
 a:visited{
   color:blue;
 }

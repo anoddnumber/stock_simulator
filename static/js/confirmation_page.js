@@ -6,8 +6,16 @@
             }, options),
 
             init : function() {
-                $("#backButton").attr("href", $(location).attr('href'));
-                ChangePageHelper.attachChangePageAction($("#backButton"));
+                $("#backButton").unbind("click");
+                $('#backButton').click(function() {
+                    history.back();
+                });
+
+                var errArg = $('#err-arg').data('err-arg');
+                if (errArg) {
+                    var a = Utility.replaceUrlParam("err", errArg);
+                    history.replaceState({}, document.title, a);
+                }
             }
          }
 

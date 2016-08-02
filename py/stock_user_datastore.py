@@ -1,6 +1,8 @@
 from flask_security import MongoEngineUserDatastore
 from bson.objectid import ObjectId
 import logging
+from py.constants import errors
+from py.constants.errors import ERROR_CODE_MAP
 
 
 class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
@@ -59,6 +61,8 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         user.stocks_owned[symbol][price_per_stock] = updated_quantity
         user.stocks_owned[symbol]['total'] = total_num_stocks_owned + quantity
         user.cash = round(float(user['cash']) - total_cost, 2)
+        user.transactions['last_transaction'] = {"type": "buy", "symbol": symbol, "quantity": quantity,
+                                                 "price_per_stock": price_per_stock.replace('_', '.')}
 
         user.save()
         return {"data": user, "error": False}
@@ -79,7 +83,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
             user_stock_symbol_info = user['stocks_owned'][symbol]
         except KeyError, e:
             self.logger.exception("User " + str(username) + " does not own stock with symbol " + str(symbol))
-            return {"data": "User does not own stock", "error": True}
+            return {"data": errors.NESTK, "error": True}
 
         user_stock_symbol_info.pop('total', None)  # remove the total and add it back at the end
         # TODO: use the total quantity field
@@ -90,7 +94,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         if num_stocks_owned < quantity:
             self.logger.warning("User " + str(username) + " does not own enough of " + str(symbol) + "." +
                                 " Trying to sell " + str(quantity) + " but only owns " + str(num_stocks_owned) + ".")
-            return {"data": "User does not own enough stock", "error": True}
+            return {"data": errors.NESTK, "error": True}
 
         quantity_left = quantity
         keys_to_remove = []
@@ -115,7 +119,10 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
             # otherwise update the total field
             user['stocks_owned'][symbol]['total'] = num_stocks_owned - quantity
 
-        user.cash = round(float(user['cash']) + quantity * float(cache.get_stock_price(symbol)), 2)
+        stock_price = float(cache.get_stock_price(symbol))
+        user.cash = round(float(user['cash']) + quantity * stock_price, 2)
+        user.transactions['last_transaction'] = {"type": "sell", "symbol": symbol, "quantity": quantity,
+                                                 "price_per_stock": str(stock_price)}
         user.save()
 
         self.logger.info("Updating the database for a sell transaction for username " + username)

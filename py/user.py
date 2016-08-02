@@ -18,6 +18,7 @@ class User(Document, UserMixin):
     roles = ListField(ReferenceField(Role), default=[])
     cash = DecimalField(max_length=255, default=50000, precision=2)
     stocks_owned = DictField(default={})
+    transactions = DictField(default={})
 
     def __str__(self):
         # user_dictionary = self.get_dict()

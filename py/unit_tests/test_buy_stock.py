@@ -2,10 +2,44 @@ import unittest
 from base_unit_test import BaseUnitTest
 import simulator
 from stock_simulator_test_client import StockSimulatorTestClient
+from py.constants import errors
+from py.constants.errors import ERROR_CODE_MAP
 
 
 # TODO: Test buying a stock at different prices (somewhat difficult to test this..)
 class TestBuyStock(BaseUnitTest):
+
+    @staticmethod
+    def assert_buy_successful(data):
+        assert "You have successfully bought" in data
+
+    @staticmethod
+    def assert_cannot_read_args(data):
+        TestBuyStock.assert_error_symbol(errors.UNEXP, data)
+
+    @staticmethod
+    def assert_negative_price(data):
+        TestBuyStock.assert_error_symbol(errors.UNEXP, data)
+
+    @staticmethod
+    def assert_buy_too_few(data):
+        TestBuyStock.assert_error_symbol(errors.BLESS, data)
+
+    @staticmethod
+    def assert_not_enough_cash(data):
+        TestBuyStock.assert_error_symbol(errors.BNEC, data)
+
+    @staticmethod
+    def assert_stock_does_not_exist(data):
+        TestBuyStock.assert_error_symbol(errors.SDNE, data)
+
+    @staticmethod
+    def assert_stock_price_changed(data):
+        TestBuyStock.assert_error_symbol(errors.PRICH, data)
+
+    @staticmethod
+    def assert_error_symbol(err_sym, data):
+        assert ERROR_CODE_MAP.get(err_sym) in data
 
     def test_basic_buy(self):
         print "test_basic_buy"
@@ -22,15 +56,15 @@ class TestBuyStock(BaseUnitTest):
 
         rv = self.client.buy_stock(symbol, quantity, price)
 
-        # assert "Success" in rv.data TODO: add new assert here
-        self.assert_user_info({"AMZN": {price.replace(".", "_"): quantity, "total": quantity}},
+        TestBuyStock.assert_buy_successful(rv.data)
+        self.assert_user_info({symbol: {price.replace(".", "_"): quantity, "total": quantity}},
                               starting_cash - quantity * float(price) - simulator.config['commission'])
 
         # buy the same stock again
         rv = self.client.buy_stock(symbol, quantity, price)
 
-        # assert "Success" in rv.data TODO: add new assert here
-        self.assert_user_info({"AMZN": {price.replace(".", "_"): quantity * 2, "total": quantity * 2}},
+        TestBuyStock.assert_buy_successful(rv.data)
+        self.assert_user_info({symbol: {price.replace(".", "_"): quantity * 2, "total": quantity * 2}},
                               starting_cash - quantity * float(price) * 2 - simulator.config['commission'] * 2)
 
     def test_buy_as_much_as_possible(self):
@@ -50,8 +84,8 @@ class TestBuyStock(BaseUnitTest):
         max_quantity_possible = int( (starting_cash - simulator.config['commission']) / float(price))
         rv = self.client.buy_stock(symbol, max_quantity_possible, price)
 
-        # assert "Success" in rv.data TODO: add new assert here
-        self.assert_user_info({"AMZN": {price.replace(".", "_"): max_quantity_possible,
+        TestBuyStock.assert_buy_successful(rv.data)
+        self.assert_user_info({symbol: {price.replace(".", "_"): max_quantity_possible,
                                         "total": max_quantity_possible
                                         }},
                               starting_cash - max_quantity_possible * float(price) - simulator.config['commission'])
@@ -81,14 +115,14 @@ class TestBuyStock(BaseUnitTest):
         # negative quantity
         rv = self.client.buy_stock(symbol, -1, price)
 
-        assert "Stock price or quantity less than 0" in rv.data
+        TestBuyStock.assert_buy_too_few(rv.data)
         self.assert_user_info({}, starting_cash)
 
         # too much quantity
         too_much_quantity = int(float(starting_cash) / float(price) + 1)
         rv = self.client.buy_stock(symbol, too_much_quantity, price)
 
-        assert "Not enough cash" in rv.data
+        TestBuyStock.assert_not_enough_cash(rv.data)
         self.assert_user_info({}, starting_cash)
 
     def test_buy_bad_symbol(self):
@@ -100,7 +134,7 @@ class TestBuyStock(BaseUnitTest):
         symbol = "bad_symbol"
 
         rv = self.client.buy_stock(symbol, 1, 1)
-        assert "Invalid symbol" in rv.data
+        TestBuyStock.assert_stock_does_not_exist(rv.data)
 
     def test_buy_bad_stock_price(self):
         print "test_buy_bad_stock_price"
@@ -119,13 +153,13 @@ class TestBuyStock(BaseUnitTest):
         # price does not equal server's price
         rv = self.client.buy_stock(symbol, quantity, bad_price)
 
-        assert "Stock price changed, please try again." in rv.data
+        TestBuyStock.assert_stock_price_changed(rv.data)
         self.assert_user_info({}, starting_cash)
 
         # pass in negative price
         rv = self.client.buy_stock(symbol, quantity, -1)
 
-        assert "Stock price or quantity less than 0" in rv.data
+        TestBuyStock.assert_negative_price(rv.data)
         self.assert_user_info({}, starting_cash)
 
     def test_buy_missing_argument(self):
@@ -144,19 +178,19 @@ class TestBuyStock(BaseUnitTest):
         # missing price
         rv = self.client.buy_stock(symbol, quantity, "")
 
-        assert "Error reading arguments" in rv.data
+        TestBuyStock.assert_cannot_read_args(rv.data)
         self.assert_user_info({}, starting_cash)
 
         # missing quantity
         rv = self.client.buy_stock(symbol, "", price)
 
-        assert "Error reading arguments" in rv.data
+        TestBuyStock.assert_cannot_read_args(rv.data)
         self.assert_user_info({}, starting_cash)
 
         # missing symbol
         rv = self.client.buy_stock("", quantity, price)
 
-        assert "Invalid symbol" in rv.data
+        TestBuyStock.assert_cannot_read_args(rv.data)
         self.assert_user_info({}, starting_cash)
 
 if __name__ == '__main__':

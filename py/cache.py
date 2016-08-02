@@ -7,6 +7,10 @@ from py.exceptions.invalid_usage import InvalidUsage
 from yahoo_stock_api import YahooStockAPI
 import logging
 
+
+# TODO: retrieve the NASDAQ file daily (currently called stock_symbols.txt)
+# and generate the json file daily (currently called parsed_symbols.json).
+
 """
 The cache is responsible for having fast access to stock price information.
 It also allows clients to update it to make sure the information is not stale.
@@ -33,11 +37,9 @@ class Cache:
                 json_string += line
             self.parsed_json = json.loads(json_string)
             self.logger.info("Successfully loaded cache from file")
-            self.update()
         except (ValueError, IOError) as e:
             self.logger.exception("Error while loading cache")
-            self.update()
-            
+
     @property
     def json(self):
         return self.parsed_json

@@ -1,6 +1,7 @@
 import json
 import os
 import re
+import threading
 
 from flask import Flask, redirect, request, jsonify, url_for
 from jinja2 import Environment, PackageLoader
@@ -19,6 +20,8 @@ from flask_mail import Mail
 from py.user import User, Role
 from py.extended_register_form import ExtendedRegisterForm
 from py.stock_user_datastore import MongoEngineStockUserDatastore
+from py.constants import errors, messages
+from py.constants.errors import ERROR_CODE_MAP
 import csv
 
 env = Environment(loader=PackageLoader('py', 'templates'))
@@ -79,9 +82,14 @@ app.config['WTF_CSRF_ENABLED'] = False  # use for debugging to be able to send r
 app.config['SECURITY_LOGIN_URL'] = '/login'
 app.config['SECURITY_POST_LOGIN_VIEW'] = '/'
 app.config['SECURITY_POST_REGISTER_VIEW'] = '/post_register'
+app.config['SECURITY_CHANGE_URL'] = '/settings'
 
-# Flask-Security register configs
+# Flask-Security template paths
+app.config['SECURITY_CHANGE_PASSWORD_TEMPLATE'] = 'security/settings.html'
+
+# Flask-Security register configs, states that there should be a registerable endpoint.
 app.config['SECURITY_REGISTERABLE'] = True
+app.config['SECURITY_CHANGEABLE'] = True
 
 # Flask-Security login error messages
 app.config['SECURITY_MSG_CONFIRMATION_REQUIRED'] = ('Please confirm your account through your email.', 'error')
@@ -121,7 +129,7 @@ def root():
 
     logger.info("User with IP address " + str(request.remote_addr) + " has visited.")
     template = env.get_template('profile_page.html')
-    return template.render(username=current_user.username, userInfo=get_user_info(),
+    return template.render(current_user=current_user, userInfo=get_user_info(),
                            stockSymbolsMap=json.dumps(cache.json), activeTab='profile')
 
 
@@ -171,8 +179,6 @@ def stock_info_page(symbol):
                 change = 'same'
 
     if stock_info and user_dict:
-
-        # TODO: make sure the file exists
         path = 'data/' + str(symbol) + '.csv'
         if os.path.isfile(path):
             with open('data/' + str(symbol) + '.csv') as csv_file:
@@ -188,7 +194,7 @@ def stock_info_page(symbol):
             info = 'undefined'
 
         template = env.get_template('stock_info_page.html')
-        return template.render(username=current_user.username, name=name, symbol=symbol, price=price, day_low=day_low,
+        return template.render(current_user=current_user, name=name, symbol=symbol, price=price, day_low=day_low,
                                daily_percent_change=daily_percent_change, daily_price_change=daily_price_change,
                                day_open=day_open, day_high=day_high, num_owned=num_owned, cash=cash, change=change,
                                commission=config['commission'], market_cap=market_cap, pe_ratio=pe_ratio,
@@ -197,19 +203,11 @@ def stock_info_page(symbol):
         return "Requested stock does not exist in our database"
 
 
-@app.route("/confirmation", methods=['GET'])
-@login_required
-def confirmation_page():
-    template = env.get_template('confirmation_page.html')
-    return template.render(error='', message='You have successfully bought n number of shares of symbol')
-
-
 @app.route("/stocks", methods=['GET'])
 @login_required
 def stocks():
-    # cache.update(5)
     template = env.get_template('stocks_page.html')
-    return template.render(username=current_user.username, userInfo=get_user_info(),
+    return template.render(current_user=current_user, userInfo=get_user_info(),
                            stockSymbolsMap=json.dumps(cache.json), activeTab='stocks')
 
 
@@ -250,20 +248,6 @@ def list_routes():
 
     return output
 
-# """
-# Returns a page where the user can buy/sell stocks as well as information regarding the stock.
-# """
-# @app.route("/stockInfo", methods=['GET'])
-# def stock_info():
-#     symbol = cgi.escape(request.args.get('symbol'))
-#     price = get_stock_info_helper([symbol])
-#
-#     logger.info("Retrieving information for stock with symbol " + str(symbol) +
-#                 "and price " + str(price))
-#
-#     template = env.get_template('stock_info_page.html')
-#     return template.render(symbol=symbol, price=price)
-
 
 @app.route("/info", methods=['GET'])
 @login_required
@@ -295,29 +279,7 @@ def get_stock_info_helper(symbols):
     """
     if symbols is None:
         return None
-    cache.update(5)
     return cache.get_stock_prices(symbols)
-
-
-@app.route("/stockSymbolsMap", methods=['GET'])
-@login_required
-def get_stock_symbol_map():
-    """
-    This service returns a json formatted string whose keys are available stock symbols
-    and whose values are the stock symbols' names and prices.
-
-    TODO: retrieve the NASDAQ file daily (currently called stock_symbols.txt) and generate the json file daily (currently called parsed_symbols.json).
-    """
-    logger.info("Retrieving the stockSymbolsMap")
-    seconds_left = cache.update(5)
-
-    lenient_time = 2  # give extra time for the server to update before the client calls again
-    delay = seconds_left + lenient_time
-
-    info_dict = {'stockSymbolsMap': cache.json, 'delay': delay * 1000}
-
-    # time.sleep(5)
-    return jsonify(info_dict)
 
 
 @app.route("/post_register", methods=['GET'])
@@ -326,19 +288,44 @@ def post_register():
     The view that is shown to the user after they create a new account. The user will still have to
     confirm their email address
     """
-    # logout_user()
-    # return redirect(url_for('root'))
     template = env.get_template('post_register.html')
     return template.render()
 
 
-@app.route("/buyStock", methods=['POST'])
+@app.route("/confirmation", methods=['GET'])
+@login_required
+def confirmation():
+    err_arg = request.args.get('err')
+    error = ERROR_CODE_MAP.get(err_arg)
+    active_tab = 'stocks'
+    template = env.get_template('confirmation_page.html')
+
+    if error:
+        return template.render(current_user=current_user, error=error, activeTab=active_tab, err_arg=err_arg)
+
+    try:
+        last_transaction = current_user.transactions['last_transaction']
+        transaction_type = last_transaction['type']
+        symbol = last_transaction['symbol']
+        quantity = last_transaction['quantity']
+        price_per_stock = last_transaction['price_per_stock']
+    except KeyError:
+        return template.render(current_user=current_user, error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab)
+
+    if transaction_type == 'sell':
+        message = messages.get_sell_success_message(quantity, symbol, price_per_stock)
+    elif transaction_type == 'buy':
+        message = messages.get_buy_success_message(quantity, symbol, price_per_stock)
+    else:
+        return template.render(current_user=current_user, error=ERROR_CODE_MAP.get(errors.UNEXP), activeTab=active_tab, err_arg=errors.UNEXP)
+
+    return template.render(current_user=current_user, message=message, activeTab=active_tab)
+
+
+@app.route("/buy", methods=['POST'])
 @login_required
 def buy_stock():
     username = current_user.username
-
-    template = env.get_template('confirmation_page.html')
-    active_tab = 'stocks'
 
     try:
         symbol = request.form['symbol']
@@ -347,73 +334,63 @@ def buy_stock():
 
     except ValueError:
         logger.warning("User trying to buy stock but there was an error trying to read the arguments")
-        return template.render(error='An unexpected error has occurred. Please try buying the stocks again.',
-                               activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.UNEXP))
 
-    if symbol is None or quantity is None or stock_price is None:
+    if symbol is None or symbol == "" or quantity is None or stock_price is None:
         logger.warning("Missing argument when buying stock:\n" +
                        "symbol: " + str(symbol) + ", " +
                        "quantity: " + str(quantity) + ", " +
                        "stock_price: " + str(stock_price))
-        return template.render(error='An unexpected error has occurred. Please try buying the stocks again.',
-                               activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.UNEXP))
 
     # check if the price that the user wants to buy the stock for is the same as the server's stock price
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
         logger.warning("User tried to buy stock with symbol " + str(symbol) + " but is not in the stocks map")
-        return template.render(error='The stock you are trying to buy does not exist in our database.',
-                               activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.SDNE))
 
     server_stock_price = float(symbol_map.get("price"))
 
     if quantity <= 0:
         logger.info("The user tried to buy 0 or fewer stocks of " + str(symbol))
-        return template.render(error='Please buy 1 or more number of stocks.', activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.BLESS))
 
     # check if the passed in stock price and quantity are positive
     if stock_price <= 0:
         logger.warning("The stock price the client entered is less than or equal to 0")
         logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return template.render(error='An unexpected error has occurred. Please try buying the stocks again.',
-                               activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.UNEXP))
 
     if stock_price != server_stock_price:
         logger.warning("User tried to buy the stock " + str(symbol) + " at price " + str(stock_price) +
                        " but the server stock price was " + str(server_stock_price))
-        return template.render(error='The stock price has changed, please try buying the stocks again.',
-                               activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.PRICH))
 
     total_cost = quantity * stock_price + config['commission']
     # check that the user has enough cash to buy the stocks requested
     if total_cost > float(current_user.cash):
         logger.warning("User " + str(username) + " tried to buy more stocks than he/she can afford")
         logger.warning("total_cost: " + str(total_cost) + ", user.cash: " + str(current_user.cash))
-        return template.render(error='You don\'t have enough cash to buy the stocks. Please try again.',
-                               activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.BNEC))
 
     logger.info("User " + str(username) + " passed all validation for buying " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price) +
                 ", totaling a cost of " + str(total_cost))
 
     # buy the stock
-    # return users_db_access.add_stock_to_user(username, symbol, stock_price, quantity)
     rtn = stock_user_datastore.add_stock_to_user(username, symbol, stock_price, quantity)
 
     if rtn.get("error"):
-        return template.render(error=rtn.get("error"), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=rtn.get("data")))
     else:
-        # TODO: be more descriptive (say the price of the stock and total cost)
-        return template.render(message='You have successfully bought ' + str(quantity) + ' share(s) of ' + str(symbol))
+        return redirect(url_for('confirmation'))
 
 
-@app.route("/sellStock", methods=['POST'])
+@app.route("/sell", methods=['POST'])
 @login_required
 def sell_stock():
     username = current_user.username
-    template = env.get_template('confirmation_page.html')
-    active_tab = 'stocks'
 
     try:
         symbol = request.form['symbol']
@@ -421,50 +398,51 @@ def sell_stock():
         stock_price = float(request.form['stockPrice'])
     except ValueError:
         logger.warning("User trying to sell stock but there was an error trying to read the arguments")
-        return template.render(error='An unexpected error has occurred. Please try selling the stocks again.',
-                               activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.UNEXP))
     
-    if symbol is None or quantity is None or stock_price is None:
+    if symbol is None or symbol == "" or quantity is None or stock_price is None:
         logger.warning("Missing argument when selling stock:\n" +
                        "symbol: " + str(symbol) + ", " +
                        "quantity: " + str(quantity) + ", " +
                        "stock_price: " + str(stock_price))
-        return template.render(error='An unexpected error has occurred. Please try selling the stocks again.',
-                               activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.UNEXP))
+
+    logger.info("User with username " + str(username) + " is attempting to sell stock with symbol " + str(symbol) +
+                " at a price of " + str(stock_price))
 
     stocks_map = cache.json
     symbol_map = stocks_map.get(symbol)
     if symbol_map is None:
         logger.warning("User tried to sell stock with symbol " + str(symbol) + " but is not in the stocks map")
-        return template.render(error='The stock you are trying to sell does not exist in our database.',
-                               activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.SDNE))
     server_stock_price = float(symbol_map.get("price"))
 
-    if stock_price < 0 or quantity <= 0:
+    if stock_price < 0:
         logger.warning("User with username " + str(username) +
-                       " tried to sell a negative amount of stock or for a negative price")
-        logger.warning("stock_price: " + str(stock_price) + ", quantity: " + str(quantity))
-        return template.render(error='An unexpected error has occurred. Please try selling the stocks again.',
-                               activeTab=active_tab)
+                       " tried to sell stock for a negative price: " + str(stock_price))
+        return redirect(url_for('confirmation', err=errors.UNEXP))
+
+    if quantity <= 0:
+        logger.warning("User with username " + str(username) +
+                       " tried to sell a negative amount of stock: " + str(quantity))
+        return redirect(url_for('confirmation', err=errors.SLESS))
 
     if stock_price != server_stock_price:
         logger.warning("User tried to sell the stock at price " + str(stock_price) +
                        " but the server stock price was " + str(server_stock_price))
-        return template.render(error='The stock price has changed, please try selling the stocks again.',
-                               activeTab=active_tab)
+        return redirect(url_for('confirmation', err=errors.PRICH))
 
     logger.info("User with username " + str(username) + " passed all validations for selling " + str(quantity) +
                 " stocks with symbol " + str(symbol) + " at a stock price of " + str(stock_price))
     # sell the stock
     rtn = stock_user_datastore.sell_stocks_from_user(username, symbol, quantity, cache)
     if rtn.get("error"):
-        return template.render(error=rtn.get("error"), activeTab=active_tab)
+        return redirect(url_for('confirmation', err=rtn.get("data")))
     else:
-        # TODO: be more descriptive
-        return template.render(message='You have successfully sold ' + str(quantity) +
-                                       ' share(s) of ' + str(symbol) + '.')
+        return redirect(url_for('confirmation'))
 
 
+# for testing only, TODO: remove this API and get the user data a different way
 @app.route("/getUserInfo", methods=['GET'])
 @login_required
 def get_user_info():
@@ -489,13 +467,33 @@ def handle_invalid_usage(error):
     return response
 
 
+def do_every(interval, worker_func, iterations=0):
+    """
+    Runs a function every interval number of seconds
+
+    :param interval: How often the function should run, in number of seconds
+    :param worker_func: The function to run
+    :param iterations: Number of iterations to do before stopping, defaults to infinite
+    """
+    if iterations != 1:
+        t = threading.Timer(
+            interval,
+            do_every, [interval, worker_func, 0 if iterations == 0 else iterations-1]
+        )
+        t.setDaemon(True)
+        t.start()
+
+    worker_func()
+
+
 def init_cache(cache_path=None):
     global cache
     logger.info("initializing cache")
     cache = Cache(cache_path)
+    do_every(15 * 60, cache.update)  # update the cache every 15 minutes
             
 if __name__ == "__main__":
-    app.debug = True
+    app.debug = False
     toolbar = DebugToolbarExtension(app)
 
     init_cache()

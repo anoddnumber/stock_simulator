@@ -1,8 +1,9 @@
 import unittest
 from stock_simulator_test_client import StockSimulatorTestClient
-from simulator import stock_user_datastore
+from simulator import stock_user_datastore, db
 from test_info import TestInfo
 import ast
+from py.datastores.transaction_datastore import MongoEngineTransactionDatastore
 
 
 class BaseUnitTest(unittest.TestCase):
@@ -15,6 +16,10 @@ class BaseUnitTest(unittest.TestCase):
         print "Tearing down a unit test"
         user = stock_user_datastore.find_user(username=TestInfo.user_name)
         if user:
+            transaction_datastore = MongoEngineTransactionDatastore(db)
+            transactions = transaction_datastore.find_transactions(user.get_id())
+            for transaction in transactions:
+                transaction.delete()
             user.delete()
         print
 

@@ -2,7 +2,7 @@ from flask_security import MongoEngineUserDatastore
 from bson.objectid import ObjectId
 import logging
 from py.constants import errors
-from py.constants.errors import ERROR_CODE_MAP
+from py.datastores.transaction_datastore import MongoEngineTransactionDatastore
 
 
 class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
@@ -10,19 +10,14 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
     def __init__(self, db, user_model, role_model):
         super(MongoEngineStockUserDatastore, self).__init__(db, user_model, role_model)
         self.logger = logging.getLogger(__name__)
+        self.transaction_datastore = MongoEngineTransactionDatastore(db)
 
     def get_user_by_id(self, user_id):
         return self.get_user(ObjectId(user_id))
 
-    # don't call this create_user since it is a parent method
+    # don't name this method "create_user" since it is a parent method
     def create_user_from_user_obj(self, user):
         return self.create_user(email=user.email, username=user.username, password=user.password)
-
-    def get_user_by_username(self, username):
-        return self.find_user(username=username)
-
-    def get_user_by_email(self, email):
-        return self.find_user(email=email)
 
     def add_stock_to_user(self, username, symbol, price_per_stock, quantity):
         from simulator import config
@@ -58,11 +53,15 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         if not user.stocks_owned.get(symbol):
             user.stocks_owned[symbol] = {}
 
+        transaction = {"type": "buy", "symbol": symbol, "quantity": quantity,
+                       "price_per_stock": price_per_stock.replace('_', '.')}
+
         user.stocks_owned[symbol][price_per_stock] = updated_quantity
         user.stocks_owned[symbol]['total'] = total_num_stocks_owned + quantity
         user.cash = round(float(user['cash']) - total_cost, 2)
-        user.transactions['last_transaction'] = {"type": "buy", "symbol": symbol, "quantity": quantity,
-                                                 "price_per_stock": price_per_stock.replace('_', '.')}
+        user.last_transaction = transaction
+
+        self.transaction_datastore.create_transaction(user.get_id(), transaction)
 
         user.save()
         return {"data": user, "error": False}
@@ -120,9 +119,13 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
             user['stocks_owned'][symbol]['total'] = num_stocks_owned - quantity
 
         stock_price = float(cache.get_stock_price(symbol))
+        transaction = {"type": "sell", "symbol": symbol, "quantity": quantity,
+                       "price_per_stock": '{0:.2f}'.format(stock_price)}
+
         user.cash = round(float(user['cash']) + quantity * stock_price, 2)
-        user.transactions['last_transaction'] = {"type": "sell", "symbol": symbol, "quantity": quantity,
-                                                 "price_per_stock": str(stock_price)}
+        user.last_transaction = transaction
+
+        self.transaction_datastore.create_transaction(user.get_id(), transaction)
         user.save()
 
         self.logger.info("Updating the database for a sell transaction for username " + username)

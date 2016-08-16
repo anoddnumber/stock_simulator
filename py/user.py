@@ -1,5 +1,6 @@
 from flask_mongoengine import Document
-from mongoengine import StringField, BooleanField, DateTimeField, DecimalField, DictField, ListField, ReferenceField
+from mongoengine import StringField, BooleanField, DateTimeField, DecimalField, DictField, ListField, ReferenceField, \
+    ObjectIdField
 from flask_security import UserMixin, RoleMixin
 from flask_security.utils import verify_password
 
@@ -18,7 +19,7 @@ class User(Document, UserMixin):
     roles = ListField(ReferenceField(Role), default=[])
     cash = DecimalField(max_length=255, default=50000, precision=2)
     stocks_owned = DictField(default={})
-    transactions = DictField(default={})
+    last_transaction = DictField(default={})
 
     def __str__(self):
         # user_dictionary = self.get_dict()
@@ -33,3 +34,10 @@ class User(Document, UserMixin):
 
     def check_password(self, password):
         return verify_password(password, self.password)
+
+
+# Note that the transaction creation date is encoded in the _id field, so we don't have to create another
+# field for it here
+class Transaction(Document):
+    user_id = ObjectIdField()  # Reference to the User's _id
+    properties = DictField(default={})  # The properties may be different based on the type of transaction

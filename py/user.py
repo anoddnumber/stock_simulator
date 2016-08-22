@@ -39,5 +39,20 @@ class User(Document, UserMixin):
 # Note that the transaction creation date is encoded in the _id field, so we don't have to create another
 # field for it here
 class Transaction(Document):
+    """
+    A Transaction is an object that contains information about whether a user bought or sold a stock and how much
+    was bought or sold on a particular date.
+    """
     user_id = ObjectIdField()  # Reference to the User's _id
     properties = DictField(default={})  # The properties may be different based on the type of transaction
+
+
+# Note that the creation date is encoded in the _id field, so we don't have to create another
+# field for it here
+class Snapshot(Document):
+    """
+    A Snapshot contains how much cash a user has and what stocks a user owns on a particular date.
+    """
+    user_id = ObjectIdField()  # Reference to the User's _id
+    cash = DecimalField(max_length=255, default=50000, precision=2)
+    stocks_owned = DictField(default={})

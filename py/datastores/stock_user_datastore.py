@@ -3,6 +3,7 @@ from bson.objectid import ObjectId
 import logging
 from py.constants import errors
 from py.datastores.transaction_datastore import MongoEngineTransactionDatastore
+from py.datastores.snapshot_datastore import MongoEngineSnapshotDatastore
 
 
 class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
@@ -11,6 +12,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         super(MongoEngineStockUserDatastore, self).__init__(db, user_model, role_model)
         self.logger = logging.getLogger(__name__)
         self.transaction_datastore = MongoEngineTransactionDatastore(db)
+        self.snapshot_datastore = MongoEngineSnapshotDatastore(db)
 
     def get_user_by_id(self, user_id):
         return self.get_user(ObjectId(user_id))
@@ -62,6 +64,7 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         user.last_transaction = transaction
 
         self.transaction_datastore.create_transaction(user.get_id(), transaction)
+        self.snapshot_datastore.create_snapshot(user.get_id(), user.cash, user.stocks_owned)
 
         user.save()
         return {"data": user, "error": False}
@@ -126,6 +129,8 @@ class MongoEngineStockUserDatastore(MongoEngineUserDatastore):
         user.last_transaction = transaction
 
         self.transaction_datastore.create_transaction(user.get_id(), transaction)
+        self.snapshot_datastore.create_snapshot(user.get_id(), user.cash, user.stocks_owned)
+
         user.save()
 
         self.logger.info("Updating the database for a sell transaction for username " + username)

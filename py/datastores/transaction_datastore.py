@@ -6,7 +6,7 @@ class MongoEngineTransactionDatastore(MongoEngineDatastore):
     def find_transactions(self, user_id):
         """
         :param user_id: The user's ID (has type ObjectId)
-        :return: A list of transaction Objects associated with the user
+        :return: A list of Transaction objects associated with the user
         """
         from mongoengine import ValidationError
         try:

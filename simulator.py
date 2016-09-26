@@ -19,7 +19,8 @@ from flask_security import Security, current_user, login_required
 from flask_mail import Mail
 from py.user import User, Role
 from py.extended_register_form import ExtendedRegisterForm
-from py.stock_user_datastore import MongoEngineStockUserDatastore
+from py.datastores.stock_user_datastore import MongoEngineStockUserDatastore
+from py.datastores.transaction_datastore import MongoEngineTransactionDatastore
 from py.constants import errors, messages
 from py.constants.errors import ERROR_CODE_MAP
 import csv
@@ -82,10 +83,10 @@ app.config['WTF_CSRF_ENABLED'] = False  # use for debugging to be able to send r
 app.config['SECURITY_LOGIN_URL'] = '/login'
 app.config['SECURITY_POST_LOGIN_VIEW'] = '/'
 app.config['SECURITY_POST_REGISTER_VIEW'] = '/post_register'
-app.config['SECURITY_CHANGE_URL'] = '/settings'
+app.config['SECURITY_POST_CHANGE_VIEW'] = '/change'
 
 # Flask-Security template paths
-app.config['SECURITY_CHANGE_PASSWORD_TEMPLATE'] = 'security/settings.html'
+app.config['SECURITY_CHANGE_PASSWORD_TEMPLATE'] = 'security/change_password.html'
 
 # Flask-Security register configs, states that there should be a registerable endpoint.
 app.config['SECURITY_REGISTERABLE'] = True
@@ -295,6 +296,9 @@ def post_register():
 @app.route("/confirmation", methods=['GET'])
 @login_required
 def confirmation():
+    """
+    Page shown to the user after buying/selling stock
+    """
     err_arg = request.args.get('err')
     error = ERROR_CODE_MAP.get(err_arg)
     active_tab = 'stocks'
@@ -304,7 +308,7 @@ def confirmation():
         return template.render(current_user=current_user, error=error, activeTab=active_tab, err_arg=err_arg)
 
     try:
-        last_transaction = current_user.transactions['last_transaction']
+        last_transaction = current_user.last_transaction
         transaction_type = last_transaction['type']
         symbol = last_transaction['symbol']
         quantity = last_transaction['quantity']

@@ -104,7 +104,6 @@
                 stockPanel.showCategoryAxis = true;
                 stockPanel.title = "Value";
                 stockPanel.eraseAll = false;
-        //        stockPanel.addLabel(0, 100, "Click on the pencil icon on top-right to start drawing", "center", 16);
 
                 var graph = new AmCharts.StockGraph();
                 graph.valueField = "value";
@@ -119,19 +118,15 @@
                 graph.useDataSetColors = false;
                 stockPanel.addStockGraph(graph);
 
-                var stockLegend = new AmCharts.StockLegend();
-                stockLegend.valueTextRegular = " ";
-                stockLegend.markerType = "none";
-                stockPanel.stockLegend = stockLegend;
-        //        stockPanel.drawingIconsEnabled = true;
-
                 chart.panels = [stockPanel];
 
-
                 // OTHER SETTINGS ////////////////////////////////////
+
                 var scrollbarSettings = new AmCharts.ChartScrollbarSettings();
                 scrollbarSettings.graph = graph;
                 scrollbarSettings.updateOnReleaseOnly = false;
+                scrollbarSettings.enabled = true;
+                scrollbarSettings.scrollDuration = .2; // in seconds, the time it takes to scroll to another portion of the graph
                 chart.chartScrollbarSettings = scrollbarSettings;
 
                 var cursorSettings = new AmCharts.ChartCursorSettings();
@@ -149,9 +144,13 @@
                 var periodSelector = new AmCharts.PeriodSelector();
                 periodSelector.position = "bottom";
                 periodSelector.periods = [{
+                    period: "mm",
+                    count: 1440,
+                    label: "1 day"
+                }, {
                     period: "DD",
-                    count: 10,
-                    label: "10 days"
+                    count: 7,
+                    label: "1 week"
                 }, {
                     period: "MM",
                     count: 1,
@@ -168,7 +167,16 @@
                     label: "MAX"
                 }];
                 chart.periodSelector = periodSelector;
-                chart.dataDateFormat = "YYYY-MM-DD";
+
+                var categoryAxis = new AmCharts.CategoryAxis();
+                categoryAxis.minPeriod = "hh";
+                categoryAxis.parseDates = true;
+                chart.categoryAxis = categoryAxis;
+                chart.dataDateFormat = "YYYY-MM-DD JJ:NN";
+
+                var categoryAxesSettings = new AmCharts.CategoryAxesSettings();
+                categoryAxesSettings.minPeriod = "mm";
+                chart.categoryAxesSettings = categoryAxesSettings;
 
                 chart.write('stockGraph');
 

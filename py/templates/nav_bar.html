@@ -13,8 +13,7 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul id="navbarTabs" class="nav navbar-nav" role="tablist">
-
-            <li id="profileTab" {% if activeTab is not defined or activeTab=="profile" %} class="active" {% endif %}>
+            <li id="profileTab" {% if activeTab=="profile" %} class="active" {% endif %}>
                 <a href="/">Profile</a>
             </li>
             <li id="stocksTab" {% if activeTab=="stocks" %} class="active" {% endif %}>
@@ -41,7 +40,7 @@
                     <li><a href="javascript:void(0)">SM Wiki</a></li>
                     <li><a href="javascript:void(0)">SM Community</a></li>
                     <li class="divider"></li>
-                    <li><a href="/settings">Settings</a></li>
+                    <li><a href="/change">Settings</a></li>
                 </ul>
             </li>
             <li>

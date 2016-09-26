@@ -7,16 +7,20 @@ from py.exceptions.invalid_usage import InvalidUsage
 from yahoo_stock_api import YahooStockAPI
 import logging
 
-"""
-The cache is responsible for having fast access to stock price information.
-It also allows clients to update it to make sure the information is not stale.
-The cache updates by calling the YahooStockApi and completely replaces the cache with the new information.
-"""
+
+# TODO: retrieve the NASDAQ file daily (currently called stock_symbols.txt)
+# and generate the json file daily (currently called parsed_symbols.json).
 class Cache:
     """
-    Creates the cache. If the path does not exist, create it by updating the cache.
+    The cache is responsible for having fast access to stock price information.
+    It also allows clients to update it to make sure the information is not stale.
+    The cache updates by calling the YahooStockApi and completely replaces the cache with the new information.
     """
+
     def __init__(self, load_from_file_path=None):
+        """
+        Creates the cache. If the path does not exist, create it by updating the cache.
+        """
         self.logger = logging.getLogger(__name__)
         self.logger.info("Initialized cache logger")
 
@@ -33,34 +37,32 @@ class Cache:
                 json_string += line
             self.parsed_json = json.loads(json_string)
             self.logger.info("Successfully loaded cache from file")
-            self.update()
         except (ValueError, IOError) as e:
             self.logger.exception("Error while loading cache")
-            self.update()
-            
+
     @property
     def json(self):
         return self.parsed_json
-    
-    """
-    Returns the last datetime that the cache was updated.
-    Looks in the cache for the last_updated key and returns the value.
-    A sample datetime would be 2015-09-07 19:07:51.870404
-    """
+
     def get_last_updated_date(self):
+        """
+        Returns the last datetime that the cache was updated.
+        Looks in the cache for the last_updated key and returns the value.
+        A sample datetime would be 2015-09-07 19:07:51.870404
+        """
         if self.parsed_json is None:
             return None
         last_updated_date = datetime.datetime.strptime(self.parsed_json['last_updated'], "%Y-%m-%dT%H:%M:%S.%f")
         return last_updated_date
-    
-    """
-    Updates the cache if timeInMinutes minutes have passed since the last time it was updated
-    or if there is no last updated date found (Either the cache does not exist or is corrupted).
-    
-    timeInMinutes - the number of minutes that should have passed before actually updating the cache
-    returns the number of seconds until the next expected update
-    """
+
     def update(self, time_in_minutes=0):
+        """
+        Updates the cache if timeInMinutes minutes have passed since the last time it was updated
+        or if there is no last updated date found (Either the cache does not exist or is corrupted).
+
+        timeInMinutes - the number of minutes that should have passed before actually updating the cache
+        returns the number of seconds until the next expected update
+        """
         time_in_seconds = time_in_minutes * 60
         try:
             last_updated_date = self.get_last_updated_date()
@@ -87,11 +89,11 @@ class Cache:
             self.__update_cache()
             return time_in_seconds
 
-    """
-    Finds what symbols should be updated. Updates the parsed_json field, which holds the cache data as a variable.
-    Updates the cache.json file.
-    """
     def __update_cache(self):
+        """
+        Finds what symbols should be updated. Updates the parsed_json field, which holds the cache data as a variable.
+        Updates the cache.json file.
+        """
         self.logger.info("Attempting to update the cache")
         # current directory is always /stock_simulator
         parsed_symbols_file = open('./static/parsed_symbols.json', 'r')
@@ -107,13 +109,13 @@ class Cache:
         cache_file = open(self.path, 'w')
         json.dump(self.parsed_json, cache_file, indent=1, sort_keys='true')
         self.logger.info("Finished updating the cache")
-    
-    """
-    Builds up the new cache and returns it
-    
-    symbol_name_json - the json object (a dictionary) that contains the symbol to name mapping
-    """
+
     def __get_new_json(self, symbol_name_json):
+        """
+        Builds up the new cache and returns it
+
+        symbol_name_json - the json object (a dictionary) that contains the symbol to name mapping
+        """
         keys = sorted(symbol_name_json.keys())
         # self.logger.info("Attempting to update the following keys in the cache: " + str(keys))
         new_json = json.loads("{}")
@@ -188,13 +190,13 @@ class Cache:
             self.logger.exception("Error calling YahooStockAPI, loading stock data from a backup source")
             self.load_from_file_path = './static/cache.json' #TODO remove this when self.load_cache_from_file() is removed
             self.load_cache_from_file() #TODO Remove this later..should not be in production, find backup sources
-    
-    """
-    Returns stock prices (as strings) that are delimited by newlines ("\n").
-    
-    symbols - an array of symbols whose stock prices will be returned
-    """
+
     def get_stock_prices(self, symbols):
+        """
+        Returns stock prices (as strings) that are delimited by newlines ("\n").
+
+        symbols - an array of symbols whose stock prices will be returned
+        """
         self.logger.info("Retrieving stock prices for the following symbols: " + str(symbols))
         prices = ''
         for i, symbol in enumerate(symbols):

@@ -13,12 +13,11 @@
     <!-- Collect the nav links, forms, and other content for toggling -->
     <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul id="navbarTabs" class="nav navbar-nav" role="tablist">
-
-            <li id="profileTab" {% if activeTab is not defined or activeTab=="profile" %} class="active" {% endif %}>
-                <a href="/" class="profileTabLink">Profile</a>
+            <li id="profileTab" {% if activeTab=="profile" %} class="active" {% endif %}>
+                <a href="/">Profile</a>
             </li>
             <li id="stocksTab" {% if activeTab=="stocks" %} class="active" {% endif %}>
-                <a href="/stocks" class="stocksTabLink">Stocks</a>
+                <a href="/stocks">Stocks</a>
             </li>
             <!--<li {% if activeTab=="watching" %} class="active" {% endif %}>-->
                 <!--<a href="#watching" aria-controls="watching" role="tab" data-toggle="tab">Watching</a>-->
@@ -30,14 +29,19 @@
         <ul class="nav navbar-nav navbar-right">
             <!--<li><a href="javascript:void(0)">News</a></li>-->
             <li class="dropdown">
-                <a href="javascript:void(0)" class="dropdown-toggle" data-toggle="dropdown">{{username}}<b class="caret"></b></a>
-                <!--<ul class="dropdown-menu">-->
-                    <!--<li><a href="javascript:void(0)">Tutorial</a></li>-->
-                    <!--<li><a href="javascript:void(0)">SM Wiki</a></li>-->
-                    <!--<li><a href="javascript:void(0)">SM Community</a></li>-->
-                    <!--<li class="divider"></li>-->
-                    <!--<li><a href="javascript:void(0)">Settings</a></li>-->
-                <!--</ul>-->
+                <a class="dropdown-toggle" data-toggle="dropdown">
+                    {% if current_user is defined %}
+                        {{current_user.username}}
+                    {% endif %}
+                    <b class="caret"></b>
+                </a>
+                <ul class="dropdown-menu">
+                    <li><a href="javascript:void(0)">Tutorial</a></li>
+                    <li><a href="javascript:void(0)">SM Wiki</a></li>
+                    <li><a href="javascript:void(0)">SM Community</a></li>
+                    <li class="divider"></li>
+                    <li><a href="/change">Settings</a></li>
+                </ul>
             </li>
             <li>
                 <!--<button type="submit" class="btn navbar-btn" action="logout" method="post">Log out</button>-->

@@ -2,9 +2,43 @@ import unittest
 from base_unit_test import BaseUnitTest
 import simulator
 from stock_simulator_test_client import StockSimulatorTestClient
+from py.constants import errors
+from py.constants.errors import ERROR_CODE_MAP
 
 
 class TestSellStock(BaseUnitTest):
+
+    @staticmethod
+    def assert_sell_successful(data):
+        assert "You have successfully sold" in data
+
+    @staticmethod
+    def assert_cannot_read_args(data):
+        TestSellStock.assert_error_symbol(errors.UNEXP, data)
+
+    @staticmethod
+    def assert_negative_price(data):
+        TestSellStock.assert_error_symbol(errors.UNEXP, data)
+
+    @staticmethod
+    def assert_sell_too_few(data):
+        TestSellStock.assert_error_symbol(errors.SLESS, data)
+
+    @staticmethod
+    def assert_not_enough_stock_owned(data):
+        TestSellStock.assert_error_symbol(errors.NESTK, data)
+
+    @staticmethod
+    def assert_stock_does_not_exist(data):
+        TestSellStock.assert_error_symbol(errors.SDNE, data)
+
+    @staticmethod
+    def assert_stock_price_changed(data):
+        TestSellStock.assert_error_symbol(errors.PRICH, data)
+
+    @staticmethod
+    def assert_error_symbol(err_sym, data):
+        assert ERROR_CODE_MAP.get(err_sym) in data
 
     def test_basic_sell(self):
         print "test_basic_sell"
@@ -21,18 +55,20 @@ class TestSellStock(BaseUnitTest):
 
         self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
                                         "total": quantity}},
-                              float(starting_cash) - int(quantity) * float(price))
+                              float(starting_cash) - int(quantity) * float(price) - simulator.config['commission'])
 
         rv = self.client.sell_stock(symbol, 1, price)
 
         self.assert_user_info({symbol: {price.replace(".", "_"): quantity - 1,
-                                "total": quantity - 1}},
-                      float(starting_cash) - (int(quantity) - 1) * float(price))
+                               "total": quantity - 1}},
+                              float(starting_cash) - (int(quantity) - 1) * float(price) - simulator.config['commission'])
+
+        TestSellStock.assert_sell_successful(rv.data)
 
         rv = self.client.sell_stock(symbol, 1, price)
 
-        self.assert_user_info({}, starting_cash)
-        # assert "Success" in rv.data TODO: add new assert here
+        TestSellStock.assert_sell_successful(rv.data)
+        self.assert_user_info({}, starting_cash - simulator.config['commission'])
 
     def test_sell_without_account(self):
         print "test_sell_without_account"
@@ -58,13 +94,13 @@ class TestSellStock(BaseUnitTest):
         # negative quantity
         rv = self.client.sell_stock(symbol, -1, price)
 
-        assert "Stock price or quantity less than 0" in rv.data
+        TestSellStock.assert_sell_too_few(rv.data)
         self.assert_user_info({}, starting_cash)
 
         # does not own any of that stock
         rv = self.client.sell_stock(symbol, 1, price)
 
-        # assert "User does not own stock" in rv.data TODO: add new assert here
+        TestSellStock.assert_not_enough_stock_owned(rv.data)
         self.assert_user_info({}, starting_cash)
 
         # buy 1 stock and try to sell 2
@@ -73,15 +109,15 @@ class TestSellStock(BaseUnitTest):
 
         self.assert_user_info({symbol: {price.replace(".", "_"): quantity_bought,
                                         "total": quantity_bought}},
-                              starting_cash - quantity_bought * float(price))
+                              starting_cash - quantity_bought * float(price) - simulator.config['commission'])
 
         rv = self.client.sell_stock(symbol, 2, price)
 
-        # assert "User does not own enough stock" in rv.data TODO: add new assert here
+        TestSellStock.assert_not_enough_stock_owned(rv.data)
         # make sure nothing changed in the db
         self.assert_user_info({symbol: {price.replace(".", "_"): quantity_bought,
                                         "total": quantity_bought}},
-                              starting_cash - quantity_bought * float(price))
+                              starting_cash - quantity_bought * float(price) - simulator.config['commission'])
 
     def test_sell_bad_symbol(self):
         print "test_sell_bad_symbol"
@@ -92,7 +128,7 @@ class TestSellStock(BaseUnitTest):
         symbol = "bad_symbol"
 
         rv = self.client.sell_stock(symbol, 1, 1)
-        assert "Invalid symbol" in rv.data
+        TestSellStock.assert_stock_does_not_exist(rv.data)
 
     def test_sell_bad_stock_price(self):
         print "test_sell_bad_stock_price"
@@ -112,23 +148,23 @@ class TestSellStock(BaseUnitTest):
 
         self.assert_user_info({symbol : {price.replace(".", "_"): quantity,
                                          "total": quantity}},
-                              starting_cash - quantity * float(price))
+                              starting_cash - quantity * float(price) - simulator.config['commission'])
 
         # price does not equal server's price
         rv = self.client.sell_stock(symbol, 1, bad_price)
 
-        assert "Stock price changed, please try again." in rv.data
+        TestSellStock.assert_stock_price_changed(rv.data)
         self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
                                "total": quantity}},
-                              starting_cash - quantity * float(price))
+                              starting_cash - quantity * float(price) - simulator.config['commission'])
 
         # pass in negative price
         rv = self.client.sell_stock(symbol, 1, -1)
 
-        assert "Stock price or quantity less than 0" in rv.data
+        TestSellStock.assert_negative_price(rv.data)
         self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
                                "total": quantity}},
-                              starting_cash - quantity * float(price))
+                              starting_cash - quantity * float(price) - simulator.config['commission'])
 
     def test_sell_missing_argument(self):
         print "test_sell_missing_argument"
@@ -147,32 +183,31 @@ class TestSellStock(BaseUnitTest):
 
         self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
                                         "total": quantity}},
-                              starting_cash - quantity * float(price))
+                              starting_cash - quantity * float(price) - simulator.config['commission'])
 
         # missing price
         rv = self.client.sell_stock(symbol, quantity, "")
 
-        assert "Error reading arguments" in rv.data
+        TestSellStock.assert_cannot_read_args(rv.data)
         self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
                                         "total": quantity}},
-                              starting_cash - quantity * float(price))
+                              starting_cash - quantity * float(price) - simulator.config['commission'])
 
         # missing quantity
         rv = self.client.sell_stock(symbol, "", price)
 
-        assert "Error reading arguments" in rv.data
+        TestSellStock.assert_cannot_read_args(rv.data)
         self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
                                         "total": quantity}},
-                              starting_cash - quantity * float(price))
+                              starting_cash - quantity * float(price) - simulator.config['commission'])
 
         # missing symbol
         rv = self.client.sell_stock("", quantity, price)
 
-        print "rv.data: " + rv.data
-        assert "Invalid symbol" in rv.data
+        TestSellStock.assert_cannot_read_args(rv.data)
         self.assert_user_info({symbol: {price.replace(".", "_"): quantity,
                                         "total": quantity}},
-                              starting_cash - quantity * float(price))
+                              starting_cash - quantity * float(price) - simulator.config['commission'])
 
 if __name__ == '__main__':
     unittest.main()

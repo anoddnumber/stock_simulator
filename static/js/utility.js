@@ -1,6 +1,3 @@
-var userInfo;
-var stockSymbolsMap;
-
 (function($) {
     $.Utility = function(options) {
         var utility = {
@@ -92,7 +89,11 @@ var stockSymbolsMap;
                 return (newNum - oldNum)/oldNum * 100;
             },
 
-            replaceUrlParam : function(url, paramName, paramValue) {
+            replaceUrlParam(paramName, paramValue) {
+                return utility.replaceUrlParamHelper(document.URL, paramName, paramValue);
+            },
+
+            replaceUrlParamHelper : function(url, paramName, paramValue) {
                 var pattern = new RegExp('\\b('+paramName+'=).*?(&|$)')
                 if(url.search(pattern)>=0){
                     return url.replace(pattern,'$1' + paramValue + '$2');
@@ -113,6 +114,21 @@ var stockSymbolsMap;
                         return sParameterName[1] === undefined ? true : sParameterName[1];
                     }
                 }
+            },
+
+            // used to modify the page parameter in the URL (i.e. /stocks?page=3) for datatables
+            modifyPageParam : function(table) {
+                var info = table.page.info();
+
+                // info.page has a range of [0, info.pages)
+                var url = document.URL;     // Returns full URL
+                var newUrl = window.location.href.split('?')[0];
+
+                if (info.page != 0) {
+                    newUrl = utility.replaceUrlParam("page", info.page + 1);
+                }
+
+                history.pushState( {}, document.title, newUrl);
             }
         }
 
@@ -126,6 +142,7 @@ var stockSymbolsMap;
             replaceAll : utility.replaceAll,
             replaceUrlParam : utility.replaceUrlParam,
             getUrlParameter : utility.getUrlParameter,
+            modifyPageParam : utility.modifyPageParam
         };
     };
 })(jQuery);

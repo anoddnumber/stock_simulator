@@ -165,9 +165,16 @@ class Cache:
                     line = results[i]
                     (decimal, daily_price_change, daily_percent_change, day_open, day_high, day_low, market_cap,
                      pe_ratio, div_yield) = tuple(line.split(','))
-                    decimal = Decimal(float(decimal))
+
+                    try:
+                        decimal = Decimal(float(decimal))
+                        price = str('{:.2f}'.format(round(decimal, 2)))
+                    except:
+                        self.logger.warn("name: " + name + " does not have a price.")
+                        price = -1
+
                     daily_percent_change = daily_percent_change.replace('"', '')
-                    price = str('{:.2f}'.format(round(decimal, 2)))
+
 
                     if float(price) > 0:
                         new_json[key] = {"name": str(name), "price": price, "daily_price_change": daily_price_change,

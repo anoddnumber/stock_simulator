@@ -7,3 +7,10 @@ static/cache.json
 *.idea*
 
 *.log
+
+# Ignore virtualenv files/directories
+bin/*
+include/*
+lib/*
+pip-selfcheck.json
+.Python

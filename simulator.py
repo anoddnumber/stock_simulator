@@ -29,20 +29,17 @@ env = Environment(loader=PackageLoader('py', 'templates'))
 app = Flask(__name__, static_url_path='', template_folder='py/templates')
 app.secret_key = 'i\xaa:\xee>\x90g\x0e\xf0\xf6-S\x0e\xf9\xc9(\xde\xe4\x08*\xb4Ath'
 
-
 def init_logger():
     global logger
     py.logging_setup.setup()
     logger = logging.getLogger(__name__)
 init_logger()
 
-
 # MongoDB Config
 def set_db_config():
     # split on multiple strings
     mongodb_uri = os.environ.get('MONGODB_URI')
     # mongodb_uri = 'mongodb://heroku_jnccm4lq:81b5jm0qkg0frk5j1o8bd63t84@ds021751.mlab.com:21751/heroku_jnccm4lq'
-
     if mongodb_uri:
         (mongo_db, db_user, db_password, host, db_port, db_name) = re.split('://|:|@|,|/', mongodb_uri)
         app.config['MONGODB_USERNAME'] = db_user
@@ -113,6 +110,16 @@ mail = Mail(app)
 # security.app.login_manager.login_view = 'root' # this will give a ?next= in the URL.
 # Using the unauthorized handler will give more control, we can add the next parameter later
 
+
+def get_collection():
+    host = os.environ.get('MONGODB_URI')
+    port = app.config['MONGODB_PORT']
+
+    client = MongoClient(host=host,port=port)
+    db_name = app.config['MONGODB_DB']
+    the_db = client[db_name]
+    collection = the_db[DBInfo.collection_name]
+    return collection
 
 @security.app.login_manager.unauthorized_handler
 def unauthorized_callback():
@@ -503,6 +510,10 @@ if __name__ == "__main__":
     init_cache()
 
     # Heroku will define the PORT environment variable, so use it if it is defined, otherwise default to 5000.
+    port = int(os.environ.get('PORT', 5000))
+
+    # Bind to PORT if defined, otherwise default to 5000.
+    # Heroku will define the PORT environment variable, so use it if it is defined
     port = int(os.environ.get('PORT', 5000))
 
     logger.info("Starting server")

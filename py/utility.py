@@ -44,3 +44,10 @@ def merge_two_dicts(x, y):
     z = x.copy()
     z.update(y)
     return z
+
+def merge_n_dicts(dict_list):
+    "Not the most efficient.."
+    result = {}
+    for d in dict_list:
+        result = merge_two_dicts(result, d)
+    return result

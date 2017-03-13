@@ -1,0 +1,26 @@
+{
+ "CNSL": {
+  "daily_percent_change": "+2.45%", 
+  "daily_price_change": "+0.55", 
+  "day_high": "23.66", 
+  "day_low": "22.78", 
+  "day_open": "23.45", 
+  "div_yield": "6.89", 
+  "market_cap": "1.17B", 
+  "name": "Consolidated Communications Holdings, Inc.", 
+  "pe_ratio": "80.52", 
+  "price": "23.03"
+ }, 
+ "CNTF": {
+  "daily_percent_change": "+31.06%", 
+  "daily_price_change": "+0.50", 
+  "day_high": "2.11", 
+  "day_low": "1.57", 
+  "day_open": "1.72", 
+  "div_yield": "N/A", 
+  "market_cap": "22.34M", 
+  "name": "China TechFaith Wireless Communication Technology Limited", 
+  "pe_ratio": "N/A", 
+  "price": "2.11"
+ }
+}

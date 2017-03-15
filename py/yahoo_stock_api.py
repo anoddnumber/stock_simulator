@@ -2,6 +2,7 @@ from urllib2 import Request, urlopen, URLError
 from py.exceptions.invalid_usage import InvalidUsage
 import logging
 
+
 class YahooStockAPI:
     """
         stock_symbols - The symbol of the stock that you want information for

@@ -31,8 +31,8 @@ class YahooStockAPIWrapper:
         # Averages
         'c8': 'After Hours Change (Realtime)',
         'c3': 'Commission',
-        'g': 'Day’s Low',
-        'h': 'Day’s High',
+        'g': 'Day\'s Low',
+        'h': 'Day\'s High',
         'k1': 'Last Trade (Realtime) With Time',
         'l': 'Last Trade (With Time)',
         'l1': 'Last Trade (Price Only)',
@@ -45,11 +45,11 @@ class YahooStockAPIWrapper:
         'm4': '200 Day Moving Average',
 
         # Misc
-        'w1': 'Day’s Value Change',
-        'w4': 'Day’s Value Change (Realtime)',
+        'w1': 'Day\'s Value Change',
+        'w4': 'Day\'s Value Change (Realtime)',
         'p1': 'Price Paid',
-        'm': 'Day’s Range',
-        'm2': 'Day’s Range (Realtime)',
+        'm': 'Day\'s Range',
+        'm2': 'Day\'s Range (Realtime)',
         'g1': 'Holdings Gain Percent',
         'g3': 'Annualized Gain',
         'g4': 'Holdings Gain',
@@ -111,13 +111,28 @@ class YahooStockAPIWrapper:
         's7': 'Short Ratio',
     }
 
-    def __init__(self):
+    def __init__(self, stocks='todo', options='todo'):
+        self.options = options
+        #self.api = YahooStockAPI(stocks)
         pass
 
-    def parse(self):
+    def get_data(self):
         pass
+
+    def _format_data(self, results):
+        results = results.replace('\n', '').split(',')
+        result_map = {}
+        for option, result in zip(self.options, results):
+            result_map[YahooStockAPIWrapper.arguments_map.get(option)] = result
+
+        return result_map
 
 if __name__ == '__main__':
-    api = YahooStockAPI('MSFT', 'l1c1p2ohgj1ry')
+    # api = YahooStockAPI('MSFT', 'l1c1p2ohgj1ry')
+    api = YahooStockAPI('MSFT', 'l1c1')
     results = api.submit_request()
-    print "results: " + results
+    print "results: " + str(results)
+    # print "results.split(): " + str(results.split(','))
+    wrapper = YahooStockAPIWrapper(options=['l1', 'c1'])
+    formatted = wrapper._format_data(results)
+    print "formatted: " + str(formatted)

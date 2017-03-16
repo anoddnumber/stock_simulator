@@ -10,7 +10,10 @@ class YahooStockAPI:
         http://www.jarloo.com/yahoo_finance/
     """
     def __init__(self, stock_symbols, info_arguments):
-        self.ss = stock_symbols
+        if isinstance(stock_symbols, basestring):
+            self.ss = [stock_symbols]
+        else:
+            self.ss = stock_symbols
         self.info = info_arguments
         self.logger = logging.getLogger(__name__)
         

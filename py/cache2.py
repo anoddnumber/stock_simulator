@@ -1,5 +1,6 @@
 import json
 
+
 class Cache2:
     """
     The cache keeps track of stock data. Its purpose is for the application to keep the data itself and not have

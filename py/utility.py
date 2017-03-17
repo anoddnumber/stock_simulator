@@ -39,11 +39,13 @@ def is_within_after_stock_hours(time=None):
     # time.weekday -> 0 = Monday, 6 = Sunday
     return time.weekday() < 5 and 20 <= time.hour < 22
 
+
 def merge_two_dicts(x, y):
     """Given two dicts, merge them into a new dict as a shallow copy."""
     z = x.copy()
     z.update(y)
     return z
+
 
 def merge_n_dicts(dict_list):
     "Not the most efficient.."

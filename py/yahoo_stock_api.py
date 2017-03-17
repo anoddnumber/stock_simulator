@@ -9,6 +9,9 @@ class YahooStockAPI:
         info_arguments - What type of information you want. The arguments you can specify are documented here:
         http://www.jarloo.com/yahoo_finance/
     """
+
+    MAX_STOCKS_PER_CALL = 200
+
     def __init__(self, stock_symbols, info_arguments):
         if isinstance(stock_symbols, basestring):
             self.ss = [stock_symbols]
@@ -18,7 +21,7 @@ class YahooStockAPI:
         self.logger = logging.getLogger(__name__)
         
     def submit_request(self):
-        if len(self.ss) > 200:
+        if len(self.ss) > YahooStockAPI.MAX_STOCKS_PER_CALL:
             raise InvalidUsage('Too many stock symbols requested. Please request at most 200 stock symbols. Exiting.', status_code=501)
         symbols = ""
         for s in self.ss:

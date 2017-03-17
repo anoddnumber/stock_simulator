@@ -1,4 +1,5 @@
 from yahoo_stock_api import YahooStockAPI
+from utility import merge_two_dicts
 
 
 class YahooStockAPIWrapper:
@@ -111,28 +112,36 @@ class YahooStockAPIWrapper:
         's7': 'Short Ratio',
     }
 
-    def __init__(self, stocks='todo', options='todo'):
-        self.options = options
-        #self.api = YahooStockAPI(stocks)
-        pass
+    @staticmethod
+    def get_data(stocks, options):
+        start = 0
+        end = YahooStockAPI.MAX_STOCKS_PER_CALL
+        yahoo_api_options = ''.join(options)
+        result = {}
 
-    def get_data(self):
-        pass
+        while start < len(stocks):
+            api = YahooStockAPI(''.join(stocks[start:end]), yahoo_api_options)
+            api_result = api.submit_request()
+            print "api_result: " + str(api_result)
+            result = merge_two_dicts(result, YahooStockAPIWrapper._format_data(api_result, options))
 
-    def _format_data(self, results):
+            start += YahooStockAPI.MAX_STOCKS_PER_CALL
+            end += YahooStockAPI.MAX_STOCKS_PER_CALL
+
+        return result
+
+    @staticmethod
+    def _format_data(results, options):
         results = results.replace('\n', '').split(',')
         result_map = {}
-        for option, result in zip(self.options, results):
-            result_map[YahooStockAPIWrapper.arguments_map.get(option)] = result
+        for option, result in zip(options, results):
+            option_value = YahooStockAPIWrapper.arguments_map.get(option)
+            if option_value is None:
+                continue
+            result_map[option_value] = result
 
         return result_map
 
 if __name__ == '__main__':
-    # api = YahooStockAPI('MSFT', 'l1c1p2ohgj1ry')
-    api = YahooStockAPI('MSFT', 'l1c1')
-    results = api.submit_request()
-    print "results: " + str(results)
-    # print "results.split(): " + str(results.split(','))
-    wrapper = YahooStockAPIWrapper(options=['l1', 'c1'])
-    formatted = wrapper._format_data(results)
+    formatted = YahooStockAPIWrapper.get_data(['MSFT'], ['l1', 'c1'])
     print "formatted: " + str(formatted)

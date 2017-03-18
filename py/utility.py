@@ -3,6 +3,7 @@ Contains useful methods for the entire application
 """
 
 import datetime
+import threading
 
 
 def is_within_stock_hours(time=None):
@@ -53,3 +54,22 @@ def merge_n_dicts(dict_list):
     for d in dict_list:
         result = merge_two_dicts(result, d)
     return result
+
+def do_every(interval, worker_func, iterations=0):
+    """
+    Runs a function every interval number of seconds
+
+    :param interval: How often the function should run, in number of seconds
+    :param worker_func: The function to run
+    :param iterations: Number of iterations to do before stopping, defaults to infinite
+    """
+    if iterations != 1:
+        t = threading.Timer(
+            interval,
+            do_every, [interval, worker_func, 0 if iterations == 0 else iterations-1]
+        )
+        t.setDaemon(True)
+        t.start()
+
+    worker_func()
+    return t

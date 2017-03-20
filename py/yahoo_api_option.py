@@ -52,7 +52,7 @@ class YahooAPIOptions:
     PRICE_PAID = YahooAPIOption(DataOptions.PRICE_PAID, 'p1')
     DAY_RANGE = YahooAPIOption(DataOptions.DAY_RANGE, 'm')
     DAY_RANGE_REAL_TIME = YahooAPIOption(DataOptions.DAY_RANGE_REAL_TIME, 'm2')
-    HOLDINGS_GAIN_PERCENT = YahooAPIOption(DataOptions.HOLDINGS_GAIN_PERCENT, ''g1)
+    HOLDINGS_GAIN_PERCENT = YahooAPIOption(DataOptions.HOLDINGS_GAIN_PERCENT, 'g1')
     ANNUALIZED_GAIN = YahooAPIOption(DataOptions.ANNUALIZED_GAIN, 'g3')
     HOLDINGS_GAIN = YahooAPIOption(DataOptions.HOLDINGS_GAIN, 'g4')
     HOLDINGS_GAIN_PERCENT_REAL_TIME = YahooAPIOption(DataOptions.HOLDINGS_GAIN_PERCENT_REAL_TIME, 'g5')

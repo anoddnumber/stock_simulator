@@ -122,8 +122,7 @@ class YahooStockAPIWrapper:
         while start < len(stocks):
             api = YahooStockAPI(stocks[start:end], yahoo_api_options)
             api_result = api.submit_request()
-            print "api_result: " + str(api_result)
-            api_result = YahooStockAPIWrapper._format_api_result(stocks, options, api_result)
+            api_result = YahooStockAPIWrapper._format_api_result(stocks[start:end], options, api_result)
 
             result = merge_two_dicts(result, api_result)
 
@@ -155,5 +154,5 @@ class YahooStockAPIWrapper:
         return stock_info
 
 if __name__ == '__main__':
-    formatted = YahooStockAPIWrapper.get_data(['MSFT', 'AMZN'], ['l1', 'c1'])
+    formatted = YahooStockAPIWrapper.get_data(['MSFT', 'AMZN', 'AAL', 'ARNA', 'AROW', 'ARQL'], ['l1', 'c1'])
     print "formatted: " + str(formatted)

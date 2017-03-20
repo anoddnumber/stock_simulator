@@ -132,6 +132,34 @@ class YahooStockAPIWrapper:
         return result
 
     @staticmethod
+    def get_data2(stocks, options):
+        """
+        Retrieves stock data
+        :param stocks: list of stock symbols
+        :param options: list of YahooAPIOption objects
+        :return: map of stock data
+        """
+        yahoo_options = []
+        for option in options:
+            yahoo_options.append(option.get_yahoo_option())
+        yahoo_api_args = ''.join(yahoo_options)
+
+        start = 0
+        end = YahooStockAPI.MAX_STOCKS_PER_CALL
+        result = {}
+        while start < len(stocks):
+            api = YahooStockAPI(stocks[start:end], yahoo_api_args)
+            api_result = api.submit_request()
+            api_result = YahooStockAPIWrapper._format_api_result2(stocks[start:end], options, api_result)
+
+            result = merge_two_dicts(result, api_result)
+
+            start += YahooStockAPI.MAX_STOCKS_PER_CALL
+            end += YahooStockAPI.MAX_STOCKS_PER_CALL
+
+        return result
+
+    @staticmethod
     def _format_api_result(stocks, options, results):
         # rstrip removes trailing newline characters
         results = results.rstrip().split('\n')
@@ -140,6 +168,18 @@ class YahooStockAPIWrapper:
         for stock, result in zip(stocks, results):
             data = result.split(',')
             rtn[stock] = YahooStockAPIWrapper._format_stock(options, data)
+
+        return rtn
+
+    @staticmethod
+    def _format_api_result2(stocks, options, results):
+        # rstrip removes trailing newline characters
+        results = results.rstrip().split('\n')
+        rtn = {}
+
+        for stock, result in zip(stocks, results):
+            data = result.split(',')
+            rtn[stock] = YahooStockAPIWrapper._format_stock2(options, data)
 
         return rtn
 
@@ -153,6 +193,16 @@ class YahooStockAPIWrapper:
             stock_info[option_value] = datum
         return stock_info
 
+    @staticmethod
+    def _format_stock2(options, data):
+        stock_info = {}
+        for option, datum in zip(options, data):
+            stock_info[option.get_option()] = datum
+        return stock_info
+
 if __name__ == '__main__':
-    formatted = YahooStockAPIWrapper.get_data(['MSFT', 'AMZN', 'AAL', 'ARNA', 'AROW', 'ARQL'], ['l1', 'c1'])
+    from yahoo_api_option import YahooAPIOptions
+    # formatted = YahooStockAPIWrapper.get_data(['MSFT', 'AMZN', 'AAL', 'ARNA', 'AROW', 'ARQL'], ['l1', 'c1'])
+    # print "formatted: " + str(formatted)
+    formatted = YahooStockAPIWrapper.get_data2(['MSFT', 'AMZN', 'AAL', 'ARNA', 'AROW', 'ARQL'], [YahooAPIOptions.LAST_TRADE_PRICE, YahooAPIOptions.ASK])
     print "formatted: " + str(formatted)

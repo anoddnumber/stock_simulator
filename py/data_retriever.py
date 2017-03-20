@@ -1,99 +1,108 @@
-from yahoo_api_option import YahooAPIOption
+from yahoo_api_option import YahooAPIOption, YahooAPIOptions
+from yahoo_stock_api_wrapper import YahooStockAPIWrapper
+from data_options import DataOptions
 
 
 class DataRetriever:
-
-    ASK = 'Ask'
-    BID = 'Bid'
-    ASK_REALTIME = 'Ask (Realtime)'
-    BID_REALTIME = 'Bid (Realtime)'
-    PREVIOUS_CLOSE = 'Previous Close'
-    OPEN = 'Open'
-    DIVIDEND_PER_SHARE = 'Dividend per Share'
-    DIVIDEND_PAY_DATE = 'Dividend Pay Date'
-    EX_DIVIDEND_DATE = 'Ex-Dividend Date'
-    CHANGE = 'Change'
-    CHANGE_AND_PERCENT_CHANGE = 'Change & Percent Change'
-    CHANGE_REAL_TIME = 'Change (Realtime)'
-    CHANGE_PERCENT_REAL_TIME = 'Change Percent (Realtime)'
-    CHANGE_IN_PERCENT = 'Change in Percent'
-    LAST_TRADE_DATE = 'Last Trade Date'
-    TRADE_DATE = 'Trade Date'
-    LAST_TRADE_TIME = 'Last Trade Time'
-    AFTER_HOURS_CHANGE_REAL_TIME = 'After Hours Change (Realtime)'
-    COMMISSION = 'Commission'
-    DAY_LOW = 'Day\'s Low'
-    DAY_HIGH = 'Day\'s High'
-    LAST_TRADE_WITH_TIME_REAL_TIME = 'Last Trade (Realtime) With Time'
-    LAST_TRADE_WITH_TIME = 'Last Trade (With Time)'
-    LAST_TRADE_PRICE = 'Last Trade (Price Only)'
-    ONE_YEAR_TARGET_PRICE = '1 yr Target Price'
-    CHANGE_FROM_200_DAY_MOVING_AVERAGE = 'Change From 200 Day Moving Average'
-    PERCENT_CHANGE_FROM_200_DAY_MOVING_AVERAGE = 'Percent Change From 200 Day Moving Average'
-    CHANGE_FROM_50_DAY_MOVING_AVERAGE = 'Change From 50 Day Moving Average'
-    PERCENT_CHANGE_FROM_50_DAY_MOVING_AVERAGE = 'Percent Change From 50 Day Moving Average'
-    FIFTY_DAY_MOVING_AVERAGE = '50 Day Moving Average'
-    TWO_HUNDRED_DAY_MOVING_AVERAGE = '200 Day Moving Average'
-    DAY_VALUE_CHANGE = 'Day\'s Value Change'
-    DAY_VALUE_CHANGE_REAL_TIME = 'Day\'s Value Change (Realtime)'
-    PRICE_PAID = 'Price Paid'
-    DAY_RANGE = 'Day\'s Range'
-    DAY_RANGE_REAL_TIME = 'Day\'s Range (Realtime)'
-    HOLDINGS_GAIN_PERCENT = 'Holdings Gain Percent'
-    ANNUALIZED_GAIN = 'Annualized Gain'
-    HOLDINGS_GAIN = 'Holdings Gain'
-    HOLDINGS_GAIN_PERCENT_REAL_TIME = 'Holdings Gain Percent (Realtime)'
-    HOLDINGS_GAIN_REAL_TIME = 'Holdings Gain (Realtime)'
-    FIFTY_TWO_WEEK_HIGH = '52 Week High'
-    FIFTY_TWO_WEEK_LOW = '52 week Low'
-    CHANGE_FROM_FIFTY_TWO_WEEK_LOW = 'Change From 52 Week Low'
-    CHANGE_FROM_FIFTY_TWO_WEEK_HIGH = 'Change From 52 week High'
-    PERCENT_CHANGE_FROM_FIFTY_TWO_WEEK_LOW = 'Percent Change From 52 week Low'
-    PERCENT_CHANGE_FROM_FIFTY_TWO_WEEK_HIGH = 'Percent Change From 52 week High'
-    FIFTY_TWO_WEEK_RANGE = '52 week Range'
-    MORE_INFO = 'More Info'
-    MARKET_CAPITALIZATION = 'Market Capitalization'
-    MARKET_CAP_REAL_TIME = 'Market Cap (Realtime)'
-    FLOAT_SHARES = 'Float Shares'
-    NAME = 'Name'
-    NOTES = 'Notes'
-    SYMBOL = 'Symbol'
-    SHARES_OWNED = 'Shares Owned'
-    STOCK_EXCHANGE = 'Stock Exchange'
-    SHARES_OUTSTANDING = 'Shares Outstanding'
-    VOLUME = 'Volume'
-    ASK_SIZE = 'Ask Size'
-    BID_SIZE = 'Bid Size'
-    LAST_TRADE_SIZE = 'Last Trade Size'
-    AVERAGE_DAILY_VOLUME = 'Average Daily Volume'
-    TICKER_TREND = 'Ticker Trend'
-    TRADE_LINKS = 'Trade Links'
-    ORDER_BOOK_REAL_TIME = 'Order Book (Realtime)'
-    HIGH_LIMIT = 'High Limit'
-    LOW_LIMIT = 'Low Limit'
-    HOLDINGS_VALUE = 'Holdings Value'
-    HOLDINGS_VALUE_REAL_TIME = 'Holdings Value (Realtime)'
-    REVENUE = 'Revenue'
-    EARNINGS_PER_SHARE = 'Earnings per Share'
-    EPS_ESTIMATE_CURRENT_YEAR = 'EPS Estimate Current Year'
-    EPS_ESTIMATE_NEXT_YEAR = 'EPS Estimate Next Year'
-    EPS_ESTIMATE_NEXT_QUARTER = 'EPS Estimate Next Quarter'
-    BOOK_VALUE = 'Book Value'
-    EBITDA = 'EBITDA'
-    PRICE_SALES = 'Price / Sales'
-    PRICE_BOOK = 'Price / Book'
-    P_E_RATIO = 'P/E Ratio'
-    P_E_RATIO_REAL_TIME = 'P/E Ratio (Realtime)'
-    PEG_RATIO = 'PEG Ratio'
-    PRICE_EPS_ESTIMATE_CURRENT_YEAR = 'Price / EPS Estimate Current Year'
-    PRICE_EPS_ESTIMATE_NEXT_YEAR = 'Price / EPS Estimate Next Year'
-    SHORT_RATIO = 'Short Ratio'
-
 
     options = [
 
     ]
 
     option_to_api_mapping = {
-
+        DataOptions.ASK: YahooAPIOptions.ASK,
+        DataOptions.BID: YahooAPIOptions.BID,
+        DataOptions.ASK_REAL_TIME: YahooAPIOption('b2'),
+        DataOptions.BID_REAL_TIME: YahooAPIOption('b3'),
+        DataOptions.PREVIOUS_CLOSE: YahooAPIOption('p'),
+        DataOptions.OPEN: YahooAPIOption('o'),
+        DataOptions.DIVIDEND_PER_SHARE: YahooAPIOption(''),
+        DataOptions.DIVIDEND_PAY_DATE: YahooAPIOption(''),
+        DataOptions.EX_DIVIDEND_DATE: YahooAPIOption(''),
+        DataOptions.CHANGE: YahooAPIOption(''),
+        DataOptions.CHANGE_AND_PERCENT_CHANGE: YahooAPIOption(''),
+        DataOptions.CHANGE_REAL_TIME: YahooAPIOption(''),
+        DataOptions.CHANGE_PERCENT_REAL_TIME: YahooAPIOption(''),
+        DataOptions.CHANGE_IN_PERCENT: YahooAPIOption(''),
+        DataOptions.LAST_TRADE_DATE: YahooAPIOption(''),
+        DataOptions.TRADE_DATE: YahooAPIOption(''),
+        DataOptions.LAST_TRADE_TIME: YahooAPIOption(''),
+        DataOptions.AFTER_HOURS_CHANGE_REAL_TIME: YahooAPIOption(''),
+        DataOptions.COMMISSION: YahooAPIOption(''),
+        DataOptions.DAY_LOW: YahooAPIOption(''),
+        DataOptions.DAY_HIGH: YahooAPIOption(''),
+        DataOptions.LAST_TRADE_WITH_TIME_REAL_TIME: YahooAPIOption(''),
+        DataOptions.LAST_TRADE_WITH_TIME: YahooAPIOption(''),
+        DataOptions.LAST_TRADE_PRICE: YahooAPIOptions.LAST_TRADE_PRICE,
+        DataOptions.ONE_YEAR_TARGET_PRICE: YahooAPIOption(''),
+        DataOptions.CHANGE_FROM_200_DAY_MOVING_AVERAGE: YahooAPIOption(''),
+        DataOptions.PERCENT_CHANGE_FROM_200_DAY_MOVING_AVERAGE: YahooAPIOption(''),
+        DataOptions.CHANGE_FROM_50_DAY_MOVING_AVERAGE: YahooAPIOption(''),
+        DataOptions.PERCENT_CHANGE_FROM_50_DAY_MOVING_AVERAGE: YahooAPIOption(''),
+        DataOptions.FIFTY_DAY_MOVING_AVERAGE: YahooAPIOption(''),
+        DataOptions.TWO_HUNDRED_DAY_MOVING_AVERAGE: YahooAPIOption(''),
+        DataOptions.DAY_VALUE_CHANGE: YahooAPIOption(''),
+        DataOptions.DAY_VALUE_CHANGE_REAL_TIME: YahooAPIOption(''),
+        DataOptions.PRICE_PAID: YahooAPIOption(''),
+        DataOptions.DAY_RANGE: YahooAPIOption(''),
+        DataOptions.DAY_RANGE_REAL_TIME: YahooAPIOption(''),
+        DataOptions.HOLDINGS_GAIN_PERCENT: YahooAPIOption(''),
+        DataOptions.ANNUALIZED_GAIN: YahooAPIOption(''),
+        DataOptions.HOLDINGS_GAIN: YahooAPIOption(''),
+        DataOptions.HOLDINGS_GAIN_PERCENT_REAL_TIME: YahooAPIOption(''),
+        DataOptions.HOLDINGS_GAIN_REAL_TIME: YahooAPIOption(''),
+        DataOptions.FIFTY_TWO_WEEK_HIGH: YahooAPIOption(''),
+        DataOptions.FIFTY_TWO_WEEK_LOW: YahooAPIOption(''),
+        DataOptions.CHANGE_FROM_FIFTY_TWO_WEEK_LOW: YahooAPIOption(''),
+        DataOptions.CHANGE_FROM_FIFTY_TWO_WEEK_HIGH: YahooAPIOption(''),
+        DataOptions.PERCENT_CHANGE_FROM_FIFTY_TWO_WEEK_LOW: YahooAPIOption(''),
+        DataOptions.PERCENT_CHANGE_FROM_FIFTY_TWO_WEEK_HIGH: YahooAPIOption(''),
+        DataOptions.FIFTY_TWO_WEEK_RANGE: YahooAPIOption(''),
+        DataOptions.MORE_INFO: YahooAPIOption(''),
+        DataOptions.MARKET_CAPITALIZATION: YahooAPIOption(''),
+        DataOptions.MARKET_CAP_REAL_TIME: YahooAPIOption(''),
+        DataOptions.FLOAT_SHARES: YahooAPIOption(''),
+        DataOptions.NAME: YahooAPIOption(''),
+        DataOptions.NOTES: YahooAPIOption(''),
+        DataOptions.SYMBOL: YahooAPIOption(''),
+        DataOptions.SHARES_OWNED: YahooAPIOption(''),
+        DataOptions.STOCK_EXCHANGE: YahooAPIOption(''),
+        DataOptions.SHARES_OUTSTANDING: YahooAPIOption(''),
+        DataOptions.VOLUME: YahooAPIOption(''),
+        DataOptions.ASK_SIZE: YahooAPIOption(''),
+        DataOptions.BID_SIZE: YahooAPIOption(''),
+        DataOptions.LAST_TRADE_SIZE: YahooAPIOption(''),
+        DataOptions.AVERAGE_DAILY_VOLUME: YahooAPIOption(''),
+        DataOptions.TICKER_TREND: YahooAPIOption(''),
+        DataOptions.TRADE_LINKS: YahooAPIOption(''),
+        DataOptions.ORDER_BOOK_REAL_TIME: YahooAPIOption(''),
+        DataOptions.HIGH_LIMIT: YahooAPIOption(''),
+        DataOptions.LOW_LIMIT: YahooAPIOption(''),
+        DataOptions.HOLDINGS_VALUE: YahooAPIOption(''),
+        DataOptions.HOLDINGS_VALUE_REAL_TIME: YahooAPIOption(''),
+        DataOptions.REVENUE: YahooAPIOption(''),
+        DataOptions.EARNINGS_PER_SHARE: YahooAPIOption(''),
+        DataOptions.EPS_ESTIMATE_CURRENT_YEAR: YahooAPIOption(''),
+        DataOptions.EPS_ESTIMATE_NEXT_YEAR: YahooAPIOption(''),
+        DataOptions.EPS_ESTIMATE_NEXT_QUARTER: YahooAPIOption(''),
+        DataOptions.BOOK_VALUE: YahooAPIOption(''),
+        DataOptions.EBITDA: YahooAPIOption(''),
+        DataOptions.PRICE_SALES: YahooAPIOption(''),
+        DataOptions.PRICE_BOOK: YahooAPIOption(''),
+        DataOptions.P_E_RATIO: YahooAPIOption(''),
+        DataOptions.P_E_RATIO_REAL_TIME: YahooAPIOption(''),
+        DataOptions.PEG_RATIO: YahooAPIOption(''),
+        DataOptions.PRICE_EPS_ESTIMATE_CURRENT_YEAR: YahooAPIOption(''),
+        DataOptions.PRICE_EPS_ESTIMATE_NEXT_YEAR: YahooAPIOption(''),
+        DataOptions.SHORT_RATIO: YahooAPIOption('')
     }
+
+    @staticmethod
+    def get_data(stocks, options):
+        yahoo_options = []
+        for option in options:
+            api_option = DataRetriever.option_to_api_mapping.get(option)
+            if isinstance(api_option, YahooAPIOption):
+                yahoo_options.append(api_option.get_option())
+
+        return YahooStockAPIWrapper.get_data2(stocks, yahoo_options)

@@ -509,9 +509,6 @@ if __name__ == "__main__":
 
     init_cache()
 
-    # Heroku will define the PORT environment variable, so use it if it is defined, otherwise default to 5000.
-    port = int(os.environ.get('PORT', 5000))
-
     # Bind to PORT if defined, otherwise default to 5000.
     # Heroku will define the PORT environment variable, so use it if it is defined
     port = int(os.environ.get('PORT', 5000))

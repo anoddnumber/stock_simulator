@@ -47,8 +47,38 @@ def merge_two_dicts(x, y):
     z.update(y)
     return z
 
+def merge_two_dicts_recursive(a, b, path=None):
+    """
+    Merges two dictionaries together. Also merges the dictionaries within the dictionary if they have the same key.
+    Example:
+    a = {'a': {'blah': 'clah'}}
+    b = {'a': {'foo': 'bar'}}
+
+    The result of merge_two_dicts_recursive(a,b) would be
+    {'a': {'blah': 'clah', 'foo': 'bar'}}
+    """
+    if path is None: path = []
+    for key in b:
+        if key in a:
+            if isinstance(a[key], dict) and isinstance(b[key], dict):
+                merge_two_dicts_recursive(a[key], b[key], path + [str(key)])
+            elif a[key] == b[key]:
+                pass # same leaf value
+            else:
+                raise Exception('Conflict at %s' % '.'.join(path + [str(key)]))
+        else:
+            a[key] = b[key]
+    return a
+
 
 def merge_n_dicts(dict_list):
+    "Not the most efficient.."
+    result = {}
+    for d in dict_list:
+        result = merge_two_dicts(result, d)
+    return result
+
+def merge_n_dicts_recursive(dict_list):
     "Not the most efficient.."
     result = {}
     for d in dict_list:

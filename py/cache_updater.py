@@ -1,4 +1,4 @@
-from yahoo_stock_api_wrapper import YahooStockAPIWrapper
+from data_retriever import DataRetriever
 from utility import do_every
 from cache2 import Cache2
 import time
@@ -33,7 +33,7 @@ class CacheUpdater:
             raise Exception("time_interval must be a positive number, current value: " + str(time_interval))
 
     def update(self):
-        results = YahooStockAPIWrapper.get_data(self.symbols, self.options)
+        results = DataRetriever.get_data(self.symbols, self.options)
         self.cache.store(results)
 
         if self.output_file is not None:

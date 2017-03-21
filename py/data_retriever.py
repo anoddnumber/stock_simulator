@@ -99,6 +99,6 @@ class DataRetriever:
         for option in options:
             api_option = DataRetriever.option_to_api_mapping.get(option)
             if isinstance(api_option, YahooAPIOption):
-                yahoo_options.append(api_option.get_option())
+                yahoo_options.append(api_option)
 
-        return YahooStockAPIWrapper.get_data2(stocks, yahoo_options)
+        return YahooStockAPIWrapper.get_data(stocks, yahoo_options)

@@ -3,6 +3,7 @@ from flask_debugtoolbar import DebugToolbarExtension
 from cache2 import Cache2
 from cache_updater import CacheUpdater
 from stock_symbols import StockSymbols
+from data_retriever import DataOptions
 
 import logging
 import logging_setup
@@ -23,7 +24,9 @@ if __name__ == "__main__":
     cache = Cache2()
 
     # determines what type of information we should get
-    stock_options = ['l1', 'c1', 'p2', 'o', 'h', 'g', 'j1', 'r', 'y']
+    stock_options = [DataOptions.LAST_TRADE_PRICE, DataOptions.CHANGE, DataOptions.CHANGE_IN_PERCENT,
+                     DataOptions.OPEN, DataOptions.DAY_HIGH, DataOptions.DAY_LOW, DataOptions.MARKET_CAPITALIZATION,
+                     DataOptions.P_E_RATIO, DataOptions.DIVIDEND_YIELD]
 
     # symbols that are in the cache
     stock_symbols = StockSymbols.get_symbols()

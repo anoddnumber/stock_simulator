@@ -8,7 +8,7 @@ def get_stock_symbols():
         symbol_end_index = line.index('|')
         stock_symbol = line[:symbol_end_index]
 
-        if stock_symbol >= "ERIC":
+        if stock_symbol >= "FORM":
             stock_symbols.append(stock_symbol)
 
     return stock_symbols

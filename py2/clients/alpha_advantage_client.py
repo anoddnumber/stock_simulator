@@ -1,5 +1,6 @@
 from urllib2 import Request, urlopen, URLError
 
+
 class AlphaAdvantageClient:
     api_key = 'S86TTOVAFIWT3D8B'
 
@@ -13,7 +14,8 @@ class AlphaAdvantageClient:
             text = response.read()
             return text
         except URLError:
-            self.logger.exception("Error in sending/receiving request/reply: ")
+            print "URL Error!"
+            # self.logger.exception("Error in sending/receiving request/reply: ")
 
 
 # alpha_advantage_client = AlphaAdvantageClient()

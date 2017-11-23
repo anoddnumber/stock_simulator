@@ -1,0 +1,32 @@
+{
+    "Meta Data": {
+        "1. Information": "Daily Prices (open, high, low, close) and Volumes",
+        "2. Symbol": "ADUS",
+        "3. Last Refreshed": "2017-11-22",
+        "4. Output Size": "Full size",
+        "5. Time Zone": "US/Eastern"
+    },
+    "Time Series (Daily)": {
+        "2017-11-22": {
+            "1. open": "32.6000",
+            "2. high": "34.0000",
+            "3. low": "32.5000",
+            "4. close": "33.7500",
+            "5. volume": "17986"
+        },
+        "2017-11-21": {
+            "1. open": "32.7500",
+            "2. high": "33.0500",
+            "3. low": "32.4000",
+            "4. close": "32.5500",
+            "5. volume": "57467"
+        },
+        "2017-11-20": {
+            "1. open": "33.2500",
+            "2. high": "33.2500",
+            "3. low": "32.1000",
+            "4. close": "32.7000",
+            "5. volume": "54700"
+        }
+    }
+}
